@@ -4,12 +4,11 @@ const jwt = require("jsonwebtoken");
 
 const signIn = async (req, res) => {
   const pool = new Pool({ connectionString: process.env.DATABASE_STRING });
-
   try {
     await pool
       .connect()
       .then()
-      .catch(() => res.status(500).json("DB connection error"));
+      .catch(() => res.status(502).json("DB connection error"));
 
     const { usernameOrEmail, password } = req.body;
 
@@ -48,8 +47,6 @@ const signIn = async (req, res) => {
   } catch (err) {
     console.error("unexpected error : ", err);
     res.status(500).json(err);
-  } finally {
-    pool.end();
   }
 };
 

@@ -1,13 +1,11 @@
-const signIn = require("./routes/auth/signIn");
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const { Pool } = require("pg");
 require("dotenv").config();
 
-const { postLink, getLink, deleteLink, updateLink } = require("./API_LINK");
+const { postLink, getLink, deleteLink, putLink } = require("./API_LINK");
 
 const app = express();
 app.use(cors());
@@ -25,16 +23,28 @@ const io = new Server(server, {
   },
 });
 
+const connectionToSocket = require("./socket/connection");
 // IMPORT ROUTES
 // AUTH
 const SignIn = require("./routes/auth/signIn");
 const SignUp = require("./routes/auth/signUp");
+// USER
+const CheckUsername = require("./routes/user/checkUsername");
+const GetUserData = require("./routes/user/getUserData");
+const Follow = require("./routes/user/follow");
 
-// APP AUTH
+// POST AUTH
 app.post(postLink.signIn, SignIn);
 app.post(postLink.signUp, SignUp);
+// POST -USER
+app.post(postLink.checkUsername, CheckUsername);
+app.post(postLink.follow, Follow);
+// GET -USER
+app.get(getLink.getUserData, GetUserData);
 
 const connectedUsers = new Map();
+
+connectionToSocket(io, connectedUsers);
 
 const listener = server.listen(8055 || process.env.PORT, () => {
   console.log(`Server is running on port ${listener.address().port}`);
