@@ -37,7 +37,7 @@ const GetUserPostFlow = async (req, res) => {
       const result = await pool.query(
         `SELECT liked_user FROM post_like_tbl 
       WHERE liked_user = $1 AND liked_post = $2`,
-        [username, postID]
+        [tokenUsername, postID]
       );
       return result.rowCount > 0;
     };
@@ -46,7 +46,7 @@ const GetUserPostFlow = async (req, res) => {
       const result = await pool.query(
         `SELECT saved_user FROM post_save_tbl 
       WHERE saved_user = $1 AND post_id = $2`,
-        [username, postID]
+        [tokenUsername, postID]
       );
       return result.rowCount > 0;
     };
