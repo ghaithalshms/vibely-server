@@ -9,26 +9,37 @@ const signUp = async (req, res) => {
     await pool
       .connect()
       .then()
-      .catch(() => res.status(502).json("DB connection error"));
+      .catch(() => {
+        if (!res.headersSent) res.status(502).json("DB connection error");
+        return;
+      });
 
     const { username, firstName, password, email } = req.body;
 
-    if (username && firstName && password && email) {
-      if (FuncIsValidUsername(username)) {
+    usernameVerified = username.toLowerCase().trim();
+
+    if (usernameVerified && firstName && password && email) {
+      if (FuncIsValidUsername(usernameVerified)) {
         client = await pool.connect();
         const usernameQuery = await client.query(
           "SELECT username FROM user_tbl WHERE username =$1",
-          [username]
+          [usernameVerified]
         );
         if (usernameQuery.rows.length === 0) {
           await client.query(
             "INSERT INTO user_tbl (username, password, email, first_name, created_date)" +
               "values ($1, $2, $3, $4, $5)",
-            [username, password, email, firstName, new Date().toISOString()]
+            [
+              usernameVerified,
+              password,
+              email,
+              firstName,
+              new Date().toISOString(),
+            ]
           );
           const token = jwt.sign(
             {
-              username,
+              username: usernameVerified,
               tokenVersion: 1,
             },
             process.env.JWT_SECRET_KEY,
@@ -36,16 +47,22 @@ const signUp = async (req, res) => {
               expiresIn: "1000d",
             }
           );
-          res.status(201).json({
-            token,
-            message: "Your account has been created, welcome to Vibely!",
-          });
-        } else res.status(409).json("Username is already taken.");
-      } else res.status(400).json("Username is not available.");
+          if (!res.headersSent)
+            res.status(201).json({
+              token,
+              message: "Your account has been created, welcome to Vibely!",
+            });
+        } else {
+          if (!res.headersSent)
+            res.status(409).json("Username is already taken.");
+        }
+      } else {
+        if (!res.headersSent)
+          res.status(400).json("Username is not available.");
+      }
     }
   } catch (err) {
-    console.error("unexpected error : ", err);
-    res.status(500).json(err);
+    if (!res.headersSent) res.status(500).json(err);
   }
 };
 

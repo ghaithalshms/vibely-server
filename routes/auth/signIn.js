@@ -8,15 +8,20 @@ const signIn = async (req, res) => {
     await pool
       .connect()
       .then()
-      .catch(() => res.status(502).json("DB connection error"));
+      .catch(() => {
+        if (!res.headersSent) res.status(502).json("DB connection error");
+        return;
+      });
 
     const { usernameOrEmail, password } = req.body;
 
-    if (usernameOrEmail && password) {
+    const usernameOrEmailVerified = usernameOrEmail.toLowerCase().trim();
+
+    if (usernameOrEmailVerified && password) {
       const tokenResult = await pool.query(
         `SELECT username, password, token_version FROM user_tbl 
         WHERE username = $1 OR email = $1`,
-        [usernameOrEmail]
+        [usernameOrEmailVerified]
       );
 
       if (tokenResult.rows.length > 0) {
@@ -36,13 +41,14 @@ const signIn = async (req, res) => {
             .status(200)
             .json({ token, username: tokenResult.rows[0].username });
         } else {
-          res.status(401).json("Password is not correct!");
+          if (!res.headersSent)
+            res.status(401).json("Password is not correct!");
         }
       } else {
-        res.status(404).json("User not exist!");
+        if (!res.headersSent) res.status(404).json("User not exist!");
       }
     } else {
-      res.status(404).json(`Empty input`);
+      if (!res.headersSent) res.status(404).json(`Empty input`);
     }
   } catch (err) {
     console.error("unexpected error : ", err);

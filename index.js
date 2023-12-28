@@ -32,6 +32,10 @@ const SignUp = require("./routes/auth/signUp");
 const CheckUsername = require("./routes/user/checkUsername");
 const GetUserData = require("./routes/user/getUserData");
 const Follow = require("./routes/user/follow");
+const GetFollowers = require("./routes/user/userList/getFollowers");
+const GetFollowing = require("./routes/user/userList/getFollowing");
+// POST FLOW
+const GetUserPostFlow = require("./routes/postflow/getUserPostFlow");
 
 // POST AUTH
 app.post(postLink.signIn, SignIn);
@@ -39,8 +43,12 @@ app.post(postLink.signUp, SignUp);
 // POST -USER
 app.post(postLink.checkUsername, CheckUsername);
 app.post(postLink.follow, Follow);
-// GET -USER
+// GET - USER
 app.get(getLink.getUserData, GetUserData);
+app.get(getLink.getUserFollowers, GetFollowers);
+app.get(getLink.getUserFollowing, GetFollowing);
+// GET - POST FLOW
+app.get(getLink.getUserPostFlow, GetUserPostFlow);
 
 const connectedUsers = new Map();
 
