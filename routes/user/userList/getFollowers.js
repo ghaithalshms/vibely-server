@@ -2,7 +2,10 @@ const { Pool } = require("pg");
 require("dotenv").config();
 
 const getUserFollowers = async (req, res) => {
-  const pool = new Pool({ connectionString: process.env.DATABASE_STRING });
+  const pool = new Pool({
+    connectionString: process.env.DATABASE_STRING,
+    connectionTimeoutMillis: 5000,
+  });
   const { username } = req.query;
   try {
     await pool

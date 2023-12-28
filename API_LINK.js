@@ -5,6 +5,8 @@ const postLink = {
   // USER
   checkUsername: `/api/user/check-username`,
   follow: `/api/user/follow`,
+  // POST
+  likePost: `/api/post/like`,
 };
 const getLink = {
   // USER

@@ -6,7 +6,10 @@ const jwt = require("jsonwebtoken");
 
 async function checkToken(token) {
   if (!token) return false;
-  const pool = new Pool({ connectionString: process.env.DATABASE_STRING });
+  const pool = new Pool({
+    connectionString: process.env.DATABASE_STRING,
+    connectionTimeoutMillis: 5000,
+  });
   try {
     await pool.connect();
     const decoded = {

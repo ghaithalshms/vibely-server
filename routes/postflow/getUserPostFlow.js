@@ -3,7 +3,10 @@ require("dotenv").config();
 const checkToken = require("../../func/checkToken");
 
 const GetUserPostFlow = async (req, res) => {
-  const pool = new Pool({ connectionString: process.env.DATABASE_STRING });
+  const pool = new Pool({
+    connectionString: process.env.DATABASE_STRING,
+    connectionTimeoutMillis: 5000,
+  });
   const { username, token, lastGotPostID } = req.query;
   try {
     const tokenUsername = await checkToken(token);

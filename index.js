@@ -36,6 +36,7 @@ const GetFollowers = require("./routes/user/userList/getFollowers");
 const GetFollowing = require("./routes/user/userList/getFollowing");
 // POST FLOW
 const GetUserPostFlow = require("./routes/postflow/getUserPostFlow");
+const LikePost = require("./routes/post/likePost");
 
 // POST AUTH
 app.post(postLink.signIn, SignIn);
@@ -43,6 +44,9 @@ app.post(postLink.signUp, SignUp);
 // POST -USER
 app.post(postLink.checkUsername, CheckUsername);
 app.post(postLink.follow, Follow);
+// POST - POST
+app.post(postLink.likePost, LikePost);
+
 // GET - USER
 app.get(getLink.getUserData, GetUserData);
 app.get(getLink.getUserFollowers, GetFollowers);

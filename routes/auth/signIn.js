@@ -3,7 +3,10 @@ require("dotenv").config();
 const jwt = require("jsonwebtoken");
 
 const signIn = async (req, res) => {
-  const pool = new Pool({ connectionString: process.env.DATABASE_STRING });
+  const pool = new Pool({
+    connectionString: process.env.DATABASE_STRING,
+    connectionTimeoutMillis: 5000,
+  });
   try {
     await pool
       .connect()

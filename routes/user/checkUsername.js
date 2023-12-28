@@ -2,7 +2,10 @@ const { Pool } = require("pg");
 const funcIsValidUsername = require("../../func/funcIsValidUsername");
 
 const checkUsername = async (req, res) => {
-  const pool = new Pool({ connectionString: process.env.DATABASE_STRING });
+  const pool = new Pool({
+    connectionString: process.env.DATABASE_STRING,
+    connectionTimeoutMillis: 5000,
+  });
   try {
     const { username } = req.body;
     if (!funcIsValidUsername(username)) {

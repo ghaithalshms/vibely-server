@@ -2,7 +2,10 @@ const { Pool } = require("pg");
 const checkToken = require("../../func/checkToken");
 
 const Follow = async (req, res) => {
-  const pool = new Pool({ connectionString: process.env.DATABASE_STRING });
+  const pool = new Pool({
+    connectionString: process.env.DATABASE_STRING,
+    connectionTimeoutMillis: 5000,
+  });
 
   try {
     const { token, username } = req.body;
@@ -82,6 +85,10 @@ const Follow = async (req, res) => {
       await pool.query(
         `UPDATE user_tbl set follower_count = follower_count-1 WHERE username=$1`,
         [username]
+      );
+      await pool.query(
+        `DELETE FROM notification_tbl WHERE noti_from = $1 AND noti_to = $2 AND noti_type=$3`,
+        [tokenUsername, username, "follow"]
       );
       if (!res.headersSent) res.status(200).json("unfollowed");
     };
