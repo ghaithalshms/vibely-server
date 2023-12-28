@@ -7,6 +7,7 @@ const postLink = {
   follow: `/api/user/follow`,
   // POST
   likePost: `/api/post/like`,
+  savePost: `/api/post/save`,
 };
 const getLink = {
   // USER

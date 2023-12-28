@@ -74,6 +74,10 @@ const GetUserPostFlow = async (req, res) => {
       });
   } catch (error) {
     if (!res.headersSent) res.status(400).json(error.message);
+  } finally {
+    if (!pool.ending) {
+      pool.end().catch(() => {});
+    }
   }
 };
 
