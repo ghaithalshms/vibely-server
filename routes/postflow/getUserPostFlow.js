@@ -22,6 +22,21 @@ const GetUserPostFlow = async (req, res) => {
         return;
       });
 
+    const privacityQuery = await pool.query(
+      `SELECT privacity FROM user_tbl WHERE username=$1`,
+      [username]
+    );
+    if (privacityQuery.rows[0].privacity === true) {
+      const isFollowingQuery = await pool.query(
+        `SELECT * from follow_tbl WHERE follower=$1 AND following=$2`,
+        [tokenUsername, username]
+      );
+      if (isFollowingQuery.rowCount === 0) {
+        if (!res.headersSent) res.json("private account");
+        return;
+      }
+    }
+
     const userPostFlowQuery = await pool.query(
       `SELECT post_id, description, picture, like_count, comment_count, post_date
       FROM post_tbl 

@@ -8,14 +8,20 @@ const postLink = {
   // POST
   likePost: `/api/post/like`,
   savePost: `/api/post/save`,
+  // COMMENT
+  likeComment: `/api/comment/like`,
 };
 const getLink = {
+  // ACTIVATE SERVER
+  activateServer: `/api/server/activate`,
   // USER
   getUserData: `/api/user/data`,
   getUserFollowers: `/api/user/followers`,
   getUserFollowing: `/api/user/following`,
   // POST FLOW
   getUserPostFlow: `/api/post-flow/user`,
+  // POST
+  getPostComments: `/api/post/comments`,
 };
 const putLink = {};
 const deleteLink = {};

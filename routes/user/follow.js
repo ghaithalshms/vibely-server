@@ -122,7 +122,10 @@ const Follow = async (req, res) => {
         return;
       } else {
         // FOLLOW REQ
-        if (privacityQuery.rowCount > 0) {
+        if (
+          privacityQuery.rowCount > 0 &&
+          privacityQuery.rows[0].privacity === true
+        ) {
           handleFollowRequest();
           return;
           // FOLLOW

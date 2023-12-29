@@ -38,23 +38,35 @@ const GetFollowing = require("./routes/user/userList/getFollowing");
 const GetUserPostFlow = require("./routes/postflow/getUserPostFlow");
 const LikePost = require("./routes/post/likePost");
 const SavePost = require("./routes/post/savePost");
+const GetPostComments = require("./routes/post/getPostComments");
+const LikeComment = require("./routes/comment/likeComment");
 
-// POST AUTH
+// *********** POST ***********
+// activate server
+app.get(getLink.activateServer, (req, res) => {
+  res.status(200).json("hey");
+});
+// AUTH
 app.post(postLink.signIn, SignIn);
 app.post(postLink.signUp, SignUp);
-// POST -USER
+// USER
 app.post(postLink.checkUsername, CheckUsername);
 app.post(postLink.follow, Follow);
-// POST - POST
+// POST
 app.post(postLink.likePost, LikePost);
 app.post(postLink.savePost, SavePost);
+// COMMENT
+app.post(postLink.likeComment, LikeComment);
 
-// GET - USER
+// *********** GET ***********
+// USER
 app.get(getLink.getUserData, GetUserData);
 app.get(getLink.getUserFollowers, GetFollowers);
 app.get(getLink.getUserFollowing, GetFollowing);
-// GET - POST FLOW
+// POST FLOW
 app.get(getLink.getUserPostFlow, GetUserPostFlow);
+// POST
+app.get(getLink.getPostComments, GetPostComments);
 
 const connectedUsers = new Map();
 
