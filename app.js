@@ -5,7 +5,13 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 require("dotenv").config();
 
-const { postLink, getLink, deleteLink, putLink } = require("./API_LINK");
+const {
+  postLink,
+  getLink,
+  deleteLink,
+  putLink,
+  updateLink,
+} = require("./API_LINK");
 
 const app = express();
 app.use(cors());
@@ -25,21 +31,25 @@ const io = new Server(server, {
 
 const connectionToSocket = require("./socket/connection");
 // IMPORT ROUTES
-// AUTH
 const SignIn = require("./routes/auth/signIn");
 const SignUp = require("./routes/auth/signUp");
-// USER
 const CheckUsername = require("./routes/user/checkUsername");
 const GetUserData = require("./routes/user/getUserData");
 const Follow = require("./routes/user/follow");
 const GetFollowers = require("./routes/user/userList/getFollowers");
 const GetFollowing = require("./routes/user/userList/getFollowing");
-// POST FLOW
 const GetUserPostFlow = require("./routes/postflow/getUserPostFlow");
 const LikePost = require("./routes/post/likePost");
 const SavePost = require("./routes/post/savePost");
 const GetPostComments = require("./routes/post/getPostComments");
 const LikeComment = require("./routes/comment/likeComment");
+const CreateComment = require("./routes/comment/createComment");
+const DeleteComment = require("./routes/comment/deleteComment");
+const GetPostLikedUsers = require("./routes/post/userList/getPostLikedUsers");
+const DeletePost = require("./routes/post/deletePost");
+const ArchivePost = require("./routes/post/archivePost");
+const GetHomePostFlow = require("./routes/postflow/getHomePostFlow");
+const GetExplorerPostFlow = require("./routes/postflow/getExplorerPostFlow");
 
 // *********** POST ***********
 // activate server
@@ -57,6 +67,7 @@ app.post(postLink.likePost, LikePost);
 app.post(postLink.savePost, SavePost);
 // COMMENT
 app.post(postLink.likeComment, LikeComment);
+app.post(postLink.createComment, CreateComment);
 
 // *********** GET ***********
 // USER
@@ -65,8 +76,21 @@ app.get(getLink.getUserFollowers, GetFollowers);
 app.get(getLink.getUserFollowing, GetFollowing);
 // POST FLOW
 app.get(getLink.getUserPostFlow, GetUserPostFlow);
+app.get(getLink.getHomePostFlow, GetHomePostFlow);
+app.get(getLink.getExplorerPostFlow, GetExplorerPostFlow);
 // POST
 app.get(getLink.getPostComments, GetPostComments);
+app.get(getLink.getPostLikedUsers, GetPostLikedUsers);
+
+// *********** DELETE ***********
+// POST
+app.post(deleteLink.deletePost, DeletePost);
+// COMMENT
+app.post(deleteLink.deleteComment, DeleteComment);
+
+// *********** UPDATE ***********
+// POST
+app.post(updateLink.archivePost, ArchivePost);
 
 const connectedUsers = new Map();
 

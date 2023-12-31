@@ -2,12 +2,16 @@ const { Pool } = require("pg");
 require("dotenv").config();
 
 const getUserData = async (req, res) => {
-  const pool = new Pool({
-    connectionString: process.env.DATABASE_STRING,
-    connectionTimeoutMillis: 5000,
-  });
   const { username, userSigned } = req.query;
   try {
+    if (!(username, userSigned)) {
+      res.status(404).json("data missing");
+      return;
+    }
+    const pool = new Pool({
+      connectionString: process.env.DATABASE_STRING,
+      connectionTimeoutMillis: 5000,
+    });
     await pool
       .connect()
       .then()

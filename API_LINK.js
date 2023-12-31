@@ -10,6 +10,7 @@ const postLink = {
   savePost: `/api/post/save`,
   // COMMENT
   likeComment: `/api/comment/like`,
+  createComment: `/api/comment/create`,
 };
 const getLink = {
   // ACTIVATE SERVER
@@ -19,11 +20,24 @@ const getLink = {
   getUserFollowers: `/api/user/followers`,
   getUserFollowing: `/api/user/following`,
   // POST FLOW
+  getHomePostFlow: `/api/post-flow/home`,
   getUserPostFlow: `/api/post-flow/user`,
+  getExplorerPostFlow: `/api/post-flow/explorer`,
   // POST
   getPostComments: `/api/post/comments`,
+  getPostLikedUsers: `/api/post/liked-users`,
 };
-const putLink = {};
-const deleteLink = {};
 
-module.exports = { getLink, postLink, putLink, deleteLink };
+const deleteLink = {
+  // POST
+  deletePost: `/api/post/delete`,
+  // COMMENT
+  deleteComment: `/api/comment/delete`,
+};
+
+const updateLink = {
+  // POST
+  archivePost: `/api/post/archive`,
+};
+
+module.exports = { getLink, postLink, updateLink, deleteLink };

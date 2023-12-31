@@ -2,12 +2,16 @@ const { Pool } = require("pg");
 const funcIsValidUsername = require("../../func/funcIsValidUsername");
 
 const checkUsername = async (req, res) => {
-  const pool = new Pool({
-    connectionString: process.env.DATABASE_STRING,
-    connectionTimeoutMillis: 5000,
-  });
+  const { username } = req.body;
   try {
-    const { username } = req.body;
+    if (!username) {
+      res.status(404).json("data missing");
+      return;
+    }
+    const pool = new Pool({
+      connectionString: process.env.DATABASE_STRING,
+      connectionTimeoutMillis: 5000,
+    });
     if (!funcIsValidUsername(username)) {
       if (!res.headersSent)
         res.json("Only letters, numbers, and underscores are allowed.");

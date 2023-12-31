@@ -3,12 +3,20 @@ require("dotenv").config();
 const checkToken = require("../../func/checkToken");
 
 const GetUserPostFlow = async (req, res) => {
-  const pool = new Pool({
-    connectionString: process.env.DATABASE_STRING,
-    connectionTimeoutMillis: 5000,
-  });
   const { username, token, lastGotPostID } = req.query;
   try {
+    if (!lastGotPostID) {
+      res.json("no post flow");
+      return;
+    }
+    if (!token) {
+      res.status(401).json("data missing");
+      return;
+    }
+    const pool = new Pool({
+      connectionString: process.env.DATABASE_STRING,
+      connectionTimeoutMillis: 5000,
+    });
     const tokenUsername = await checkToken(token);
     if (tokenUsername === false) {
       if (!res.headersSent) res.status(401);
@@ -37,20 +45,23 @@ const GetUserPostFlow = async (req, res) => {
       }
     }
 
+    const postIdInstructionString =
+      lastGotPostID > 0 ? "AND post_id < $2" : "AND post_id > $2";
+
     const userPostFlowQuery = await pool.query(
-      `SELECT post_id, description, picture, like_count, comment_count, post_date
+      `SELECT post_id, posted_user, description, picture, like_count, comment_count, post_date
       FROM post_tbl 
       WHERE posted_user = $1
       AND archived = 'false'
-      AND post_id > $2
+      ${postIdInstructionString}
       ORDER BY post_id DESC
-      LIMIT 3`,
+      LIMIT 5`,
       [username, lastGotPostID]
     );
 
     const handleIsPostLiked = async (postID) => {
       const result = await pool.query(
-        `SELECT liked_user FROM post_like_tbl 
+        `SELECT DISTINCT liked_user FROM post_like_tbl 
       WHERE liked_user = $1 AND liked_post = $2`,
         [tokenUsername, postID]
       );
@@ -59,7 +70,7 @@ const GetUserPostFlow = async (req, res) => {
 
     const handleIsPostSaved = async (postID) => {
       const result = await pool.query(
-        `SELECT saved_user FROM post_save_tbl 
+        `SELECT DISTINCT saved_user FROM post_save_tbl 
       WHERE saved_user = $1 AND post_id = $2`,
         [tokenUsername, postID]
       );
@@ -73,6 +84,7 @@ const GetUserPostFlow = async (req, res) => {
       const isSaved = await handleIsPostSaved(post.post_id);
       postFlowArray.push({
         postID: post.post_id,
+        postedUser: post.posted_user,
         description: post.description,
         picture: post.picture,
         likeCount: post.like_count,
@@ -89,10 +101,6 @@ const GetUserPostFlow = async (req, res) => {
       });
   } catch (error) {
     if (!res.headersSent) res.status(400).json(error.message);
-  } finally {
-    if (!pool.ending) {
-      pool.end().catch(() => {});
-    }
   }
 };
 

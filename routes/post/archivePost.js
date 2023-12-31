@@ -1,10 +1,10 @@
 const { Pool } = require("pg");
 const checkToken = require("../../func/checkToken");
 
-const DeleteComment = async (req, res) => {
-  const { token, commentID } = req.body;
+const ArchivePost = async (req, res) => {
+  const { token, postID } = req.body;
   try {
-    if (!(token && commentID)) {
+    if (!(token && postID)) {
       res.status(404).json("data missing");
       return;
     }
@@ -25,14 +25,25 @@ const DeleteComment = async (req, res) => {
         return;
       });
 
-    await pool.query(
-      `DELETE FROM comment_tbl WHERE comment_id = $1 AND commented_user = $2`,
-      [commentID, tokenUsername]
+    const archiveQuery = await pool.query(
+      `UPDATE post_tbl 
+      SET archived=true 
+      WHERE post_id = $1 AND posted_user = $2
+      RETURNING post_id`,
+      [postID, tokenUsername]
     );
-    if (!res.headersSent) res.status(200).json("comment deleted");
+
+    if (archiveQuery.rowCount > 0)
+      await pool.query(
+        `UPDATE user_tbl 
+      SET post_count=post_count-1 
+      WHERE username = $1`,
+        [tokenUsername]
+      );
+    if (!res.headersSent) res.status(200).json("post archived");
   } catch (err) {
     if (!res.headersSent) res.status(500).json(err);
   }
 };
 
-module.exports = DeleteComment;
+module.exports = ArchivePost;

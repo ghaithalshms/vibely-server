@@ -2,13 +2,17 @@ const { Pool } = require("pg");
 const checkToken = require("../../func/checkToken");
 
 const Follow = async (req, res) => {
-  const pool = new Pool({
-    connectionString: process.env.DATABASE_STRING,
-    connectionTimeoutMillis: 5000,
-  });
-
+  const { token, username } = req.body;
   try {
-    const { token, username } = req.body;
+    if (!(token, username)) {
+      res.status(404).json("data missing");
+      return;
+    }
+    const pool = new Pool({
+      connectionString: process.env.DATABASE_STRING,
+      connectionTimeoutMillis: 5000,
+    });
+
     const tokenUsername = await checkToken(token);
     if (tokenUsername === false) {
       if (!res.headersSent) res.status(401);

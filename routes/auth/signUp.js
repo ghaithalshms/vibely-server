@@ -4,11 +4,16 @@ require("dotenv").config();
 const jwt = require("jsonwebtoken");
 
 const signUp = async (req, res) => {
-  const pool = new Pool({
-    connectionString: process.env.DATABASE_STRING,
-    connectionTimeoutMillis: 5000,
-  });
+  const { username, firstName, password, email } = req.body;
   try {
+    if (!(username && password && firstName && password && email)) {
+      res.status(404).json("data missing");
+      return;
+    }
+    const pool = new Pool({
+      connectionString: process.env.DATABASE_STRING,
+      connectionTimeoutMillis: 5000,
+    });
     await pool
       .connect()
       .then()
@@ -17,9 +22,7 @@ const signUp = async (req, res) => {
         return;
       });
 
-    const { username, firstName, password, email } = req.body;
-
-    usernameVerified = username.toLowerCase().trim();
+    const usernameVerified = username.toLowerCase().trim();
 
     if (usernameVerified && firstName && password && email) {
       if (FuncIsValidUsername(usernameVerified)) {

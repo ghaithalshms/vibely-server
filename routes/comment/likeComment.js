@@ -2,13 +2,17 @@ const { Pool } = require("pg");
 const checkToken = require("../../func/checkToken");
 
 const LikeComment = async (req, res) => {
-  const pool = new Pool({
-    connectionString: process.env.DATABASE_STRING,
-    connectionTimeoutMillis: 5000,
-  });
-
+  const { token, commentID } = req.body;
   try {
-    const { token, commentID } = req.body;
+    if (!(token, commentID)) {
+      res.status(404).json("data missing");
+      return;
+    }
+    const pool = new Pool({
+      connectionString: process.env.DATABASE_STRING,
+      connectionTimeoutMillis: 5000,
+    });
+
     const tokenUsername = await checkToken(token);
     if (tokenUsername === false) {
       if (!res.headersSent) res.status(401);
@@ -24,7 +28,7 @@ const LikeComment = async (req, res) => {
 
     const isLikedQuery = await pool.query(
       `SELECT liked_comment from comment_like_tbl WHERE liked_user=$1 AND liked_comment=$2`,
-      [tokenUsername, postID]
+      [tokenUsername, commentID]
     );
 
     // DEFINITION OF FUNCTIONS

@@ -2,13 +2,17 @@ const { Pool } = require("pg");
 const checkToken = require("../../func/checkToken");
 
 const SavePost = async (req, res) => {
-  const pool = new Pool({
-    connectionString: process.env.DATABASE_STRING,
-    connectionTimeoutMillis: 5000,
-  });
-
+  const { token, postID } = req.body;
   try {
-    const { token, postID } = req.body;
+    if (!(token, postID)) {
+      res.status(404).json("data missing");
+      return;
+    }
+    const pool = new Pool({
+      connectionString: process.env.DATABASE_STRING,
+      connectionTimeoutMillis: 5000,
+    });
+
     const tokenUsername = await checkToken(token);
     if (tokenUsername === false) {
       if (!res.headersSent) res.status(401);
@@ -23,7 +27,7 @@ const SavePost = async (req, res) => {
       });
 
     const isSavedQuery = await pool.query(
-      `SELECT post_id from post_save_tbl WHERE saved_user=$1 AND post_id=$2`,
+      `SELECT DISTINCT post_id from post_save_tbl WHERE saved_user=$1 AND post_id=$2`,
       [tokenUsername, postID]
     );
 

@@ -16,12 +16,7 @@ const dissconnectSocket = async (socket, connectedUsers) => {
           disconnectedUsername,
         ]);
       }
-    } catch (error) {
-    } finally {
-      try {
-        client.release();
-      } catch (error) {}
-    }
+    } catch (error) {}
   });
 };
 

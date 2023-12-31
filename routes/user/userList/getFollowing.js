@@ -2,12 +2,16 @@ const { Pool } = require("pg");
 require("dotenv").config();
 
 const getUserFollowing = async (req, res) => {
-  const pool = new Pool({
-    connectionString: process.env.DATABASE_STRING,
-    connectionTimeoutMillis: 5000,
-  });
   const { username } = req.query;
   try {
+    if (!username) {
+      res.status(404).json("data missing");
+      return;
+    }
+    const pool = new Pool({
+      connectionString: process.env.DATABASE_STRING,
+      connectionTimeoutMillis: 5000,
+    });
     await pool
       .connect()
       .then()
@@ -33,7 +37,7 @@ const getUserFollowing = async (req, res) => {
     // }
 
     const userListQuery = await pool.query(
-      `SELECT username, first_name, last_name, picture, admin, verified FROM user_tbl, follow_tbl WHERE username=following AND follower=$1`,
+      `SELECT DISTINCT username, first_name, last_name, picture, admin, verified FROM user_tbl, follow_tbl WHERE username=following AND follower=$1`,
       [username]
     );
 

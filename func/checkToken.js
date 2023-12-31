@@ -5,12 +5,12 @@ const jwt = require("jsonwebtoken");
 // !!!!!!!!!!! USE await !!!!!!!!!!!!!!!!!!!!!!!!
 
 async function checkToken(token) {
-  if (!token) return false;
-  const pool = new Pool({
-    connectionString: process.env.DATABASE_STRING,
-    connectionTimeoutMillis: 5000,
-  });
   try {
+    if (!token) return false;
+    const pool = new Pool({
+      connectionString: process.env.DATABASE_STRING,
+      connectionTimeoutMillis: 5000,
+    });
     await pool.connect();
     const decoded = {
       username: jwt.verify(token, process.env.JWT_SECRET_KEY).username,
