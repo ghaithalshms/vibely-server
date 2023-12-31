@@ -6,6 +6,7 @@ const postLink = {
   checkUsername: `/api/user/check-username`,
   follow: `/api/user/follow`,
   // POST
+  createPost: `/api/post/create`,
   likePost: `/api/post/like`,
   savePost: `/api/post/save`,
   // COMMENT
@@ -17,6 +18,7 @@ const getLink = {
   activateServer: `/api/server/activate`,
   // USER
   getUserData: `/api/user/data`,
+  getUserPicture: `/api/user/data/picture`,
   getUserFollowers: `/api/user/followers`,
   getUserFollowing: `/api/user/following`,
   // POST FLOW

@@ -5,7 +5,7 @@ const checkToken = require("../../func/checkToken");
 const GetPostComments = async (req, res) => {
   const { postID, token } = req.query;
   try {
-    if (!(postID, token)) {
+    if (!(postID && token)) {
       res.status(404).json("data missing");
       return;
     }

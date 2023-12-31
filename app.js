@@ -50,6 +50,9 @@ const DeletePost = require("./routes/post/deletePost");
 const ArchivePost = require("./routes/post/archivePost");
 const GetHomePostFlow = require("./routes/postflow/getHomePostFlow");
 const GetExplorerPostFlow = require("./routes/postflow/getExplorerPostFlow");
+const GetUserPicture = require("./routes/user/getUserPicture");
+const CreatePost = require("./routes/post/createPost");
+const multer = require("multer");
 
 // *********** POST ***********
 // activate server
@@ -63,6 +66,9 @@ app.post(postLink.signUp, SignUp);
 app.post(postLink.checkUsername, CheckUsername);
 app.post(postLink.follow, Follow);
 // POST
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+app.post(postLink.createPost, upload.single("file"), CreatePost);
 app.post(postLink.likePost, LikePost);
 app.post(postLink.savePost, SavePost);
 // COMMENT
@@ -74,6 +80,7 @@ app.post(postLink.createComment, CreateComment);
 app.get(getLink.getUserData, GetUserData);
 app.get(getLink.getUserFollowers, GetFollowers);
 app.get(getLink.getUserFollowing, GetFollowing);
+app.get(getLink.getUserPicture, GetUserPicture);
 // POST FLOW
 app.get(getLink.getUserPostFlow, GetUserPostFlow);
 app.get(getLink.getHomePostFlow, GetHomePostFlow);

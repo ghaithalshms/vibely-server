@@ -44,7 +44,8 @@ const GetExplorerPostFlow = async (req, res) => {
         FROM follow_tbl
         WHERE follower = $1
         )
-     AND username!=$1
+      AND username!=$1
+      AND privacity=false
       AND archived=false
       ${postIdInstructionString}
       AND follower=$1

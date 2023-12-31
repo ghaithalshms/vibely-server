@@ -4,7 +4,7 @@ require("dotenv").config();
 const getUserData = async (req, res) => {
   const { username, userSigned } = req.query;
   try {
-    if (!(username, userSigned)) {
+    if (!(username && userSigned)) {
       res.status(404).json("data missing");
       return;
     }

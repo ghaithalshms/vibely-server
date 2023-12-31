@@ -4,7 +4,7 @@ const checkToken = require("../../func/checkToken");
 const LikePost = async (req, res) => {
   const { token, postID } = req.body;
   try {
-    if (!(token, postID)) {
+    if (!(token && postID)) {
       res.status(404).json("data missing");
       return;
     }

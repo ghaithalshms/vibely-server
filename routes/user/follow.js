@@ -4,7 +4,7 @@ const checkToken = require("../../func/checkToken");
 const Follow = async (req, res) => {
   const { token, username } = req.body;
   try {
-    if (!(token, username)) {
+    if (!(token && username)) {
       res.status(404).json("data missing");
       return;
     }
