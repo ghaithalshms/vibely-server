@@ -2,10 +2,10 @@
   "name": "vibely-server",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": "App.js",
   "scripts": {
-    "start": "nodemon app.js",
-    "pm2": "pm2 start app.js"
+    "start": "nodemon App.js",
+    "pm2": "pm2 start App.js"
   },
   "keywords": [],
   "author": "",

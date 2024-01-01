@@ -33,15 +33,15 @@ const getUserData = async (req, res) => {
     );
     if (dataQuery.rows.length > 0) {
       const userData = {
-        username: dataQuery.rows[0].username ?? null,
-        firstName: dataQuery.rows[0].first_name ?? null,
-        lastName: dataQuery.rows[0].last_name ?? null,
+        username: dataQuery.rows[0].username ?? "",
+        firstName: dataQuery.rows[0].first_name ?? "",
+        lastName: dataQuery.rows[0].last_name ?? "",
         postCount: dataQuery.rows[0].post_count ?? 0,
         followerCount: dataQuery.rows[0].follower_count ?? 0,
         followingCount: dataQuery.rows[0].following_count ?? 0,
-        biography: dataQuery.rows[0].biography ?? null,
-        picture: dataQuery.rows[0].picture ?? null,
-        link: dataQuery.rows[0].link ?? null,
+        biography: dataQuery.rows[0].biography ?? "",
+        picture: dataQuery.rows[0].picture ?? "",
+        link: dataQuery.rows[0].link ?? "",
         privacity: dataQuery.rows[0].privacity ?? false,
         isFollowing: isFollowingQuery.rows.length > 0,
         isFollowRequested: isFollowRequestedQuery.rows.length > 0,

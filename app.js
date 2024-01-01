@@ -38,7 +38,7 @@ const GetUserData = require("./routes/user/getUserData");
 const Follow = require("./routes/user/follow");
 const GetFollowers = require("./routes/user/userList/getFollowers");
 const GetFollowing = require("./routes/user/userList/getFollowing");
-const GetUserPostFlow = require("./routes/postflow/getUserPostFlow");
+const GetUserPostFlow = require("./routes/postFlow/getUserPostFlow");
 const LikePost = require("./routes/post/likePost");
 const SavePost = require("./routes/post/savePost");
 const GetPostComments = require("./routes/post/getPostComments");
@@ -48,11 +48,15 @@ const DeleteComment = require("./routes/comment/deleteComment");
 const GetPostLikedUsers = require("./routes/post/userList/getPostLikedUsers");
 const DeletePost = require("./routes/post/deletePost");
 const ArchivePost = require("./routes/post/archivePost");
-const GetHomePostFlow = require("./routes/postflow/getHomePostFlow");
-const GetExplorerPostFlow = require("./routes/postflow/getExplorerPostFlow");
+const GetHomePostFlow = require("./routes/postFlow/getHomePostFlow");
+const GetExplorerPostFlow = require("./routes/postFlow/getExplorerPostFlow");
 const GetUserPicture = require("./routes/user/getUserPicture");
 const CreatePost = require("./routes/post/createPost");
 const multer = require("multer");
+const GetSearchUser = require("./routes/search/getSearchUser");
+const GetLikedPostFlow = require("./routes/postFlow/getLikedPostFlow");
+const GetSavedPostFlow = require("./routes/postFlow/getSavedPostFlow");
+const GetArchivedPostFlow = require("./routes/postFlow/getArchivedPostFlow");
 
 // *********** POST ***********
 // activate server
@@ -81,10 +85,14 @@ app.get(getLink.getUserData, GetUserData);
 app.get(getLink.getUserFollowers, GetFollowers);
 app.get(getLink.getUserFollowing, GetFollowing);
 app.get(getLink.getUserPicture, GetUserPicture);
+app.get(getLink.getSearchUser, GetSearchUser);
 // POST FLOW
 app.get(getLink.getUserPostFlow, GetUserPostFlow);
 app.get(getLink.getHomePostFlow, GetHomePostFlow);
 app.get(getLink.getExplorerPostFlow, GetExplorerPostFlow);
+app.get(getLink.getLikedPostFlow, GetLikedPostFlow);
+app.get(getLink.getSavedPostFlow, GetSavedPostFlow);
+app.get(getLink.getArchivedPostFlow, GetArchivedPostFlow);
 // POST
 app.get(getLink.getPostComments, GetPostComments);
 app.get(getLink.getPostLikedUsers, GetPostLikedUsers);

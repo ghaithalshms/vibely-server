@@ -1,7 +1,7 @@
 const { Pool } = require("pg");
 require("dotenv").config();
 
-const getUserFollowing = async (req, res) => {
+const GetUserFollowing = async (req, res) => {
   const { username } = req.query;
   try {
     if (!username) {
@@ -49,9 +49,9 @@ const getUserFollowing = async (req, res) => {
       //   user.username
       // );
       userList.push({
-        username: user.username ?? null,
-        firstName: user.first_name ?? null,
-        lastName: user.last_name ?? null,
+        username: user.username ?? "",
+        firstName: user.first_name ?? "",
+        lastName: user.last_name ?? "",
         picture: user.picture ?? null,
         // isFollowing,
         // isFollowRequested,
@@ -66,4 +66,4 @@ const getUserFollowing = async (req, res) => {
   }
 };
 
-module.exports = getUserFollowing;
+module.exports = GetUserFollowing;

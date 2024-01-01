@@ -31,9 +31,9 @@ const GetPostLikedUsers = async (req, res) => {
 
     for (const user of userListQuery.rows) {
       userList.push({
-        username: user.username ?? null,
-        firstName: user.first_name ?? null,
-        lastName: user.last_name ?? null,
+        username: user.username ?? "",
+        firstName: user.first_name ?? "",
+        lastName: user.last_name ?? "",
         picture: user.picture ?? null,
         isVerified: user.verified ?? false,
         isAdmin: user.admin ?? false,

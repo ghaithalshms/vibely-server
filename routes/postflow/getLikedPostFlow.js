@@ -2,8 +2,8 @@ const { Pool } = require("pg");
 require("dotenv").config();
 const checkToken = require("../../func/checkToken");
 
-const GetUserPostFlow = async (req, res) => {
-  const { username, token, lastGotPostID } = req.query;
+const GetLikedPostFlow = async (req, res) => {
+  const { token, lastGotPostID } = req.query;
   try {
     if (!lastGotPostID) {
       res.json("no post flow");
@@ -30,46 +30,20 @@ const GetUserPostFlow = async (req, res) => {
         return;
       });
 
-    const privacityQuery = await pool.query(
-      `SELECT privacity FROM user_tbl WHERE username=$1`,
-      [username]
-    );
-    if (
-      privacityQuery.rows[0].privacity === true &&
-      username !== tokenUsername
-    ) {
-      const isFollowingQuery = await pool.query(
-        `SELECT * from follow_tbl WHERE follower=$1 AND following=$2`,
-        [tokenUsername, username]
-      );
-      if (isFollowingQuery.rowCount === 0) {
-        if (!res.headersSent) res.json("private account");
-        return;
-      }
-    }
-
     const postIdInstructionString =
       lastGotPostID > 0 ? "AND post_id < $2" : "AND post_id > $2";
 
-    const userPostFlowQuery = await pool.query(
-      `SELECT post_id, posted_user, description, picture, like_count, comment_count, post_date
-      FROM post_tbl 
-      WHERE posted_user = $1
+    const likedPostFlowQuery = await pool.query(
+      `SELECT DISTINCT post_id, posted_user, description, picture, like_count, comment_count, post_date
+      FROM post_tbl, post_like_tbl 
+      WHERE liked_user = $1
+      AND post_id = liked_post
       AND archived = 'false'
       ${postIdInstructionString}
       ORDER BY post_id DESC
       LIMIT 5`,
-      [username, lastGotPostID]
+      [tokenUsername, lastGotPostID]
     );
-
-    const handleIsPostLiked = async (postID) => {
-      const result = await pool.query(
-        `SELECT DISTINCT liked_user FROM post_like_tbl 
-      WHERE liked_user = $1 AND liked_post = $2`,
-        [tokenUsername, postID]
-      );
-      return result.rowCount > 0;
-    };
 
     const handleIsPostSaved = async (postID) => {
       const result = await pool.query(
@@ -82,8 +56,7 @@ const GetUserPostFlow = async (req, res) => {
 
     let postFlowArray = [];
 
-    for (const post of userPostFlowQuery.rows) {
-      const isLiked = await handleIsPostLiked(post.post_id);
+    for (const post of likedPostFlowQuery.rows) {
       const isSaved = await handleIsPostSaved(post.post_id);
       postFlowArray.push({
         postID: post.post_id,
@@ -93,7 +66,7 @@ const GetUserPostFlow = async (req, res) => {
         likeCount: post.like_count,
         commentCount: post.comment_count,
         postDate: post.post_date,
-        isLiked,
+        isLiked: true,
         isSaved,
       });
     }
@@ -107,4 +80,4 @@ const GetUserPostFlow = async (req, res) => {
   }
 };
 
-module.exports = GetUserPostFlow;
+module.exports = GetLikedPostFlow;

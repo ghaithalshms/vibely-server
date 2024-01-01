@@ -21,10 +21,14 @@ const getLink = {
   getUserPicture: `/api/user/data/picture`,
   getUserFollowers: `/api/user/followers`,
   getUserFollowing: `/api/user/following`,
+  getSearchUser: `/api/user/search`,
   // POST FLOW
   getHomePostFlow: `/api/post-flow/home`,
   getUserPostFlow: `/api/post-flow/user`,
   getExplorerPostFlow: `/api/post-flow/explorer`,
+  getLikedPostFlow: `/api/post-flow/liked`,
+  getSavedPostFlow: `/api/post-flow/saved`,
+  getArchivedPostFlow: `/api/post-flow/archived`,
   // POST
   getPostComments: `/api/post/comments`,
   getPostLikedUsers: `/api/post/liked-users`,
