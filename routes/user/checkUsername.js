@@ -5,7 +5,7 @@ const checkUsername = async (req, res) => {
   const { username } = req.body;
   try {
     if (!username) {
-      res.status(404).json("data missing");
+      res.status(400).json("data missing");
       return;
     }
     const pool = new Pool({

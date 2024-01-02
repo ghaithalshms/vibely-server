@@ -58,6 +58,7 @@ const GetLikedPostFlow = require("./routes/postFlow/getLikedPostFlow");
 const GetSavedPostFlow = require("./routes/postFlow/getSavedPostFlow");
 const GetArchivedPostFlow = require("./routes/postFlow/getArchivedPostFlow");
 const GetNotifications = require("./routes/notification/getNotification");
+const AcceptFollowRequest = require("./routes/user/acceptFollowRequest");
 
 // *********** POST ***********
 // activate server
@@ -70,6 +71,7 @@ app.post(postLink.signUp, SignUp);
 // USER
 app.post(postLink.checkUsername, CheckUsername);
 app.post(postLink.follow, Follow);
+app.post(postLink.acceptFollowRequest, AcceptFollowRequest);
 // POST
 const storage = multer.memoryStorage();
 const upload = multer({ storage });

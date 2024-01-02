@@ -35,7 +35,7 @@ const GetExplorerPostFlow = async (req, res) => {
       lastGotPostID > 0 ? "AND post_id < $2" : "AND post_id > $2";
 
     const homePostFlowQuery = await pool.query(
-      `SELECT DISTINCT post_id, description, post_tbl.picture as post_picture, like_count, comment_count, post_date,
+      `SELECT DISTINCT post_id, description, file, file_type, like_count, comment_count, post_date,
       username, first_name, post_count, user_tbl.picture as user_picture, admin, verified
       FROM user_tbl, post_tbl, follow_tbl 
       WHERE posted_user=username
@@ -80,7 +80,8 @@ const GetExplorerPostFlow = async (req, res) => {
         post: {
           postID: post.post_id,
           description: post.description,
-          picture: post.post_picture,
+          file: post.file,
+          fileType: post.file_type,
           likeCount: post.like_count,
           commentCount: post.comment_count,
           postDate: post.post_date,

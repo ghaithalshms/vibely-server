@@ -3,13 +3,14 @@ const checkToken = require("../../func/checkToken");
 
 const CreatePost = async (req, res) => {
   const file = req.file;
+  const fileType = req.body.fileType;
   const buffer = file ? file.buffer : null;
   const token = req.body.token;
   const description = req.body.description;
 
   try {
     if (!(token && (file || description))) {
-      res.status(404).json("data missing");
+      res.status(400).json("data missing");
       return;
     }
     const pool = new Pool({
@@ -31,11 +32,11 @@ const CreatePost = async (req, res) => {
       });
 
     // DEFINITION OF FUNCTIONS
-    const handleCreateComment = async () => {
+    const handlePostComment = async () => {
       await pool.query(
-        `INSERT INTO post_tbl (posted_user, description, post_date, picture) 
-          VALUES ($1,$2,$3, $4)`,
-        [tokenUsername, description, new Date().toISOString(), buffer]
+        `INSERT INTO post_tbl (posted_user, description, post_date, file, file_type) 
+          VALUES ($1,$2,$3, $4, $5)`,
+        [tokenUsername, description, new Date().toISOString(), buffer, fileType]
       );
       await pool.query(
         `UPDATE user_tbl SET post_count = post_count+1 WHERE username =$1`,
@@ -45,7 +46,7 @@ const CreatePost = async (req, res) => {
     };
 
     // START QUERY HERE
-    handleCreateComment();
+    handlePostComment();
   } catch (err) {
     if (!res.headersSent) res.status(500).json(err);
   }

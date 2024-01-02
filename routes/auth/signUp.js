@@ -7,7 +7,7 @@ const signUp = async (req, res) => {
   const { username, firstName, password, email } = req.body;
   try {
     if (!(username && password && firstName && password && email)) {
-      res.status(404).json("data missing");
+      res.status(400).json("data missing");
       return;
     }
     const pool = new Pool({

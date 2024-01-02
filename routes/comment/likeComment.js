@@ -5,7 +5,7 @@ const LikeComment = async (req, res) => {
   const { token, commentID } = req.body;
   try {
     if (!(token && commentID)) {
-      res.status(404).json("data missing");
+      res.status(400).json("data missing");
       return;
     }
     const pool = new Pool({

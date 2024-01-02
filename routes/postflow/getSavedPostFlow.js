@@ -34,7 +34,7 @@ const GetSavedPostFlow = async (req, res) => {
       lastGotPostID > 0 ? "AND saved_id < $2" : "AND saved_id > $2";
 
     const likedPostFlowQuery = await pool.query(
-      `SELECT DISTINCT saved_id, post_tbl.post_id, description, post_tbl.picture as post_picture, like_count, comment_count, post_date,
+      `SELECT DISTINCT saved_id, post_tbl.post_id, description, file, file_type, like_count, comment_count, post_date,
       username, first_name, post_count, user_tbl.picture as user_picture, admin, verified
       FROM post_tbl, post_save_tbl, user_tbl 
       WHERE saved_user = $1
@@ -65,7 +65,8 @@ const GetSavedPostFlow = async (req, res) => {
           postID: post.post_id,
           orderID: post.saved_id,
           description: post.description,
-          picture: post.post_picture,
+          file: post.file,
+          fileType: post.file_type,
           likeCount: post.like_count,
           commentCount: post.comment_count,
           postDate: post.post_date,

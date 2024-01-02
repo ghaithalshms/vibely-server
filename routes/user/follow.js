@@ -5,7 +5,7 @@ const Follow = async (req, res) => {
   const { token, username } = req.body;
   try {
     if (!(token && username)) {
-      res.status(404).json("data missing");
+      res.status(400).json("data missing");
       return;
     }
     const pool = new Pool({

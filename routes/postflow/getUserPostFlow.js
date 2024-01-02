@@ -52,7 +52,7 @@ const GetUserPostFlow = async (req, res) => {
       lastGotPostID > 0 ? "AND post_id < $2" : "AND post_id > $2";
 
     const userPostFlowQuery = await pool.query(
-      `SELECT post_id, posted_user, description, picture, like_count, comment_count, post_date
+      `SELECT post_id, posted_user, description, file, file_type, like_count, comment_count, post_date
       FROM post_tbl 
       WHERE posted_user = $1
       AND archived = 'false'
@@ -89,7 +89,8 @@ const GetUserPostFlow = async (req, res) => {
         postID: post.post_id,
         postedUser: post.posted_user,
         description: post.description,
-        picture: post.picture,
+        file: post.file,
+        fileType: post.file_type,
         likeCount: post.like_count,
         commentCount: post.comment_count,
         postDate: post.post_date,

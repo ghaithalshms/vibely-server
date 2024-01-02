@@ -5,7 +5,7 @@ const getUserData = async (req, res) => {
   const { username, userSigned } = req.query;
   try {
     if (!(username && userSigned)) {
-      res.status(404).json("data missing");
+      res.status(400).json("data missing");
       return;
     }
     const pool = new Pool({

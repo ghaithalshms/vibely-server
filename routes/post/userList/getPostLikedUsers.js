@@ -5,7 +5,7 @@ const GetPostLikedUsers = async (req, res) => {
   const { postID } = req.query;
   try {
     if (!postID) {
-      res.status(404).json("data missing");
+      res.status(400).json("data missing");
       return;
     }
     const pool = new Pool({
