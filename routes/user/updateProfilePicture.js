@@ -37,9 +37,8 @@ const UpdateProfilePicture = async (req, res) => {
         [buffer, tokenUsername]
       );
       if (!res.headersSent) res.status(200).json("pfp updated");
-
-      handleUpdateProfilePicture();
     };
+    handleUpdateProfilePicture();
   } catch (err) {
     if (!res.headersSent) res.status(500).json(err);
   }

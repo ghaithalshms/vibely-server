@@ -36,7 +36,7 @@ const UpdateProfileData = async (req, res) => {
         last_name=$3,
         biography=$4,
         link=$5,
-        privacity=$6,
+        privacity=$6
         WHERE username=$7`,
         [
           username,
@@ -49,9 +49,8 @@ const UpdateProfileData = async (req, res) => {
         ]
       );
       if (!res.headersSent) res.status(200).json("data updated");
-
-      handleUpdateProfileData();
     };
+    handleUpdateProfileData();
   } catch (err) {
     if (!res.headersSent) res.status(500).json(err);
   }
