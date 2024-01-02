@@ -15,7 +15,7 @@ const LikeComment = async (req, res) => {
 
     const tokenUsername = await checkToken(token);
     if (tokenUsername === false) {
-      if (!res.headersSent) res.status(401);
+      if (!res.headersSent) res.status(401).json("wrong token");
       return;
     }
     await pool
@@ -45,7 +45,7 @@ const LikeComment = async (req, res) => {
         `INSERT INTO notification_tbl (noti_from, noti_to, noti_type, noti_date) values ($1,$2,$3,$4)`,
         [
           tokenUsername,
-          commentedUserQuery?.rows[0].posted_user,
+          commentedUserQuery?.rows[0].commented_user,
           "comment like",
           new Date().toISOString(),
         ]

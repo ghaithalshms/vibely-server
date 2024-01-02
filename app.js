@@ -57,6 +57,7 @@ const GetSearchUser = require("./routes/search/getSearchUser");
 const GetLikedPostFlow = require("./routes/postFlow/getLikedPostFlow");
 const GetSavedPostFlow = require("./routes/postFlow/getSavedPostFlow");
 const GetArchivedPostFlow = require("./routes/postFlow/getArchivedPostFlow");
+const GetNotifications = require("./routes/notification/getNotification");
 
 // *********** POST ***********
 // activate server
@@ -96,6 +97,8 @@ app.get(getLink.getArchivedPostFlow, GetArchivedPostFlow);
 // POST
 app.get(getLink.getPostComments, GetPostComments);
 app.get(getLink.getPostLikedUsers, GetPostLikedUsers);
+// NOTIFICATION
+app.get(getLink.getNotification, GetNotifications);
 
 // *********** DELETE ***********
 // POST

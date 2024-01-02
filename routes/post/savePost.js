@@ -15,7 +15,7 @@ const SavePost = async (req, res) => {
 
     const tokenUsername = await checkToken(token);
     if (tokenUsername === false) {
-      if (!res.headersSent) res.status(401);
+      if (!res.headersSent) res.status(401).json("wrong token");
       return;
     }
     await pool

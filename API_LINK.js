@@ -5,6 +5,7 @@ const postLink = {
   // USER
   checkUsername: `/api/user/check-username`,
   follow: `/api/user/follow`,
+  acceptFollowRequest: `/api/user/follow/request/accept`,
   // POST
   createPost: `/api/post/create`,
   likePost: `/api/post/like`,
@@ -32,6 +33,8 @@ const getLink = {
   // POST
   getPostComments: `/api/post/comments`,
   getPostLikedUsers: `/api/post/liked-users`,
+  // NOTIFICATION
+  getNotification: `/api/notification`,
 };
 
 const deleteLink = {
@@ -39,6 +42,8 @@ const deleteLink = {
   deletePost: `/api/post/delete`,
   // COMMENT
   deleteComment: `/api/comment/delete`,
+  // USER
+  deleteFollowRequest: `/api/user/follow/request/delete`,
 };
 
 const updateLink = {

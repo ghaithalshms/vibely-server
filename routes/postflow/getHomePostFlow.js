@@ -19,7 +19,7 @@ const GetHomePostFlow = async (req, res) => {
     });
     const tokenUsername = await checkToken(token);
     if (tokenUsername === false) {
-      if (!res.headersSent) res.status(401);
+      if (!res.headersSent) res.status(401).json("wrong token");
       return;
     }
 
@@ -35,7 +35,7 @@ const GetHomePostFlow = async (req, res) => {
       lastGotPostID > 0 ? "AND post_id < $2" : "AND post_id > $2";
 
     const homePostFlowQuery = await pool.query(
-      `SELECT post_id, description, post_tbl.picture as post_picture, like_count, comment_count, post_date,
+      `SELECT DISTINCT post_id, description, post_tbl.picture as post_picture, like_count, comment_count, post_date,
       username, first_name, post_count, user_tbl.picture as user_picture, admin, verified
       FROM user_tbl, post_tbl, follow_tbl 
       WHERE posted_user=username

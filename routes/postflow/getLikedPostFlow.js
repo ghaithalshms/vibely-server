@@ -19,7 +19,7 @@ const GetLikedPostFlow = async (req, res) => {
     });
     const tokenUsername = await checkToken(token);
     if (tokenUsername === false) {
-      if (!res.headersSent) res.status(401);
+      if (!res.headersSent) res.status(401).json("wrong token");
       return;
     }
     await pool
@@ -31,16 +31,18 @@ const GetLikedPostFlow = async (req, res) => {
       });
 
     const postIdInstructionString =
-      lastGotPostID > 0 ? "AND post_id < $2" : "AND post_id > $2";
+      lastGotPostID > 0 ? "AND like_id < $2" : "AND like_id > $2";
 
     const likedPostFlowQuery = await pool.query(
-      `SELECT DISTINCT post_id, posted_user, description, picture, like_count, comment_count, post_date
-      FROM post_tbl, post_like_tbl 
+      `SELECT DISTINCT like_id, post_id, description, post_tbl.picture as post_picture, like_count, comment_count, post_date,
+      username, first_name, post_count, user_tbl.picture as user_picture, admin, verified
+      FROM post_tbl, user_tbl, post_like_tbl 
       WHERE liked_user = $1
+      AND username = posted_user
       AND post_id = liked_post
       AND archived = 'false'
       ${postIdInstructionString}
-      ORDER BY post_id DESC
+      ORDER BY like_id DESC
       LIMIT 5`,
       [tokenUsername, lastGotPostID]
     );
@@ -59,21 +61,31 @@ const GetLikedPostFlow = async (req, res) => {
     for (const post of likedPostFlowQuery.rows) {
       const isSaved = await handleIsPostSaved(post.post_id);
       postFlowArray.push({
-        postID: post.post_id,
-        postedUser: post.posted_user,
-        description: post.description,
-        picture: post.picture,
-        likeCount: post.like_count,
-        commentCount: post.comment_count,
-        postDate: post.post_date,
-        isLiked: true,
-        isSaved,
+        post: {
+          postID: post.post_id,
+          orderID: post.like_id,
+          description: post.description,
+          picture: post.post_picture,
+          likeCount: post.like_count,
+          commentCount: post.comment_count,
+          postDate: post.post_date,
+          isLiked: true,
+          isSaved,
+        },
+        user: {
+          username: post.username,
+          firstName: post.first_name,
+          picture: post.user_picture,
+          postCount: post.post_count,
+          isAdmin: post.admin,
+          isVerified: post.verified,
+        },
       });
     }
     if (!res.headersSent)
       res.send({
         postFlowArray,
-        lastGotPostID: postFlowArray[postFlowArray.length - 1]?.postID,
+        lastGotPostID: postFlowArray[postFlowArray.length - 1]?.post.orderID,
       });
   } catch (error) {
     if (!res.headersSent) res.status(400).json(error.message);
