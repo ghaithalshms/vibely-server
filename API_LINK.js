@@ -49,6 +49,9 @@ const deleteLink = {
 const updateLink = {
   // POST
   archivePost: `/api/post/archive`,
+  // USER
+  updateProfileData: `/api/user/update/data`,
+  updateProfilePicture: `/api/user/update/picture`,
 };
 
 module.exports = { getLink, postLink, updateLink, deleteLink };

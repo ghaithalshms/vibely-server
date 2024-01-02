@@ -59,6 +59,8 @@ const GetSavedPostFlow = require("./routes/postFlow/getSavedPostFlow");
 const GetArchivedPostFlow = require("./routes/postFlow/getArchivedPostFlow");
 const GetNotifications = require("./routes/notification/getNotification");
 const AcceptFollowRequest = require("./routes/user/acceptFollowRequest");
+const UpdateProfileData = require("./routes/user/updateProfileData");
+const UpdateProfilePicture = require("./routes/user/updateProfilePicture");
 
 // *********** POST ***********
 // activate server
@@ -111,6 +113,12 @@ app.post(deleteLink.deleteComment, DeleteComment);
 // *********** UPDATE ***********
 // POST
 app.post(updateLink.archivePost, ArchivePost);
+app.post(updateLink.updateProfileData, UpdateProfileData);
+app.post(
+  updateLink.updateProfilePicture,
+  upload.single("file"),
+  UpdateProfilePicture
+);
 
 const connectedUsers = new Map();
 
