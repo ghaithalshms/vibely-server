@@ -15,6 +15,7 @@ const {
 
 const app = express();
 app.use(cors());
+
 app.use(bodyParser.json({ limit: "2mb" }));
 app.use(bodyParser.urlencoded({ limit: "2mb", extended: true }));
 app.use(express.json({ limit: "2mb" }));
@@ -23,6 +24,7 @@ app.use(express.urlencoded({ extended: true, limit: "2mb" }));
 const server = http.createServer(app);
 
 const io = new Server(server, {
+  maxHttpBufferSize: 2e6,
   cors: {
     origin: process.env.CLIENT_URL,
     methods: ["GET", "POST", "DELETE"],
@@ -61,6 +63,12 @@ const GetNotifications = require("./routes/notification/getNotification");
 const AcceptFollowRequest = require("./routes/user/acceptFollowRequest");
 const UpdateProfileData = require("./routes/user/updateProfileData");
 const UpdateProfilePicture = require("./routes/user/updateProfilePicture");
+const GetInbox = require("./routes/inbox/getInbox");
+const GetChat = require("./routes/chat/getChat");
+const SendMessageToDB = require("./routes/chat/sendMessageToDB");
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
 // *********** POST ***********
 // activate server
@@ -75,14 +83,15 @@ app.post(postLink.checkUsername, CheckUsername);
 app.post(postLink.follow, Follow);
 app.post(postLink.acceptFollowRequest, AcceptFollowRequest);
 // POST
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
+
 app.post(postLink.createPost, upload.single("file"), CreatePost);
 app.post(postLink.likePost, LikePost);
 app.post(postLink.savePost, SavePost);
 // COMMENT
 app.post(postLink.likeComment, LikeComment);
 app.post(postLink.createComment, CreateComment);
+// CHAT
+app.post(postLink.sendMessageToDB, upload.single("file"), SendMessageToDB);
 
 // *********** GET ***********
 // USER
@@ -103,6 +112,10 @@ app.get(getLink.getPostComments, GetPostComments);
 app.get(getLink.getPostLikedUsers, GetPostLikedUsers);
 // NOTIFICATION
 app.get(getLink.getNotification, GetNotifications);
+// INBOX
+app.get(getLink.getInbox, GetInbox);
+// CHAT
+app.get(getLink.getChat, GetChat);
 
 // *********** DELETE ***********
 // POST

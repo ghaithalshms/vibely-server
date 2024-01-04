@@ -1,6 +1,7 @@
 const dissconnectSocket = require("./disconnect");
-const setUserSocket = require("./setUser");
+const setUserSocket = require("./setUserSocket");
 const sendMessageSocket = require("./sendMessage");
+
 const connectionToSocket = (io, connectedUsers) => {
   io.on("connection", (socket) => {
     setUserSocket(socket, connectedUsers);

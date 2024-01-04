@@ -1,8 +1,8 @@
 const sendMessageSocket = (socket, connectedUsers) => {
-  socket.on("send_message", (data) => {
-    console.log("aa");
-    const userSocketID = connectedUsers.get(data.message.to)?.id;
-    socket.to(userSocketID)?.emit("receive_message", data.message);
+  socket.on("send_message", (messageData) => {
+    console.log(messageData);
+    const userSocketID = connectedUsers.get(messageData.to)?.id;
+    socket.to(userSocketID)?.emit("receive_message", messageData);
   });
 };
 module.exports = sendMessageSocket;

@@ -13,6 +13,8 @@ const postLink = {
   // COMMENT
   likeComment: `/api/comment/like`,
   createComment: `/api/comment/create`,
+  // CHAT
+  sendMessageToDB: `/api/chat/send-message`,
 };
 const getLink = {
   // ACTIVATE SERVER
@@ -35,6 +37,10 @@ const getLink = {
   getPostLikedUsers: `/api/post/liked-users`,
   // NOTIFICATION
   getNotification: `/api/notification`,
+  // INBOX
+  getInbox: `/api/inbox`,
+  // CHAT
+  getChat: `/api/chat`,
 };
 
 const deleteLink = {

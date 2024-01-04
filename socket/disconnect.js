@@ -1,7 +1,5 @@
 const { Pool } = require("pg");
 const dissconnectSocket = async (socket, connectedUsers) => {
-  let pool = new Pool({ connectionString: process.env.DATABASE_STRING });
-
   socket.on("disconnect", async () => {
     try {
       let disconnectedUsername = null;
@@ -10,8 +8,11 @@ const dissconnectSocket = async (socket, connectedUsers) => {
       });
       if (disconnectedUsername) {
         connectedUsers.delete(disconnectedUsername);
-        client = await pool.connect();
-        client.query(`UPDATE user_tbl SET last_seen=$1 WHERE username=$2`, [
+        const pool = new Pool({
+          connectionString: process.env.DATABASE_STRING,
+          connectionTimeoutMillis: 5000,
+        });
+        pool.query(`UPDATE user_tbl SET last_seen=$1 WHERE username=$2`, [
           new Date().toISOString(),
           disconnectedUsername,
         ]);
