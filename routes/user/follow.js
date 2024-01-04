@@ -1,5 +1,5 @@
 const { Pool } = require("pg");
-const checkToken = require("../../func/checkToken");
+const checkToken = require("../../func/check_token");
 
 const Follow = async (req, res) => {
   const { token, username } = req.body;
