@@ -66,6 +66,10 @@ const UpdateProfilePicture = require("./routes/user/updateProfilePicture");
 const GetInbox = require("./routes/inbox/getInbox");
 const GetChat = require("./routes/chat/getChat");
 const SendMessageToDB = require("./routes/chat/sendMessageToDB");
+const SetMessagesSeen = require("./routes/chat/setMessagesSeen");
+const SetNotificationSeen = require("./routes/notification/setNotificationSeen");
+const GetNotificationCount = require("./routes/notification/getNotificationCount");
+const GetMessagesCount = require("./routes/inbox/getMessagesCount");
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -83,7 +87,6 @@ app.post(postLink.checkUsername, CheckUsername);
 app.post(postLink.follow, Follow);
 app.post(postLink.acceptFollowRequest, AcceptFollowRequest);
 // POST
-
 app.post(postLink.createPost, upload.single("file"), CreatePost);
 app.post(postLink.likePost, LikePost);
 app.post(postLink.savePost, SavePost);
@@ -112,8 +115,10 @@ app.get(getLink.getPostComments, GetPostComments);
 app.get(getLink.getPostLikedUsers, GetPostLikedUsers);
 // NOTIFICATION
 app.get(getLink.getNotification, GetNotifications);
+app.get(getLink.getNotificationCount, GetNotificationCount);
 // INBOX
 app.get(getLink.getInbox, GetInbox);
+app.get(getLink.getMessagesCount, GetMessagesCount);
 // CHAT
 app.get(getLink.getChat, GetChat);
 
@@ -132,6 +137,10 @@ app.post(
   upload.single("file"),
   UpdateProfilePicture
 );
+// CHAT
+app.post(updateLink.setMessagesSeen, SetMessagesSeen);
+// CHAT
+app.post(updateLink.setNotificationSeen, SetNotificationSeen);
 
 const connectedUsers = new Map();
 
@@ -140,3 +149,25 @@ connectionToSocket(io, connectedUsers);
 const listener = server.listen(8055 || process.env.PORT, () => {
   console.log(`Server is running on port ${listener.address().port}`);
 });
+
+////////////////////////////////
+//KEEP SERVER ACTIVE
+const axios = require("axios");
+
+// Function to send HTTP request to the self server
+const sendHttpRequest = async () => {
+  try {
+    const response = await axios.get(
+      `${process.env.API_URL}/api/server/activate`
+    );
+    console.log("HTTP Request Successful:", response.data);
+  } catch (error) {
+    console.error("HTTP Request Failed:", error);
+  }
+};
+
+// Set up interval to send HTTP request every 10 minutes (600,000 milliseconds)
+const interval = 10 * 60 * 1000;
+setInterval(sendHttpRequest, interval);
+
+////////////////////////////////

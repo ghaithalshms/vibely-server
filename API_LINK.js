@@ -37,8 +37,10 @@ const getLink = {
   getPostLikedUsers: `/api/post/liked-users`,
   // NOTIFICATION
   getNotification: `/api/notification`,
+  getNotificationCount: `/api/notification/count`,
   // INBOX
   getInbox: `/api/inbox`,
+  getMessagesCount: `/api/inbox/count`,
   // CHAT
   getChat: `/api/chat`,
 };
@@ -58,6 +60,10 @@ const updateLink = {
   // USER
   updateProfileData: `/api/user/update/data`,
   updateProfilePicture: `/api/user/update/picture`,
+  // CHAT
+  setMessagesSeen: `/api/chat/seen`,
+  // NOTIFICATION
+  setNotificationSeen: `/api/notification/seen`,
 };
 
 module.exports = { getLink, postLink, updateLink, deleteLink };

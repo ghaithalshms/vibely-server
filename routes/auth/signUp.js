@@ -56,6 +56,7 @@ const signUp = async (req, res) => {
           if (!res.headersSent)
             res.status(201).json({
               token,
+              username: usernameVerified,
               message: "Your account has been created, welcome to Vibely!",
             });
         } else {

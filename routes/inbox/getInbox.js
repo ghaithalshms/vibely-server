@@ -43,7 +43,6 @@ const GetInbox = async (req, res) => {
     m.msg_to,
     m.sent_date,
     m.file_type,
-    m.file,
     m.message,
     m.seen
 FROM 
@@ -82,7 +81,6 @@ ORDER BY u.last_seen DESC;
           from: inbox.msg_from,
           to: inbox.msg_to,
           sentDate: inbox.sent_date,
-          file: inbox.file,
           fileType: inbox.file_type,
           seen: inbox.seen,
         },
