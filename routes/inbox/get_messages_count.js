@@ -22,6 +22,8 @@ const GetMessagesCount = async (req, res) => {
       return;
     }
 
+    await client.connect();
+
     const handleGetMessagesCount = async () => {
       const countQuery = await client.query(
         `SELECT COUNT(seen) FROM message_tbl WHERE msg_to=$1 AND seen=false
