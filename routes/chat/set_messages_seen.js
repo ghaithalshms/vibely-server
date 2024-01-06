@@ -21,6 +21,8 @@ const SetMessagesSeen = async (req, res) => {
       return;
     }
 
+    await client.connect();
+
     const handleSetMessagesSeen = async () => {
       await client.query(
         `UPDATE message_tbl SET seen=true WHERE msg_from=$1 AND msg_to=$2`,

@@ -23,6 +23,8 @@ const GetNotificationCount = async (req, res) => {
       return;
     }
 
+    await client.connect();
+
     const handleGetNotificationCount = async () => {
       const countQuery = await client.query(
         `SELECT COUNT(seen) FROM notification_tbl WHERE noti_to=$1 AND seen=false`,
