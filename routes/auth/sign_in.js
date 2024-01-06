@@ -1,30 +1,27 @@
-const { Pool } = require("pg");
+const { Client } = require("pg");
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 
 const signIn = async (req, res) => {
   const { usernameOrEmail, password } = req.body;
+
+  const client = new Client({
+    connectionString: process.env.DATABASE_STRING,
+    connectionTimeoutMillis: 5000,
+  });
+
   try {
     if (!(usernameOrEmail && password)) {
       res.status(400).json("data missing");
       return;
     }
-    const pool = new Pool({
-      connectionString: process.env.DATABASE_STRING,
-      connectionTimeoutMillis: 5000,
-    });
-    await pool
-      .connect()
-      .then()
-      .catch(() => {
-        if (!res.headersSent) res.status(502).json("DB connection error");
-        return;
-      });
 
     const usernameOrEmailVerified = usernameOrEmail.toLowerCase().trim();
 
+    await client.connect();
+
     if (usernameOrEmailVerified && password) {
-      const tokenResult = await pool.query(
+      const tokenResult = await client.query(
         `SELECT username, password, token_version FROM user_tbl 
         WHERE username = $1 OR email = $1`,
         [usernameOrEmailVerified]
@@ -57,8 +54,11 @@ const signIn = async (req, res) => {
       if (!res.headersSent) res.status(404).json(`Empty input`);
     }
   } catch (err) {
+    if (client.connected) client.end().catch(() => {});
     console.error("unexpected error : ", err);
     res.status(500).json(err);
+  } finally {
+    if (client.connected) client.end().catch(() => {});
   }
 };
 

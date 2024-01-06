@@ -1,36 +1,30 @@
-const { Pool } = require("pg");
+const { Client } = require("pg");
 const checkToken = require("../../func/check_token");
 
 const UpdateProfilePicture = async (req, res) => {
   const { token } = req.body;
   const file = req.file;
   const buffer = file ? file.buffer : null;
+  const client = new Client({
+    connectionString: process.env.DATABASE_STRING,
+    connectionTimeoutMillis: 5000,
+  });
   try {
     if (!token) {
       res.status(401).json("data missing");
       return;
     }
-    const pool = new Pool({
-      connectionString: process.env.DATABASE_STRING,
-      connectionTimeoutMillis: 5000,
-    });
 
     const tokenUsername = await checkToken(token);
     if (tokenUsername === false) {
       if (!res.headersSent) res.status(401).json("wrong token");
       return;
     }
-    await pool
-      .connect()
-      .then()
-      .catch(() => {
-        if (!res.headersSent) res.status(502).json("DB connection error");
-        return;
-      });
+    await client.connect();
 
     // DEFINITION OF FUNCTIONS
     const handleUpdateProfilePicture = async () => {
-      await pool.query(
+      await client.query(
         `UPDATE user_tbl 
         SET picture=$1
         WHERE username=$2`,
@@ -40,7 +34,11 @@ const UpdateProfilePicture = async (req, res) => {
     };
     handleUpdateProfilePicture();
   } catch (err) {
-    if (!res.headersSent) res.status(500).json(err);
+    if (client.connected) client.end().catch(() => {});
+    console.error("unexpected error : ", err);
+    res.status(500).json(err);
+  } finally {
+    if (client.connected) client.end().catch(() => {});
   }
 };
 

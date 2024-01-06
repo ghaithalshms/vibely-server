@@ -1,9 +1,13 @@
-const { Pool } = require("pg");
+const { Client } = require("pg");
 require("dotenv").config();
 const checkToken = require("../../func/check_token");
 
 const GetNotifications = async (req, res) => {
   const { token } = req.query;
+  const client = new Client({
+    connectionString: process.env.DATABASE_STRING,
+    connectionTimeoutMillis: 5000,
+  });
   try {
     if (!token) {
       res.status(401).json("data missing");
@@ -14,11 +18,8 @@ const GetNotifications = async (req, res) => {
       if (!res.headersSent) res.status(401).json("wrong token");
       return;
     }
-    const pool = new Pool({
-      connectionString: process.env.DATABASE_STRING,
-      connectionTimeoutMillis: 5000,
-    });
-    await pool
+
+    await client
       .connect()
       .then()
       .catch(() => {
@@ -26,7 +27,7 @@ const GetNotifications = async (req, res) => {
         return;
       });
 
-    const notificationQuery = await pool.query(
+    const notificationQuery = await client.query(
       `SELECT noti_from, noti_to, noti_type, noti_date, 
       username, first_name, picture, verified, admin
       FROM user_tbl, notification_tbl
@@ -56,8 +57,12 @@ const GetNotifications = async (req, res) => {
       });
     }
     if (!res.headersSent) res.send(notificationList);
-  } catch (error) {
-    if (!res.headersSent) res.status(400).json(error.message);
+  } catch (err) {
+    if (client.connected) client.end().catch(() => {});
+    console.error("unexpected error : ", err);
+    res.status(500).json(err);
+  } finally {
+    if (client.connected) client.end().catch(() => {});
   }
 };
 

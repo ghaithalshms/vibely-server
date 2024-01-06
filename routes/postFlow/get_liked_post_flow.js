@@ -1,9 +1,13 @@
-const { Pool } = require("pg");
+const { Client } = require("pg");
 require("dotenv").config();
 const checkToken = require("../../func/check_token");
 
 const GetLikedPostFlow = async (req, res) => {
   const { token, lastGotPostID } = req.query;
+  const client = new Client({
+    connectionString: process.env.DATABASE_STRING,
+    connectionTimeoutMillis: 5000,
+  });
   try {
     if (!lastGotPostID) {
       res.json("no post flow");
@@ -13,27 +17,18 @@ const GetLikedPostFlow = async (req, res) => {
       res.status(401).json("data missing");
       return;
     }
-    const pool = new Pool({
-      connectionString: process.env.DATABASE_STRING,
-      connectionTimeoutMillis: 5000,
-    });
+
     const tokenUsername = await checkToken(token);
     if (tokenUsername === false) {
       if (!res.headersSent) res.status(401).json("wrong token");
       return;
     }
-    await pool
-      .connect()
-      .then()
-      .catch(() => {
-        if (!res.headersSent) res.status(502).json("DB connection error");
-        return;
-      });
+    await client.connect();
 
     const postIdInstructionString =
       lastGotPostID > 0 ? "AND like_id < $2" : "AND like_id > $2";
 
-    const likedPostFlowQuery = await pool.query(
+    const likedPostFlowQuery = await client.query(
       `SELECT DISTINCT like_id, post_id, description, file, file_type, like_count, comment_count, post_date,
       username, first_name, post_count, user_tbl.picture as user_picture, admin, verified
       FROM post_tbl, user_tbl, post_like_tbl 
@@ -48,7 +43,7 @@ const GetLikedPostFlow = async (req, res) => {
     );
 
     const handleIsPostSaved = async (postID) => {
-      const result = await pool.query(
+      const result = await client.query(
         `SELECT DISTINCT saved_user FROM post_save_tbl 
       WHERE saved_user = $1 AND post_id = $2`,
         [tokenUsername, postID]
@@ -88,8 +83,12 @@ const GetLikedPostFlow = async (req, res) => {
         postFlowArray,
         lastGotPostID: postFlowArray[postFlowArray.length - 1]?.post.orderID,
       });
-  } catch (error) {
-    if (!res.headersSent) res.status(400).json(error.message);
+  } catch (err) {
+    if (client.connected) client.end().catch(() => {});
+    console.error("unexpected error : ", err);
+    res.status(500).json(err);
+  } finally {
+    if (client.connected) client.end().catch(() => {});
   }
 };
 

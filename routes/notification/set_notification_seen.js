@@ -1,34 +1,43 @@
 const CheckTokenNoDB = require("../../func/check_token_no_db");
-const { Pool } = require("pg");
+const { Client } = require("pg");
 require("dotenv").config();
 
 const SetNotificationSeen = async (req, res) => {
   const { token } = req.body;
 
-  if (!token)
-    if (!res.headersSent) {
-      res.status(400).json("missing data");
-      return;
-    }
-
-  const tokenUsername = await CheckTokenNoDB(token);
-  if (tokenUsername === false) {
-    if (!res.headersSent) res.status(401).json("wrong token");
-    return;
-  }
-
-  const pool = new Pool({
+  const client = new Client({
     connectionString: process.env.DATABASE_STRING,
     connectionTimeoutMillis: 5000,
   });
 
-  const handleSetNotificationSeen = async () => {
-    await pool.query(`UPDATE notification_tbl SET seen=true WHERE noti_to=$1`, [
-      tokenUsername,
-    ]);
-    if (!res.headersSent) res.status(200).json("seen");
-  };
-  handleSetNotificationSeen();
+  try {
+    if (!token)
+      if (!res.headersSent) {
+        res.status(400).json("missing data");
+        return;
+      }
+
+    const tokenUsername = await CheckTokenNoDB(token);
+    if (tokenUsername === false) {
+      if (!res.headersSent) res.status(401).json("wrong token");
+      return;
+    }
+
+    const handleSetNotificationSeen = async () => {
+      await client.query(
+        `UPDATE notification_tbl SET seen=true WHERE noti_to=$1`,
+        [tokenUsername]
+      );
+      if (!res.headersSent) res.status(200).json("seen");
+    };
+    handleSetNotificationSeen();
+  } catch (err) {
+    if (client.connected) client.end().catch(() => {});
+    console.error("unexpected error : ", err);
+    res.status(500).json(err);
+  } finally {
+    if (client.connected) client.end().catch(() => {});
+  }
 };
 
 module.exports = SetNotificationSeen;

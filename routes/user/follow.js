@@ -1,60 +1,54 @@
-const { Pool } = require("pg");
+const { Client } = require("pg");
 const checkToken = require("../../func/check_token");
 
 const Follow = async (req, res) => {
   const { token, username } = req.body;
+  const client = new Client({
+    connectionString: process.env.DATABASE_STRING,
+    connectionTimeoutMillis: 5000,
+  });
   try {
     if (!(token && username)) {
       res.status(400).json("data missing");
       return;
     }
-    const pool = new Pool({
-      connectionString: process.env.DATABASE_STRING,
-      connectionTimeoutMillis: 5000,
-    });
 
     const tokenUsername = await checkToken(token);
     if (tokenUsername === false) {
       if (!res.headersSent) res.status(401).json("wrong token");
       return;
     }
-    await pool
-      .connect()
-      .then()
-      .catch(() => {
-        if (!res.headersSent) res.status(502).json("DB connection error");
-        return;
-      });
+    await client.connect();
 
-    const followingResult = await pool.query(
+    const followingResult = await client.query(
       `SELECT * from follow_tbl WHERE follower=$1 AND following=$2`,
       [tokenUsername, username]
     );
-    const followRequestResult = await pool.query(
+    const followRequestResult = await client.query(
       `SELECT * from follow_request_tbl WHERE req_follower=$1 AND req_following=$2`,
       [tokenUsername, username]
     );
 
-    const privacityQuery = await pool.query(
+    const privacityQuery = await client.query(
       `SELECT privacity FROM user_tbl WHERE username=$1`,
       [username]
     );
 
     // DEFINITION OF FUNCTIONS
     const handleFollow = async () => {
-      await pool.query(
+      await client.query(
         `INSERT INTO follow_tbl (follower, following, following_date) values ($1,$2,$3)`,
         [tokenUsername, username, new Date().toISOString()]
       );
-      await pool.query(
+      await client.query(
         `UPDATE user_tbl set following_count = following_count+1 WHERE username=$1`,
         [tokenUsername]
       );
-      await pool.query(
+      await client.query(
         `UPDATE user_tbl set follower_count = follower_count+1 WHERE username=$1`,
         [username]
       );
-      await pool.query(
+      await client.query(
         `INSERT INTO notification_tbl (noti_from, noti_to, noti_type, noti_date) values ($1,$2,$3,$4)`,
         [tokenUsername, username, "follow", new Date().toISOString()]
       );
@@ -62,15 +56,15 @@ const Follow = async (req, res) => {
     };
 
     const handleFollowRequest = async () => {
-      await pool.query(
+      await client.query(
         `INSERT INTO follow_request_tbl (req_follower, req_following, req_date) values ($1,$2,$3)`,
         [tokenUsername, username, new Date().toISOString()]
       );
-      await pool.query(
+      await client.query(
         `UPDATE user_tbl set request_count = request_count+1 WHERE username=$1`,
         [username]
       );
-      await pool.query(
+      await client.query(
         `INSERT INTO notification_tbl (noti_from, noti_to, noti_type, noti_date) values ($1,$2,$3,$4)`,
         [tokenUsername, username, "request", new Date().toISOString()]
       );
@@ -78,19 +72,19 @@ const Follow = async (req, res) => {
     };
 
     const handleUnfollow = async () => {
-      await pool.query(
+      await client.query(
         `DELETE FROM follow_tbl WHERE follower=$1 AND following=$2`,
         [tokenUsername, username]
       );
-      await pool.query(
+      await client.query(
         `UPDATE user_tbl set following_count = following_count-1 WHERE username=$1`,
         [tokenUsername]
       );
-      await pool.query(
+      await client.query(
         `UPDATE user_tbl set follower_count = follower_count-1 WHERE username=$1`,
         [username]
       );
-      await pool.query(
+      await client.query(
         `DELETE FROM notification_tbl WHERE noti_from = $1 AND noti_to = $2 AND noti_type=$3`,
         [tokenUsername, username, "follow"]
       );
@@ -98,15 +92,15 @@ const Follow = async (req, res) => {
     };
 
     const handleDeleteFollowRequest = async () => {
-      await pool.query(
+      await client.query(
         `DELETE FROM follow_request_tbl WHERE req_follower=$1 AND req_following=$2`,
         [tokenUsername, username]
       );
-      await pool.query(
+      await client.query(
         `UPDATE user_tbl set request_count = request_count-1 WHERE username=$1`,
         [username]
       );
-      await pool.query(
+      await client.query(
         `DELETE FROM notification_tbl WHERE noti_from = $1 AND noti_to = $2 AND noti_type=$3`,
         [tokenUsername, username, "request"]
       );
@@ -139,7 +133,11 @@ const Follow = async (req, res) => {
       }
     }
   } catch (err) {
-    if (!res.headersSent) res.status(500).json(err);
+    if (client.connected) client.end().catch(() => {});
+    console.error("unexpected error : ", err);
+    res.status(500).json(err);
+  } finally {
+    if (client.connected) client.end().catch(() => {});
   }
 };
 

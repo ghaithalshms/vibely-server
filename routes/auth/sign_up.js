@@ -1,32 +1,28 @@
 const FuncIsValidUsername = require("../../func/is_valid_username");
-const { Pool } = require("pg");
+const { Client } = require("pg");
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 
 const signUp = async (req, res) => {
   const { username, firstName, password, email } = req.body;
+  const client = new Client({
+    connectionString: process.env.DATABASE_STRING,
+    connectionTimeoutMillis: 5000,
+  });
+
   try {
     if (!(username && password && firstName && password && email)) {
       res.status(400).json("data missing");
       return;
     }
-    const pool = new Pool({
-      connectionString: process.env.DATABASE_STRING,
-      connectionTimeoutMillis: 5000,
-    });
-    await pool
-      .connect()
-      .then()
-      .catch(() => {
-        if (!res.headersSent) res.status(502).json("DB connection error");
-        return;
-      });
 
     const usernameVerified = username.toLowerCase().trim();
 
+    await client.connect();
+
     if (usernameVerified && firstName && password && email) {
       if (FuncIsValidUsername(usernameVerified)) {
-        client = await pool.connect();
+        client = await client.connect();
         const usernameQuery = await client.query(
           "SELECT username FROM user_tbl WHERE username =$1",
           [usernameVerified]
@@ -69,7 +65,10 @@ const signUp = async (req, res) => {
       }
     }
   } catch (err) {
+    if (client.connected) client.end().catch(() => {});
     if (!res.headersSent) res.status(500).json(err);
+  } finally {
+    if (client.connected) client.end().catch(() => {});
   }
 };
 

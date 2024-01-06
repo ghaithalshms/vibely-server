@@ -1,33 +1,29 @@
-const { Pool } = require("pg");
+const { Client } = require("pg");
 require("dotenv").config();
 
 const getUserData = async (req, res) => {
   const { username, userSigned } = req.query;
+  const client = new Client({
+    connectionString: process.env.DATABASE_STRING,
+    connectionTimeoutMillis: 5000,
+  });
   try {
     if (!(username && userSigned)) {
       res.status(400).json("data missing");
       return;
     }
-    const pool = new Pool({
-      connectionString: process.env.DATABASE_STRING,
-      connectionTimeoutMillis: 5000,
-    });
-    await pool
-      .connect()
-      .then()
-      .catch(() => {
-        if (!res.headersSent) res.status(502).json("DB connection error");
-        return;
-      });
-    const dataQuery = await pool.query(
+
+    await client.connect();
+
+    const dataQuery = await client.query(
       "SELECT * FROM user_tbl WHERE username = $1",
       [username]
     );
-    const isFollowingQuery = await pool.query(
+    const isFollowingQuery = await client.query(
       "SELECT * FROM follow_tbl WHERE follower = $1 AND following = $2",
       [userSigned, username]
     );
-    const isFollowRequestedQuery = await pool.query(
+    const isFollowRequestedQuery = await client.query(
       "SELECT * FROM follow_request_tbl WHERE req_follower = $1 AND req_following = $2",
       [userSigned, username]
     );
@@ -52,8 +48,12 @@ const getUserData = async (req, res) => {
     } else {
       if (!res.headersSent) res.status(404).json("User not found");
     }
-  } catch (error) {
-    if (!res.headersSent) res.status(400).json(error.message);
+  } catch (err) {
+    if (client.connected) client.end().catch(() => {});
+    console.error("unexpected error : ", err);
+    res.status(500).json(err);
+  } finally {
+    if (client.connected) client.end().catch(() => {});
   }
 };
 

@@ -1,5 +1,9 @@
-const { Pool } = require("pg");
+const { Client } = require("pg");
 const dissconnectSocket = async (socket, connectedUsers) => {
+  const client = new Client({
+    connectionString: process.env.DATABASE_STRING,
+    connectionTimeoutMillis: 5000,
+  });
   socket.on("disconnect", async () => {
     try {
       let disconnectedUsername = null;
@@ -8,16 +12,18 @@ const dissconnectSocket = async (socket, connectedUsers) => {
       });
       if (disconnectedUsername) {
         connectedUsers.delete(disconnectedUsername);
-        const pool = new Pool({
-          connectionString: process.env.DATABASE_STRING,
-          connectionTimeoutMillis: 5000,
-        });
-        pool.query(`UPDATE user_tbl SET last_seen=$1 WHERE username=$2`, [
+        await client.connect();
+        client.query(`UPDATE user_tbl SET last_seen=$1 WHERE username=$2`, [
           new Date().toISOString(),
           disconnectedUsername,
         ]);
       }
-    } catch (error) {}
+    } catch (err) {
+      if (client.connected) client.end().catch(() => {});
+      console.error("unexpected error : ", err);
+    } finally {
+      if (client.connected) client.end().catch(() => {});
+    }
   });
 };
 

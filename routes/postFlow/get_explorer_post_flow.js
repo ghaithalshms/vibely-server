@@ -1,9 +1,13 @@
-const { Pool } = require("pg");
+const { Client } = require("pg");
 require("dotenv").config();
 const checkToken = require("../../func/check_token");
 
 const GetExplorerPostFlow = async (req, res) => {
   const { token, lastGotPostID } = req.query;
+  const client = new Client({
+    connectionString: process.env.DATABASE_STRING,
+    connectionTimeoutMillis: 5000,
+  });
   try {
     if (!lastGotPostID) {
       res.json("no post flow");
@@ -18,12 +22,12 @@ const GetExplorerPostFlow = async (req, res) => {
       if (!res.headersSent) res.status(401).json("wrong token");
       return;
     }
-    const pool = new Pool({
+    const client = new client({
       connectionString: process.env.DATABASE_STRING,
       connectionTimeoutMillis: 5000,
     });
 
-    await pool
+    await client
       .connect()
       .then()
       .catch(() => {
@@ -34,7 +38,7 @@ const GetExplorerPostFlow = async (req, res) => {
     const postIdInstructionString =
       lastGotPostID > 0 ? "AND post_id < $2" : "AND post_id > $2";
 
-    const homePostFlowQuery = await pool.query(
+    const homePostFlowQuery = await client.query(
       `SELECT DISTINCT post_id, description, file, file_type, like_count, comment_count, post_date,
       username, first_name, post_count, user_tbl.picture as user_picture, admin, verified
       FROM user_tbl, post_tbl, follow_tbl 
@@ -54,7 +58,7 @@ const GetExplorerPostFlow = async (req, res) => {
     );
 
     const handleIsPostLiked = async (postID) => {
-      const result = await pool.query(
+      const result = await client.query(
         `SELECT DISTINCT liked_user FROM post_like_tbl 
       WHERE liked_user = $1 AND liked_post = $2`,
         [tokenUsername, postID]
@@ -63,7 +67,7 @@ const GetExplorerPostFlow = async (req, res) => {
     };
 
     const handleIsPostSaved = async (postID) => {
-      const result = await pool.query(
+      const result = await client.query(
         `SELECT DISTINCT saved_user FROM post_save_tbl 
       WHERE saved_user = $1 AND post_id = $2`,
         [tokenUsername, postID]
@@ -103,8 +107,12 @@ const GetExplorerPostFlow = async (req, res) => {
         postFlowArray,
         lastGotPostID: postFlowArray[postFlowArray.length - 1]?.post?.postID,
       });
-  } catch (error) {
-    if (!res.headersSent) res.status(400).json(error.message);
+  } catch (err) {
+    if (client.connected) client.end().catch(() => {});
+    console.error("unexpected error : ", err);
+    res.status(500).json(err);
+  } finally {
+    if (client.connected) client.end().catch(() => {});
   }
 };
 

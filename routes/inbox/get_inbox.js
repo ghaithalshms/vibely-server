@@ -1,9 +1,13 @@
-const { Pool } = require("pg");
+const { Client } = require("pg");
 const checkToken = require("../../func/check_token");
 require("dotenv").config();
 
 const GetInbox = async (req, res) => {
   const { token } = req.query;
+  const client = new Client({
+    connectionString: process.env.DATABASE_STRING,
+    connectionTimeoutMillis: 5000,
+  });
   try {
     if (!token) {
       res.status(401).json("data missing");
@@ -14,19 +18,10 @@ const GetInbox = async (req, res) => {
       if (!res.headersSent) res.status(401).json("wrong token");
       return;
     }
-    const pool = new Pool({
-      connectionString: process.env.DATABASE_STRING,
-      connectionTimeoutMillis: 5000,
-    });
-    await pool
-      .connect()
-      .then()
-      .catch(() => {
-        if (!res.headersSent) res.status(502).json("DB connection error");
-        return;
-      });
 
-    const inboxUsersArray = await pool.query(
+    await client.connect();
+
+    const inboxUsersArray = await client.query(
       `SELECT 
     u.username,
     u.first_name,
@@ -89,6 +84,9 @@ ORDER BY u.last_seen DESC;
     if (!res.headersSent) res.send(inboxList);
   } catch (error) {
     if (!res.headersSent) res.status(400).json(error.message);
+    if (client.connected) client.end().catch(() => {});
+  } finally {
+    if (client.connected) client.end().catch(() => {});
   }
 };
 

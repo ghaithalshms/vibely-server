@@ -1,42 +1,38 @@
-const { Pool } = require("pg");
+const { Client } = require("pg");
 const checkToken = require("../../func/check_token");
 
 const CreateComment = async (req, res) => {
   const { token, postID, comment } = req.body;
+
+  const client = new Client({
+    connectionString: process.env.DATABASE_STRING,
+    connectionTimeoutMillis: 5000,
+  });
+
   try {
     if (!(token && postID && comment)) {
       res.status(400).json("data missing");
       return;
     }
-    const pool = new Pool({
-      connectionString: process.env.DATABASE_STRING,
-      connectionTimeoutMillis: 5000,
-    });
 
     const tokenUsername = await checkToken(token);
     if (tokenUsername === false) {
       if (!res.headersSent) res.status(401).json("wrong token");
       return;
     }
-    await pool
-      .connect()
-      .then()
-      .catch(() => {
-        if (!res.headersSent) res.status(502).json("DB connection error");
-        return;
-      });
+    await client.connect();
 
     // DEFINITION OF FUNCTIONS
     const handleCreateComment = async () => {
-      await pool.query(
+      await client.query(
         `INSERT INTO comment_tbl (comment, post, commented_user, commented_date) values ($1,$2,$3,$4)`,
         [comment, postID, tokenUsername, new Date().toISOString()]
       );
-      const postedUserQuery = await pool.query(
+      const postedUserQuery = await client.query(
         `SELECT posted_user FROM post_tbl WHERE post_id = $1`,
         [postID]
       );
-      await pool.query(
+      await client.query(
         `INSERT INTO notification_tbl (noti_from, noti_to, noti_type, noti_date) values ($1,$2,$3,$4)`,
         [
           tokenUsername,
@@ -52,6 +48,9 @@ const CreateComment = async (req, res) => {
     handleCreateComment();
   } catch (err) {
     if (!res.headersSent) res.status(500).json(err);
+    if (client.connected) client.end().catch(() => {});
+  } finally {
+    if (client.connected) client.end().catch(() => {});
   }
 };
 
