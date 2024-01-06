@@ -23,6 +23,8 @@ const SetNotificationSeen = async (req, res) => {
       return;
     }
 
+    await client.connect();
+
     const handleSetNotificationSeen = async () => {
       await client.query(
         `UPDATE notification_tbl SET seen=true WHERE noti_to=$1`,
