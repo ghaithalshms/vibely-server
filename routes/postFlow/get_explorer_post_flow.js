@@ -22,10 +22,6 @@ const GetExplorerPostFlow = async (req, res) => {
       if (!res.headersSent) res.status(401).json("wrong token");
       return;
     }
-    const client = new client({
-      connectionString: process.env.DATABASE_STRING,
-      connectionTimeoutMillis: 5000,
-    });
 
     await client
       .connect()
