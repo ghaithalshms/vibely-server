@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 
 const signUp = async (req, res) => {
   const { username, firstName, password, email } = req.body;
+
   const client = new Client({
     connectionString: process.env.DATABASE_STRING,
     connectionTimeoutMillis: 5000,
@@ -18,11 +19,9 @@ const signUp = async (req, res) => {
 
     const usernameVerified = username.toLowerCase().trim();
 
-    await client.connect();
-
     if (usernameVerified && firstName && password && email) {
       if (FuncIsValidUsername(usernameVerified)) {
-        client = await client.connect();
+        await client.connect();
         const usernameQuery = await client.query(
           "SELECT username FROM user_tbl WHERE username =$1",
           [usernameVerified]
