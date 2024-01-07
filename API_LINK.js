@@ -18,7 +18,7 @@ const postLink = {
 };
 const getLink = {
   // ACTIVATE SERVER
-  // activateServer: `/api/server/activate`,
+  activateServer: `/api/server/activate`,
   // USER
   getUserData: `/api/user/data`,
   getUserPicture: `/api/user/data/picture`,

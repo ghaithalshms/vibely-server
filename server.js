@@ -149,3 +149,25 @@ connectionToSocket(io, connectedUsers);
 const listener = server.listen(8055 || process.env.PORT, () => {
   console.log(`Server is running on port ${listener.address().port}`);
 });
+
+////////////////////////////////
+//KEEP SERVER ACTIVE
+const axios = require("axios");
+
+// Function to send HTTP request to the self server
+const sendHttpRequest = async () => {
+  try {
+    const response = await axios.get(
+      `${process.env.API_URL}/api/server/activate`
+    );
+    console.log("HTTP Request Successful:", response.data);
+  } catch (error) {
+    console.error("HTTP Request Failed:", error);
+  }
+};
+
+// Set up interval to send HTTP request every 10 minutes (600,000 milliseconds)
+const interval = 10 * 60 * 1000;
+setInterval(sendHttpRequest, interval);
+
+////////////////////////////////
