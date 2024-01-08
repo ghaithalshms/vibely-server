@@ -23,59 +23,36 @@ const GetExplorerPostFlow = async (req, res) => {
       return;
     }
 
-    await client
-      .connect()
-      .then()
-      .catch(() => {
-        if (!res.headersSent) res.status(502).json("DB connection error");
-        return;
-      });
+    await client.connect();
 
     const postIdInstructionString =
-      lastGotPostID > 0 ? "AND post_id < $2" : "AND post_id > $2";
+      lastGotPostID > 0 ? "AND p.post_id < $2" : "AND p.post_id > $2";
 
     const homePostFlowQuery = await client.query(
-      `SELECT DISTINCT post_id, description, file, file_type, like_count, comment_count, post_date,
-      username, first_name, post_count, user_tbl.picture as user_picture, admin, verified
-      FROM user_tbl, post_tbl, follow_tbl 
-      WHERE posted_user=username
-      AND username NOT IN (
-        SELECT following
-        FROM follow_tbl
-        WHERE follower = $1
-        )
-      AND username!=$1
-      AND privacity=false
-      AND archived=false
-      ${postIdInstructionString}
-      ORDER BY post_id desc
-      LIMIT 5`,
+      `SELECT DISTINCT p.post_id, p.description, p.file, p.file_type, p.like_count, p.comment_count, p.post_date,
+u.username, u.first_name, u.picture as user_picture, u.admin, u.verified,
+pl.like_id, ps.saved_id
+FROM post_tbl p
+JOIN user_tbl u ON u.username = p.posted_user
+AND u.username NOT IN (
+	SELECT following 
+	FROM follow_tbl 
+	WHERE follower = $1
+)
+AND u.username!=$1
+AND u.privacity=false
+LEFT JOIN post_like_tbl pl ON pl.liked_post = p.post_id AND pl.liked_user =$1
+LEFT JOIN post_save_tbl ps ON ps.post_id = p.post_id AND ps.saved_user = $1
+WHERE archived=false
+${postIdInstructionString}
+ORDER BY p.post_id desc
+LIMIT 5`,
       [tokenUsername, lastGotPostID]
     );
-
-    const handleIsPostLiked = async (postID) => {
-      const result = await client.query(
-        `SELECT DISTINCT liked_user FROM post_like_tbl 
-      WHERE liked_user = $1 AND liked_post = $2`,
-        [tokenUsername, postID]
-      );
-      return result.rowCount > 0;
-    };
-
-    const handleIsPostSaved = async (postID) => {
-      const result = await client.query(
-        `SELECT DISTINCT saved_user FROM post_save_tbl 
-      WHERE saved_user = $1 AND post_id = $2`,
-        [tokenUsername, postID]
-      );
-      return result.rowCount > 0;
-    };
 
     let postFlowArray = [];
 
     for (const post of homePostFlowQuery.rows) {
-      const isLiked = await handleIsPostLiked(post.post_id);
-      const isSaved = await handleIsPostSaved(post.post_id);
       postFlowArray.push({
         post: {
           postID: post.post_id,
@@ -85,8 +62,8 @@ const GetExplorerPostFlow = async (req, res) => {
           likeCount: post.like_count,
           commentCount: post.comment_count,
           postDate: post.post_date,
-          isLiked,
-          isSaved,
+          isLiked: post.like_id > 0,
+          isSaved: post.saved_id > 0,
         },
         user: {
           username: post.username,

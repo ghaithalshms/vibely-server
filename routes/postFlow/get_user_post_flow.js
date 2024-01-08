@@ -44,42 +44,25 @@ const GetUserPostFlow = async (req, res) => {
     }
 
     const postIdInstructionString =
-      lastGotPostID > 0 ? "AND post_id < $2" : "AND post_id > $2";
+      lastGotPostID > 0 ? "AND p.post_id < $3" : "AND p.post_id > $3";
 
     const userPostFlowQuery = await client.query(
-      `SELECT post_id, posted_user, description, file, file_type, like_count, comment_count, post_date
-      FROM post_tbl 
-      WHERE posted_user = $1
-      AND archived = 'false'
-      ${postIdInstructionString}
-      ORDER BY post_id DESC
-      LIMIT 5`,
-      [username, lastGotPostID]
+      `SELECT DISTINCT p.post_id, p.posted_user, p.description, p.file, p.file_type, p.like_count, p.comment_count, p.post_date,
+pl.like_id, ps.saved_id
+FROM post_tbl p
+JOIN user_tbl u ON u.username = p.posted_user AND u.username=$1
+LEFT JOIN post_like_tbl pl ON pl.liked_post = p.post_id AND pl.liked_user =$2
+LEFT JOIN post_save_tbl ps ON ps.post_id = p.post_id AND ps.saved_user = $2
+WHERE archived=false
+${postIdInstructionString}
+ORDER BY p.post_id desc
+LIMIT 5`,
+      [username, tokenUsername, lastGotPostID]
     );
-
-    const handleIsPostLiked = async (postID) => {
-      const result = await client.query(
-        `SELECT DISTINCT liked_user FROM post_like_tbl 
-      WHERE liked_user = $1 AND liked_post = $2`,
-        [tokenUsername, postID]
-      );
-      return result.rowCount > 0;
-    };
-
-    const handleIsPostSaved = async (postID) => {
-      const result = await client.query(
-        `SELECT DISTINCT saved_user FROM post_save_tbl 
-      WHERE saved_user = $1 AND post_id = $2`,
-        [tokenUsername, postID]
-      );
-      return result.rowCount > 0;
-    };
 
     let postFlowArray = [];
 
     for (const post of userPostFlowQuery.rows) {
-      const isLiked = await handleIsPostLiked(post.post_id);
-      const isSaved = await handleIsPostSaved(post.post_id);
       postFlowArray.push({
         postID: post.post_id,
         postedUser: post.posted_user,
@@ -89,8 +72,8 @@ const GetUserPostFlow = async (req, res) => {
         likeCount: post.like_count,
         commentCount: post.comment_count,
         postDate: post.post_date,
-        isLiked,
-        isSaved,
+        isLiked: post.like_id > 0,
+        isSaved: post.saved_id > 0,
       });
     }
     if (!res.headersSent)

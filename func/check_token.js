@@ -24,7 +24,9 @@ async function checkToken(token) {
       [decoded.username]
     );
 
-    if (decoded.tokenVersion == currentTokenVersionQuery.rows[0].token_version)
+    if (
+      decoded.tokenVersion == currentTokenVersionQuery?.rows[0]?.token_version
+    )
       return decoded.username;
     else return false;
   } catch (err) {

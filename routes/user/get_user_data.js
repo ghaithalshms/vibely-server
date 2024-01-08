@@ -16,17 +16,14 @@ const getUserData = async (req, res) => {
     await client.connect();
 
     const dataQuery = await client.query(
-      "SELECT * FROM user_tbl WHERE username = $1",
-      [username]
-    );
-    const isFollowingQuery = await client.query(
-      "SELECT * FROM follow_tbl WHERE follower = $1 AND following = $2",
+      `SELECT *
+FROM user_tbl u
+LEFT JOIN follow_tbl f ON f.follower = $1 AND f.following = u.username
+LEFT JOIN follow_request_tbl fr ON fr.req_follower = $2 AND fr.req_following = u.username
+WHERE u.username = $2`,
       [userSigned, username]
     );
-    const isFollowRequestedQuery = await client.query(
-      "SELECT * FROM follow_request_tbl WHERE req_follower = $1 AND req_following = $2",
-      [userSigned, username]
-    );
+
     if (dataQuery.rows.length > 0) {
       const userData = {
         username: dataQuery.rows[0].username ?? "",
@@ -39,8 +36,8 @@ const getUserData = async (req, res) => {
         picture: dataQuery.rows[0].picture ?? "",
         link: dataQuery.rows[0].link ?? "",
         privacity: dataQuery.rows[0].privacity ?? false,
-        isFollowing: isFollowingQuery.rows.length > 0,
-        isFollowRequested: isFollowRequestedQuery.rows.length > 0,
+        isFollowing: dataQuery.rows[0].follow_id > 0,
+        isFollowRequested: dataQuery.rows[0].req_id > 0,
         isVerified: dataQuery.rows[0].verified ?? false,
         isAdmin: dataQuery.rows[0].admin ?? false,
       };
