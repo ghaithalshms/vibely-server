@@ -3,6 +3,8 @@ const http = require("http");
 const { Server } = require("socket.io");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const webpush = require("web-push");
+
 require("dotenv").config();
 
 const {
@@ -70,6 +72,7 @@ const SetMessagesSeen = require("./routes/chat/set_messages_seen");
 const SetNotificationSeen = require("./routes/notification/set_notification_seen");
 const GetNotificationCount = require("./routes/notification/get_notifications_count");
 const GetMessagesCount = require("./routes/inbox/get_messages_count");
+const SubscribeWebPush = require("./routes/web_push_notification/subscribe_web_push");
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -95,7 +98,8 @@ app.post(postLink.likeComment, LikeComment);
 app.post(postLink.createComment, CreateComment);
 // CHAT
 app.post(postLink.sendMessageToDB, upload.single("file"), SendMessageToDB);
-
+// WEB PUSH NOTIFICATION
+app.post(postLink.subscribeWebPush, SubscribeWebPush);
 // *********** GET ***********
 // USER
 app.get(getLink.getUserData, GetUserData);

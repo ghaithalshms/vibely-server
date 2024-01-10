@@ -15,6 +15,8 @@ const postLink = {
   createComment: `/api/comment/create`,
   // CHAT
   sendMessageToDB: `/api/chat/send-message`,
+  // WEB PUSH NOTIFICATION
+  subscribeWebPush: `/api/notification/subscribe`,
 };
 const getLink = {
   // ACTIVATE SERVER
