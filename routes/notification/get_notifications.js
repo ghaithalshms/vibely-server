@@ -29,12 +29,13 @@ const GetNotifications = async (req, res) => {
 
     const notificationQuery = await client.query(
       `SELECT noti_from, noti_to, noti_type, noti_date, 
-      username, first_name, picture, verified, admin
+      username, first_name, verified, admin
       FROM user_tbl, notification_tbl
       WHERE noti_to = $1
       AND noti_from = username
       AND noti_from != $1
-      ORDER BY noti_id DESC`,
+      ORDER BY noti_id DESC
+      LIMIT 7`,
       [tokenUsername]
     );
 
@@ -45,7 +46,7 @@ const GetNotifications = async (req, res) => {
         user: {
           username: noti.username ?? "",
           firstName: noti.first_name ?? "",
-          picture: noti.picture ?? null,
+          picture: null,
           isAdmin: noti.admin ?? false,
           isVerified: noti.verified ?? false,
         },

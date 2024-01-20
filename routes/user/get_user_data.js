@@ -16,7 +16,9 @@ const getUserData = async (req, res) => {
     await client.connect();
 
     const dataQuery = await client.query(
-      `SELECT *
+      `SELECT username, first_name, last_name, post_count, follower_count, 
+      following_count, biography, link, privacity, verified, admin, 
+      follow_id, req_id
 FROM user_tbl u
 LEFT JOIN follow_tbl f ON f.follower = $1 AND f.following = u.username
 LEFT JOIN follow_request_tbl fr ON fr.req_follower = $2 AND fr.req_following = u.username
@@ -33,7 +35,7 @@ WHERE u.username = $2`,
         followerCount: dataQuery.rows[0].follower_count ?? 0,
         followingCount: dataQuery.rows[0].following_count ?? 0,
         biography: dataQuery.rows[0].biography ?? "",
-        picture: dataQuery.rows[0].picture ?? "",
+        picture: null,
         link: dataQuery.rows[0].link ?? "",
         privacity: dataQuery.rows[0].privacity ?? false,
         isFollowing: dataQuery.rows[0].follow_id > 0,

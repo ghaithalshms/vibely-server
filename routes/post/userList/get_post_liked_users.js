@@ -16,7 +16,7 @@ const GetPostLikedUsers = async (req, res) => {
     await client.connect();
 
     const userListQuery = await client.query(
-      `SELECT DISTINCT username, first_name,last_name, picture, admin, verified 
+      `SELECT DISTINCT username, first_name,last_name, admin, verified 
       FROM user_tbl, post_like_tbl 
       WHERE username=liked_user AND liked_post=$1`,
       [postID]
@@ -29,7 +29,7 @@ const GetPostLikedUsers = async (req, res) => {
         username: user.username ?? "",
         firstName: user.first_name ?? "",
         lastName: user.last_name ?? "",
-        picture: user.picture ?? null,
+        picture: null,
         isVerified: user.verified ?? false,
         isAdmin: user.admin ?? false,
       });

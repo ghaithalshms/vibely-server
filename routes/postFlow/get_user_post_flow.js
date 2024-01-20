@@ -47,7 +47,7 @@ const GetUserPostFlow = async (req, res) => {
       lastGotPostID > 0 ? "AND p.post_id < $3" : "AND p.post_id > $3";
 
     const userPostFlowQuery = await client.query(
-      `SELECT DISTINCT p.post_id, p.posted_user, p.description, p.file, p.file_type, p.like_count, p.comment_count, p.post_date,
+      `SELECT DISTINCT p.post_id, p.posted_user, p.description, p.file_type, p.like_count, p.comment_count, p.post_date,
 pl.like_id, ps.saved_id
 FROM post_tbl p
 JOIN user_tbl u ON u.username = p.posted_user AND u.username=$1
@@ -67,7 +67,7 @@ LIMIT 5`,
         postID: post.post_id,
         postedUser: post.posted_user,
         description: post.description,
-        file: post.file,
+        file: null,
         fileType: post.file_type,
         likeCount: post.like_count,
         commentCount: post.comment_count,

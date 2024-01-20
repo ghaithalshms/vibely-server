@@ -29,8 +29,8 @@ const GetLikedPostFlow = async (req, res) => {
       lastGotPostID > 0 ? "AND like_id < $2" : "AND like_id > $2";
 
     const likedPostFlowQuery = await client.query(
-      `SELECT DISTINCT like_id, post_id, description, file, file_type, like_count, comment_count, post_date,
-      username, first_name, post_count, user_tbl.picture as user_picture, admin, verified
+      `SELECT DISTINCT like_id, post_id, description, file_type, like_count, comment_count, post_date,
+      username, first_name, post_count, admin, verified
       FROM post_tbl, user_tbl, post_like_tbl 
       WHERE liked_user = $1
       AND username = posted_user
@@ -60,7 +60,7 @@ const GetLikedPostFlow = async (req, res) => {
           postID: post.post_id,
           orderID: post.like_id,
           description: post.description,
-          file: post.file,
+          file: null,
           fileType: post.file_type,
           likeCount: post.like_count,
           commentCount: post.comment_count,
@@ -71,7 +71,7 @@ const GetLikedPostFlow = async (req, res) => {
         user: {
           username: post.username,
           firstName: post.first_name,
-          picture: post.user_picture,
+          picture: null,
           postCount: post.post_count,
           isAdmin: post.admin,
           isVerified: post.verified,

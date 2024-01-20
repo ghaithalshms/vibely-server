@@ -30,8 +30,8 @@ const GetHomePostFlow = async (req, res) => {
       lastGotPostID > 0 ? "AND p.post_id < $2" : "AND p.post_id > $2";
 
     const homePostFlowQuery = await client.query(
-      `SELECT DISTINCT p.post_id, p.description, p.file, p.file_type, p.like_count, p.comment_count, p.post_date,
-u.username, u.first_name, u.picture as user_picture, u.admin, u.verified,
+      `SELECT DISTINCT p.post_id, p.description, p.file_type, p.like_count, p.comment_count, p.post_date,
+u.username, u.first_name, u.admin, u.verified,
 pl.like_id, ps.saved_id
 FROM post_tbl p
 JOIN user_tbl u ON u.username = p.posted_user
@@ -52,7 +52,8 @@ LIMIT 5`,
         post: {
           postID: post.post_id,
           description: post.description,
-          file: post.file,
+          // file: post.file,
+          file: null,
           fileType: post.file_type,
           likeCount: post.like_count,
           commentCount: post.comment_count,
@@ -63,7 +64,8 @@ LIMIT 5`,
         user: {
           username: post.username,
           firstName: post.first_name,
-          picture: post.user_picture,
+          //picture: post.user_picture,
+          picture: null,
           postCount: post.post_count,
           isAdmin: post.admin,
           isVerified: post.verified,

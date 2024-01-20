@@ -3,9 +3,8 @@ const http = require("http");
 const { Server } = require("socket.io");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const webpush = require("web-push");
-
 require("dotenv").config();
+const axios = require("axios");
 
 const {
   postLink,
@@ -73,6 +72,7 @@ const SetNotificationSeen = require("./routes/notification/set_notification_seen
 const GetNotificationCount = require("./routes/notification/get_notifications_count");
 const GetMessagesCount = require("./routes/inbox/get_messages_count");
 const SubscribeWebPush = require("./routes/web_push_notification/subscribe_web_push");
+const GetPostFile = require("./routes/post/get_post_file");
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -117,6 +117,7 @@ app.get(getLink.getArchivedPostFlow, GetArchivedPostFlow);
 // POST
 app.get(getLink.getPostComments, GetPostComments);
 app.get(getLink.getPostLikedUsers, GetPostLikedUsers);
+app.get(getLink.getPostFile, GetPostFile);
 // NOTIFICATION
 app.get(getLink.getNotification, GetNotifications);
 app.get(getLink.getNotificationCount, GetNotificationCount);
@@ -150,14 +151,12 @@ const connectedUsers = new Map();
 
 connectionToSocket(io, connectedUsers);
 
-const listener = server.listen(8055 || process.env.PORT, () => {
+const listener = server.listen(8000 || process.env.PORT, () => {
   console.log(`Server is running on port ${listener.address().port}`);
 });
 
 ////////////////////////////////
 //KEEP SERVER ACTIVE
-const axios = require("axios");
-
 // Function to send HTTP request to the self server
 const sendHttpRequest = async () => {
   try {
@@ -173,5 +172,4 @@ const sendHttpRequest = async () => {
 // Set up interval to send HTTP request every 10 minutes (600,000 milliseconds)
 const interval = 10 * 60 * 1000;
 setInterval(sendHttpRequest, interval);
-
 ////////////////////////////////

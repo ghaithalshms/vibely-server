@@ -27,7 +27,9 @@ const GetNotificationCount = async (req, res) => {
 
     const handleGetNotificationCount = async () => {
       const countQuery = await client.query(
-        `SELECT COUNT(seen) FROM notification_tbl WHERE noti_to=$1 AND seen=false`,
+        `SELECT COUNT(seen) 
+        FROM notification_tbl 
+        WHERE noti_to=$1 AND seen=false`,
         [tokenUsername]
       );
       if (!res.headersSent) res.send(countQuery.rows[0].count);
