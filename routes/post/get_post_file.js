@@ -25,12 +25,14 @@ const GetPostFile = async (req, res) => {
     const fileQuery = await client.query(
       `SELECT DISTINCT file, file_type 
 FROM post_tbl , user_tbl, follow_tbl
-WHERE ((username = follower AND posted_user = following) 
-OR (privacity = false AND username = posted_user)
-OR posted_user=$2)
-AND post_id = $1
-AND username=$2`,
-      [postID, tokenUsername]
+WHERE (
+	(follower=$1 AND posted_user = following)
+	   OR (privacity = false AND username = posted_user)
+	   OR posted_user=$1
+)
+AND post_id = $2
+`,
+      [tokenUsername, postID]
     );
 
     if (!res.headersSent) res.send(fileQuery?.rows[0]);
