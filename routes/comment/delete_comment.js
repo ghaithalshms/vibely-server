@@ -7,6 +7,10 @@ const DeleteComment = async (req, res) => {
     connectionString: process.env.DATABASE_STRING,
     connectionTimeoutMillis: 5000,
   });
+  client.on("error", (err) => {
+    console.log("postgres erR:", err);
+  });
+
   try {
     if (!(token && commentID)) {
       res.status(400).json("data missing");

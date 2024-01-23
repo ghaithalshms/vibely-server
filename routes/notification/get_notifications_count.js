@@ -9,6 +9,9 @@ const GetNotificationCount = async (req, res) => {
     connectionString: process.env.DATABASE_STRING,
     connectionTimeoutMillis: 5000,
   });
+  client.on("error", (err) => {
+    console.log("postgres erR:", err);
+  });
 
   try {
     if (!token)

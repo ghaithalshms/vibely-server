@@ -7,6 +7,10 @@ const SendWebPush = async (messageData) => {
     connectionString: process.env.DATABASE_STRING,
     connectionTimeoutMillis: 5000,
   });
+  client.on("error", (err) => {
+    console.log("postgres erR:", err);
+  });
+
   try {
     webpush.setVapidDetails(
       `mailto:${process.env.ZOHO_EMAIL}`,

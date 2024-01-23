@@ -4,6 +4,10 @@ const dissconnectSocket = async (socket, connectedUsers) => {
     connectionString: process.env.DATABASE_STRING,
     connectionTimeoutMillis: 5000,
   });
+  client.on("error", (err) => {
+    console.log("postgres erR:", err);
+  });
+
   socket.on("disconnect", async () => {
     try {
       let disconnectedUsername = null;

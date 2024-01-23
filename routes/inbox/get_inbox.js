@@ -8,6 +8,10 @@ const GetInbox = async (req, res) => {
     connectionString: process.env.DATABASE_STRING,
     connectionTimeoutMillis: 5000,
   });
+  client.on("error", (err) => {
+    console.log("postgres erR:", err);
+  });
+
   try {
     if (!token) {
       res.status(401).json("data missing");
