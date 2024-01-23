@@ -19,10 +19,10 @@ const dissconnectSocket = async (socket, connectedUsers) => {
         ]);
       }
     } catch (err) {
-      if (client.connected) client.end().catch(() => {});
+      if (client?.connected) client.end().catch(() => {});
       console.error("unexpected error : ", err);
     } finally {
-      if (client.connected) client.end().catch(() => {});
+      if (client?.connected) client.end().catch(() => {});
     }
   });
 };

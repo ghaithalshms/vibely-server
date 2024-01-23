@@ -69,10 +69,10 @@ const SubscribeWebPush = async (req, res) => {
     if (web_push_query.rowCount > 0) updateWebPush();
     else insertNewWebPush();
   } catch (err) {
-    if (client.connected) client.end().catch(() => {});
+    if (client?.connected) client.end().catch(() => {});
     if (!res.headersSent) res.status(500).json(err);
   } finally {
-    if (client.connected) client.end().catch(() => {});
+    if (client?.connected) client.end().catch(() => {});
   }
 };
 

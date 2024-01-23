@@ -84,11 +84,11 @@ const GetSavedPostFlow = async (req, res) => {
         lastGotPostID: postFlowArray[postFlowArray.length - 1]?.post.orderID,
       });
   } catch (err) {
-    if (client.connected) client.end().catch(() => {});
+    if (client?.connected) client.end().catch(() => {});
     console.error("unexpected error : ", err);
     res.status(500).json(err);
   } finally {
-    if (client.connected) client.end().catch(() => {});
+    if (client?.connected) client.end().catch(() => {});
   }
 };
 

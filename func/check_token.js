@@ -30,11 +30,11 @@ async function checkToken(token) {
       return decoded.username;
     else return false;
   } catch (err) {
-    if (client.connected) client.end().catch(() => {});
+    if (client?.connected) client.end().catch(() => {});
     console.error("unexpected error : ", err);
     return false;
   } finally {
-    if (client.connected) client.end().catch(() => {});
+    if (client?.connected) client.end().catch(() => {});
   }
 }
 

@@ -78,11 +78,11 @@ LIMIT 5`,
         lastGotPostID: postFlowArray[postFlowArray.length - 1]?.post?.postID,
       });
   } catch (err) {
-    if (client.connected) client.end().catch(() => {});
+    if (client?.connected) client.end().catch(() => {});
     console.error("unexpected error : ", err);
     res.status(500).json(err);
   } finally {
-    if (client.connected) client.end().catch(() => {});
+    if (client?.connected) client.end().catch(() => {});
   }
 };
 

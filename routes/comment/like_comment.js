@@ -77,9 +77,9 @@ const LikeComment = async (req, res) => {
     }
   } catch (err) {
     if (!res.headersSent) res.status(500).json(err);
-    if (client.connected) client.end().catch(() => {});
+    if (client?.connected) client.end().catch(() => {});
   } finally {
-    if (client.connected) client.end().catch(() => {});
+    if (client?.connected) client.end().catch(() => {});
   }
 };
 

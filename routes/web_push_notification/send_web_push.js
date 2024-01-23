@@ -40,9 +40,9 @@ const SendWebPush = async (messageData) => {
       )
       .catch((err) => console.log(err));
   } catch (err) {
-    if (client.connected) client.end().catch(() => {});
+    if (client?.connected) client.end().catch(() => {});
   } finally {
-    if (client.connected) client.end().catch(() => {});
+    if (client?.connected) client.end().catch(() => {});
   }
 };
 

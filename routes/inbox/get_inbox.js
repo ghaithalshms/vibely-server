@@ -83,9 +83,9 @@ ORDER BY u.last_seen DESC;
     if (!res.headersSent) res.send(inboxList);
   } catch (error) {
     if (!res.headersSent) res.status(400).json(error.message);
-    if (client.connected) client.end().catch(() => {});
+    if (client?.connected) client.end().catch(() => {});
   } finally {
-    if (client.connected) client.end().catch(() => {});
+    if (client?.connected) client.end().catch(() => {});
   }
 };
 
