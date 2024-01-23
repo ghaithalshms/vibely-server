@@ -2,7 +2,7 @@ const { Client } = require("pg");
 const dissconnectSocket = async (socket, connectedUsers) => {
   const client = new Client({
     connectionString: process.env.DATABASE_STRING,
-    connectionTimeoutMillis: 5000,
+    connectionTimeoutMillis: 30000,
   });
   client.on("error", (err) => {
     console.log("postgres erR:", err);

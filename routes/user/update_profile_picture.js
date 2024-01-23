@@ -7,7 +7,7 @@ const UpdateProfilePicture = async (req, res) => {
   const buffer = file ? file.buffer : null;
   const client = new Client({
     connectionString: process.env.DATABASE_STRING,
-    connectionTimeoutMillis: 5000,
+    connectionTimeoutMillis: 30000,
   });
   client.on("error", (err) => {
     console.log("postgres erR:", err);

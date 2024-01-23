@@ -6,7 +6,7 @@ const GetInbox = async (req, res) => {
   const { token } = req.query;
   const client = new Client({
     connectionString: process.env.DATABASE_STRING,
-    connectionTimeoutMillis: 5000,
+    connectionTimeoutMillis: 30000,
   });
   client.on("error", (err) => {
     console.log("postgres erR:", err);
