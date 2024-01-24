@@ -1,8 +1,19 @@
 const { Pool } = require("pg");
 
-const _pool = new Pool({
+let pool = new Pool({
   connectionString: process.env.DATABASE_STRING,
   connectionTimeoutMillis: 5000,
 });
 
-module.exports = _pool;
+const _pool = () => {
+  if (pool.idleCount > 0) return pool;
+  else {
+    pool = new Pool({
+      connectionString: process.env.DATABASE_STRING,
+      connectionTimeoutMillis: 5000,
+    });
+    return pool;
+  }
+};
+
+module.exports = _pool();
