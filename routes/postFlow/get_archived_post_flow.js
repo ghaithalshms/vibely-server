@@ -1,16 +1,9 @@
-const { Client } = require("pg");
 require("dotenv").config();
 const checkToken = require("../../func/check_token");
+const _pool = require("../../pg_pool");
 
 const GetArchivedPostFlow = async (req, res) => {
   const { token, lastGotPostID } = req.query;
-  const client = new Client({
-    connectionString: process.env.DATABASE_STRING,
-    connectionTimeoutMillis: 30000,
-  });
-  client.on("error", (err) => {
-    console.log("postgres erR:", err);
-  });
 
   try {
     if (!lastGotPostID) {
@@ -27,7 +20,7 @@ const GetArchivedPostFlow = async (req, res) => {
       if (!res.headersSent) res.status(401).json("wrong token");
       return;
     }
-    await client
+    await _pool
       .connect()
       .then()
       .catch(() => {
@@ -38,7 +31,7 @@ const GetArchivedPostFlow = async (req, res) => {
     const postIdInstructionString =
       lastGotPostID > 0 ? "AND post_id < $2" : "AND post_id > $2";
 
-    const likedPostFlowQuery = await client.query(
+    const likedPostFlowQuery = await _pool.query(
       `SELECT DISTINCT post_id, description, file, file_type, like_count, comment_count, post_date,
       username, first_name, post_count, user_tbl.picture as user_picture, admin, verified
       FROM post_tbl, user_tbl
@@ -52,7 +45,7 @@ const GetArchivedPostFlow = async (req, res) => {
     );
 
     const handleIsPostLiked = async (postID) => {
-      const result = await client.query(
+      const result = await _pool.query(
         `SELECT DISTINCT liked_user FROM post_like_tbl
       WHERE liked_user = $1 AND liked_post = $2`,
         [tokenUsername, postID]
@@ -61,7 +54,7 @@ const GetArchivedPostFlow = async (req, res) => {
     };
 
     const handleIsPostSaved = async (postID) => {
-      const result = await client.query(
+      const result = await _pool.query(
         `SELECT DISTINCT saved_user FROM post_save_tbl
       WHERE saved_user = $1 AND post_id = $2`,
         [tokenUsername, postID]
@@ -102,11 +95,8 @@ const GetArchivedPostFlow = async (req, res) => {
         lastGotPostID: postFlowArray[postFlowArray.length - 1]?.post.postID,
       });
   } catch (err) {
-    if (client?.connected) client.end().catch(() => {});
-    console.error("unexpected error : ", err);
+    console.log("unexpected error : ", err);
     res.status(500).json(err);
-  } finally {
-    if (client?.connected) client.end().catch(() => {});
   }
 };
 

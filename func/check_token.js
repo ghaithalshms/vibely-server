@@ -1,18 +1,11 @@
 require("dotenv").config();
-const { Client } = require("pg");
+
 const jwt = require("jsonwebtoken");
+const _pool = require("../pg_pool");
 
 // !!!!!!!!!!! USE await !!!!!!!!!!!!!!!!!!!!!!!!
 
 async function checkToken(token) {
-  const client = new Client({
-    connectionString: process.env.DATABASE_STRING,
-    connectionTimeoutMillis: 30000,
-  });
-  client.on("error", (err) => {
-    console.log("postgres erR:", err);
-  });
-
   try {
     if (!token) return false;
 
@@ -21,9 +14,7 @@ async function checkToken(token) {
       tokenVersion: jwt.verify(token, process.env.JWT_SECRET_KEY).tokenVersion,
     };
 
-    await client.connect();
-
-    const currentTokenVersionQuery = await client.query(
+    const currentTokenVersionQuery = await _pool.query(
       `SELECT token_version FROM user_tbl WHERE username=$1`,
       [decoded.username]
     );
@@ -34,11 +25,8 @@ async function checkToken(token) {
       return decoded.username;
     else return false;
   } catch (err) {
-    if (client?.connected) client.end().catch(() => {});
-    console.error("unexpected error : ", err);
+    console.log("unexpected error : ", err);
     return false;
-  } finally {
-    if (client?.connected) client.end().catch(() => {});
   }
 }
 

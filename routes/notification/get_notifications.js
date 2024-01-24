@@ -1,16 +1,9 @@
-const { Client } = require("pg");
 require("dotenv").config();
 const checkToken = require("../../func/check_token");
+const _pool = require("../../pg_pool");
 
 const GetNotifications = async (req, res) => {
   const { token } = req.query;
-  const client = new Client({
-    connectionString: process.env.DATABASE_STRING,
-    connectionTimeoutMillis: 30000,
-  });
-  client.on("error", (err) => {
-    console.log("postgres erR:", err);
-  });
 
   try {
     if (!token) {
@@ -23,7 +16,7 @@ const GetNotifications = async (req, res) => {
       return;
     }
 
-    await client
+    await _pool
       .connect()
       .then()
       .catch(() => {
@@ -31,7 +24,7 @@ const GetNotifications = async (req, res) => {
         return;
       });
 
-    const notificationQuery = await client.query(
+    const notificationQuery = await _pool.query(
       `SELECT noti_from, noti_to, noti_type, noti_date, 
       username, first_name, verified, admin
       FROM user_tbl, notification_tbl
@@ -63,11 +56,8 @@ const GetNotifications = async (req, res) => {
     }
     if (!res.headersSent) res.send(notificationList);
   } catch (err) {
-    if (client?.connected) client.end().catch(() => {});
-    console.error("unexpected error : ", err);
+    console.log("unexpected error : ", err);
     res.status(500).json(err);
-  } finally {
-    if (client?.connected) client.end().catch(() => {});
   }
 };
 

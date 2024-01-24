@@ -1,16 +1,9 @@
-const { Client } = require("pg");
 const checkToken = require("../../func/check_token");
+const _pool = require("../../pg_pool");
 require("dotenv").config();
 
 const GetInbox = async (req, res) => {
   const { token } = req.query;
-  const client = new Client({
-    connectionString: process.env.DATABASE_STRING,
-    connectionTimeoutMillis: 30000,
-  });
-  client.on("error", (err) => {
-    console.log("postgres erR:", err);
-  });
 
   try {
     if (!token) {
@@ -23,9 +16,7 @@ const GetInbox = async (req, res) => {
       return;
     }
 
-    await client.connect();
-
-    const inboxUsersArray = await client.query(
+    const inboxUsersArray = await _pool.query(
       `SELECT 
     u.username,
     u.first_name,
@@ -87,9 +78,6 @@ ORDER BY u.last_seen DESC;
     if (!res.headersSent) res.send(inboxList);
   } catch (error) {
     if (!res.headersSent) res.status(400).json(error.message);
-    if (client?.connected) client.end().catch(() => {});
-  } finally {
-    if (client?.connected) client.end().catch(() => {});
   }
 };
 

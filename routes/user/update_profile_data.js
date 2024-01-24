@@ -1,16 +1,9 @@
-const { Client } = require("pg");
 const checkToken = require("../../func/check_token");
+const _pool = require("../../pg_pool");
 
 const UpdateProfileData = async (req, res) => {
   const { token, username, firstName, lastName, biography, link, privacity } =
     req.body;
-  const client = new Client({
-    connectionString: process.env.DATABASE_STRING,
-    connectionTimeoutMillis: 30000,
-  });
-  client.on("error", (err) => {
-    console.log("postgres erR:", err);
-  });
 
   try {
     if (!(token && username)) {
@@ -23,11 +16,10 @@ const UpdateProfileData = async (req, res) => {
       if (!res.headersSent) res.status(401).json("wrong token");
       return;
     }
-    await client.connect();
 
     // DEFINITION OF FUNCTIONS
     const handleUpdateProfileData = async () => {
-      await client.query(
+      await _pool.query(
         `UPDATE user_tbl 
         SET username=$1,
         first_name=$2,
@@ -50,11 +42,8 @@ const UpdateProfileData = async (req, res) => {
     };
     handleUpdateProfileData();
   } catch (err) {
-    if (client?.connected) client.end().catch(() => {});
-    console.error("unexpected error : ", err);
+    console.log("unexpected error : ", err);
     res.status(500).json(err);
-  } finally {
-    if (client?.connected) client.end().catch(() => {});
   }
 };
 

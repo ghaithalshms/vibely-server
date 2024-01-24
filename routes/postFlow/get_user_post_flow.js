@@ -1,16 +1,9 @@
-const { Client } = require("pg");
 require("dotenv").config();
 const checkToken = require("../../func/check_token");
+const _pool = require("../../pg_pool");
 
 const GetUserPostFlow = async (req, res) => {
   const { username, token, lastGotPostID } = req.query;
-  const client = new Client({
-    connectionString: process.env.DATABASE_STRING,
-    connectionTimeoutMillis: 30000,
-  });
-  client.on("error", (err) => {
-    console.log("postgres erR:", err);
-  });
 
   try {
     if (!lastGotPostID) {
@@ -27,9 +20,8 @@ const GetUserPostFlow = async (req, res) => {
       if (!res.headersSent) res.status(401).json("wrong token");
       return;
     }
-    await client.connect();
 
-    const privacityQuery = await client.query(
+    const privacityQuery = await _pool.query(
       `SELECT privacity FROM user_tbl WHERE username=$1`,
       [username]
     );
@@ -37,7 +29,7 @@ const GetUserPostFlow = async (req, res) => {
       privacityQuery.rows[0].privacity === true &&
       username !== tokenUsername
     ) {
-      const isFollowingQuery = await client.query(
+      const isFollowingQuery = await _pool.query(
         `SELECT * from follow_tbl WHERE follower=$1 AND following=$2`,
         [tokenUsername, username]
       );
@@ -50,7 +42,7 @@ const GetUserPostFlow = async (req, res) => {
     const postIdInstructionString =
       lastGotPostID > 0 ? "AND p.post_id < $3" : "AND p.post_id > $3";
 
-    const userPostFlowQuery = await client.query(
+    const userPostFlowQuery = await _pool.query(
       `SELECT DISTINCT p.post_id, p.posted_user, p.description, p.file_type, p.like_count, p.comment_count, p.post_date,
 pl.like_id, ps.saved_id
 FROM post_tbl p
@@ -86,11 +78,8 @@ LIMIT 5`,
         lastGotPostID: postFlowArray[postFlowArray.length - 1]?.postID,
       });
   } catch (err) {
-    if (client?.connected) client.end().catch(() => {});
-    console.error("unexpected error : ", err);
+    console.log("unexpected error : ", err);
     res.status(500).json(err);
-  } finally {
-    if (client?.connected) client.end().catch(() => {});
   }
 };
 

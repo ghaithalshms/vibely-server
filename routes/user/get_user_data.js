@@ -1,15 +1,9 @@
-const { Client } = require("pg");
+const _pool = require("../../pg_pool");
+
 require("dotenv").config();
 
 const getUserData = async (req, res) => {
   const { username, userSigned } = req.query;
-  const client = new Client({
-    connectionString: process.env.DATABASE_STRING,
-    connectionTimeoutMillis: 30000,
-  });
-  client.on("error", (err) => {
-    console.log("postgres erR:", err);
-  });
 
   try {
     if (!(username && userSigned)) {
@@ -17,9 +11,7 @@ const getUserData = async (req, res) => {
       return;
     }
 
-    await client.connect();
-
-    const dataQuery = await client.query(
+    const dataQuery = await _pool.query(
       `SELECT username, first_name, last_name, post_count, follower_count, 
       following_count, biography, link, privacity, verified, admin, 
       follow_id, req_id
@@ -52,11 +44,8 @@ WHERE u.username = $2`,
       if (!res.headersSent) res.status(404).json("User not found");
     }
   } catch (err) {
-    if (client?.connected) client.end().catch(() => {});
     console.error("unexpected error : ", err);
     res.status(500).json(err);
-  } finally {
-    if (client?.connected) client.end().catch(() => {});
   }
 };
 

@@ -1,15 +1,8 @@
-const { Client } = require("pg");
 const funcIsValidUsername = require("../../func/is_valid_username");
+const _pool = require("../../pg_pool");
 
 const checkUsername = async (req, res) => {
   const { username } = req.body;
-  const client = new Client({
-    connectionString: process.env.DATABASE_STRING,
-    connectionTimeoutMillis: 30000,
-  });
-  client.on("error", (err) => {
-    console.log("postgres erR:", err);
-  });
 
   try {
     if (!username) {
@@ -23,9 +16,7 @@ const checkUsername = async (req, res) => {
       return;
     }
 
-    await client.connect();
-
-    const result = await client.query(
+    const result = await _pool.query(
       `SELECT username FROM user_tbl WHERE username = $1`,
       [username]
     );
@@ -35,11 +26,8 @@ const checkUsername = async (req, res) => {
       if (!res.headersSent) res.json("This username is already taken.");
     }
   } catch (err) {
-    if (client?.connected) client.end().catch(() => {});
-    console.error("unexpected error : ", err);
+    console.log("unexpected error : ", err);
     res.status(500).json(err);
-  } finally {
-    if (client?.connected) client.end().catch(() => {});
   }
 };
 

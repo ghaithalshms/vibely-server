@@ -1,16 +1,8 @@
 const webpush = require("web-push");
+const _pool = require("../../pg_pool");
 require("dotenv").config();
-const { Client } = require("pg");
 
 const SendWebPush = async (messageData) => {
-  const client = new Client({
-    connectionString: process.env.DATABASE_STRING,
-    connectionTimeoutMillis: 30000,
-  });
-  client.on("error", (err) => {
-    console.log("postgres erR:", err);
-  });
-
   try {
     webpush.setVapidDetails(
       `mailto:${process.env.ZOHO_EMAIL}`,
@@ -18,9 +10,7 @@ const SendWebPush = async (messageData) => {
       process.env.WEB_PUSH_PRIVATE_KEY
     );
 
-    await client.connect();
-
-    const web_push_query = await client.query(
+    const web_push_query = await _pool.query(
       `SELECT * FROM subscribe_web_push WHERE username = $1`,
       [messageData.to]
     );
@@ -43,11 +33,7 @@ const SendWebPush = async (messageData) => {
         })
       )
       .catch((err) => console.log(err));
-  } catch (err) {
-    if (client?.connected) client.end().catch(() => {});
-  } finally {
-    if (client?.connected) client.end().catch(() => {});
-  }
+  } catch (err) {}
 };
 
 module.exports = SendWebPush;

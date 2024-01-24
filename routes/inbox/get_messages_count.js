@@ -1,17 +1,10 @@
 const CheckTokenNoDB = require("../../func/check_token_no_db");
-const { Client } = require("pg");
+const _pool = require("../../pg_pool");
+
 require("dotenv").config();
 
 const GetMessagesCount = async (req, res) => {
   const { token } = req.query;
-
-  const client = new Client({
-    connectionString: process.env.DATABASE_STRING,
-    connectionTimeoutMillis: 30000,
-  });
-  client.on("error", (err) => {
-    console.log("postgres erR:", err);
-  });
 
   try {
     if (!token)
@@ -26,10 +19,8 @@ const GetMessagesCount = async (req, res) => {
       return;
     }
 
-    await client.connect();
-
     const handleGetMessagesCount = async () => {
-      const countQuery = await client.query(
+      const countQuery = await _pool.query(
         `SELECT COUNT(seen) FROM message_tbl WHERE msg_to=$1 AND seen=false
 `,
         [tokenUsername]
@@ -38,11 +29,8 @@ const GetMessagesCount = async (req, res) => {
     };
     handleGetMessagesCount();
   } catch (err) {
-    if (client?.connected) client.end().catch(() => {});
-    console.error("unexpected error : ", err);
+    console.log("unexpected error : ", err);
     res.status(500).json(err);
-  } finally {
-    if (client?.connected) client.end().catch(() => {});
   }
 };
 

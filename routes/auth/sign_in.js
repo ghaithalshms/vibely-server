@@ -1,17 +1,9 @@
-const { Client } = require("pg");
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
+const _pool = require("../../pg_pool");
 
 const signIn = async (req, res) => {
   const { usernameOrEmail, password } = req.body;
-
-  const client = new Client({
-    connectionString: process.env.DATABASE_STRING,
-    connectionTimeoutMillis: 30000,
-  });
-  client.on("error", (err) => {
-    console.log("postgres erR:", err);
-  });
 
   try {
     if (!(usernameOrEmail && password)) {
@@ -21,10 +13,8 @@ const signIn = async (req, res) => {
 
     const usernameOrEmailVerified = usernameOrEmail.toLowerCase().trim();
 
-    await client.connect();
-
     if (usernameOrEmailVerified && password) {
-      const tokenResult = await client.query(
+      const tokenResult = await _pool.query(
         `SELECT username, password, token_version FROM user_tbl 
         WHERE username = $1 OR email = $1`,
         [usernameOrEmailVerified]
@@ -57,11 +47,8 @@ const signIn = async (req, res) => {
       if (!res.headersSent) res.status(404).json(`Empty input`);
     }
   } catch (err) {
-    if (client?.connected) client.end().catch(() => {});
-    console.error("unexpected error : ", err);
+    console.log("unexpected error : ", err);
     res.status(500).json(err);
-  } finally {
-    if (client?.connected) client.end().catch(() => {});
   }
 };
 

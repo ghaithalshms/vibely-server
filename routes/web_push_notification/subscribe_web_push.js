@@ -1,6 +1,7 @@
 require("dotenv").config();
-const { Client } = require("pg");
+
 const checkToken = require("../../func/check_token");
+const _pool = require("../../pg_pool");
 require("dotenv").config();
 
 const SubscribeWebPush = async (req, res) => {
@@ -19,24 +20,14 @@ const SubscribeWebPush = async (req, res) => {
     return;
   }
 
-  const client = new Client({
-    connectionString: process.env.DATABASE_STRING,
-    connectionTimeoutMillis: 30000,
-  });
-  client.on("error", (err) => {
-    console.log("postgres erR:", err);
-  });
-
   try {
-    await client.connect();
-
-    const web_push_query = await client.query(
+    const web_push_query = await _pool.query(
       `SELECT id FROM subscribe_web_push WHERE username = $1`,
       [tokenUsername]
     );
 
     const insertNewWebPush = async () => {
-      await client
+      await _pool
         .query(
           `INSERT INTO subscribe_web_push (username, endpoint, p256dh, auth)
      VALUES ($1, $2, $3, $4)`,
@@ -52,7 +43,7 @@ const SubscribeWebPush = async (req, res) => {
     };
 
     const updateWebPush = async () => {
-      await client
+      await _pool
         .query(
           `UPDATE subscribe_web_push SET endpoint=$1, p256dh=$2, auth=$3 WHERE username = $4`,
           [
@@ -72,10 +63,7 @@ const SubscribeWebPush = async (req, res) => {
     if (web_push_query.rowCount > 0) updateWebPush();
     else insertNewWebPush();
   } catch (err) {
-    if (client?.connected) client.end().catch(() => {});
     if (!res.headersSent) res.status(500).json(err);
-  } finally {
-    if (client?.connected) client.end().catch(() => {});
   }
 };
 

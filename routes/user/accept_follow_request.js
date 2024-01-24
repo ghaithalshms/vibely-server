@@ -1,15 +1,8 @@
-const { Client } = require("pg");
 const checkToken = require("../../func/check_token");
+const _pool = require("../../pg_pool");
 
 const AcceptFollowRequest = async (req, res) => {
   const { token, username } = req.body;
-  const client = new Client({
-    connectionString: process.env.DATABASE_STRING,
-    connectionTimeoutMillis: 30000,
-  });
-  client.on("error", (err) => {
-    console.log("postgres erR:", err);
-  });
 
   try {
     if (!(token && username)) {
@@ -22,18 +15,17 @@ const AcceptFollowRequest = async (req, res) => {
       if (!res.headersSent) res.status(401).json("wrong token");
       return;
     }
-    await client.connect();
 
     // DEFINITION OF FUNCTIONS
     const handleVerifyDeleteFollowRequest = async () => {
-      await client.query(
+      await _pool.query(
         `DELETE FROM notification_tbl 
         WHERE noti_from = $1 
         AND noti_to = $2 
         AND noti_type='request'`,
         [username, tokenUsername]
       );
-      return (userRequested = await client.query(
+      return (userRequested = await _pool.query(
         `DELETE FROM follow_request_tbl 
       WHERE req_follower = $1
       AND req_following = $2
@@ -43,19 +35,19 @@ const AcceptFollowRequest = async (req, res) => {
     };
 
     const handleAcceptFollowRequest = async () => {
-      await client.query(
+      await _pool.query(
         `INSERT INTO follow_tbl (follower, following, following_date) values ($1,$2,$3)`,
         [username, tokenUsername, new Date().toISOString()]
       );
-      await client.query(
+      await _pool.query(
         `UPDATE user_tbl set following_count = following_count+1 WHERE username=$1`,
         [username]
       );
-      await client.query(
+      await _pool.query(
         `UPDATE user_tbl set follower_count = follower_count+1 WHERE username=$1`,
         [tokenUsername]
       );
-      await client.query(
+      await _pool.query(
         `INSERT INTO notification_tbl (noti_from, noti_to, noti_type, noti_date) values ($1,$2,$3,$4)`,
         [username, tokenUsername, "follow", new Date().toISOString()]
       );
@@ -66,11 +58,8 @@ const AcceptFollowRequest = async (req, res) => {
       handleAcceptFollowRequest();
     else if (!res.headersSent) res.status(200).json("no any request");
   } catch (err) {
-    if (client?.connected) client.end().catch(() => {});
-    console.error("unexpected error : ", err);
+    console.log("unexpected error : ", err);
     res.status(500).json(err);
-  } finally {
-    if (client?.connected) client.end().catch(() => {});
   }
 };
 

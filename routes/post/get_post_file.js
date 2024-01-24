@@ -1,16 +1,9 @@
-const { Client } = require("pg");
 require("dotenv").config();
 const CheckTokenNoDB = require("../../func/check_token_no_db");
+const _pool = require("../../pg_pool");
 
 const GetPostFile = async (req, res) => {
   const { token, postID } = req.query;
-  const client = new Client({
-    connectionString: process.env.DATABASE_STRING,
-    connectionTimeoutMillis: 30000,
-  });
-  client.on("error", (err) => {
-    console.log("postgres erR:", err);
-  });
 
   try {
     if (!(token && postID)) {
@@ -24,9 +17,7 @@ const GetPostFile = async (req, res) => {
       return;
     }
 
-    await client.connect();
-
-    const fileQuery = await client.query(
+    const fileQuery = await _pool.query(
       `SELECT DISTINCT file, file_type 
 FROM post_tbl , user_tbl, follow_tbl
 WHERE (
@@ -41,11 +32,8 @@ AND post_id = $2
 
     if (!res.headersSent) res.send(fileQuery?.rows[0]);
   } catch (err) {
-    if (client?.connected) client.end().catch(() => {});
-    console.error("unexpected error : ", err);
+    console.log("unexpected error : ", err);
     res.status(500).json(err);
-  } finally {
-    if (client?.connected) client.end().catch(() => {});
   }
 };
 

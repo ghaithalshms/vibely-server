@@ -1,16 +1,9 @@
-const { Client } = require("pg");
 const checkToken = require("../../func/check_token");
+const _pool = require("../../pg_pool");
 require("dotenv").config();
 
 const GetChat = async (req, res) => {
   const { token, username } = req.query;
-  const client = new Client({
-    connectionString: process.env.DATABASE_STRING,
-    connectionTimeoutMillis: 30000,
-  });
-  client.on("error", (err) => {
-    console.log("postgres erR:", err);
-  });
 
   try {
     if (!(token && username)) {
@@ -23,9 +16,7 @@ const GetChat = async (req, res) => {
       return;
     }
 
-    await client.connect();
-
-    const chatQuery = await client.query(
+    const chatQuery = await _pool.query(
       `SELECT DISTINCT * FROM message_tbl
     WHERE (msg_to = $1 AND msg_from = $2) 
        OR (msg_to = $2 AND msg_from = $1)
@@ -49,11 +40,8 @@ const GetChat = async (req, res) => {
     }
     if (!res.headersSent) res.send(chatList);
   } catch (err) {
-    if (client?.connected) client.end().catch(() => {});
-    console.error("unexpected error : ", err);
+    console.log("unexpected error : ", err);
     res.status(500).json(err);
-  } finally {
-    if (client?.connected) client.end().catch(() => {});
   }
 };
 

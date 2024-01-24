@@ -1,5 +1,5 @@
-const { Client } = require("pg");
 const checkToken = require("../../func/check_token");
+const _pool = require("../../pg_pool");
 
 const ArchivePost = async (req, res) => {
   const { token, postID } = req.body;
@@ -22,7 +22,7 @@ const ArchivePost = async (req, res) => {
       if (!res.headersSent) res.status(401).json("wrong token");
       return;
     }
-    await client
+    await _pool
       .connect()
       .then()
       .catch(() => {
@@ -30,7 +30,7 @@ const ArchivePost = async (req, res) => {
         return;
       });
 
-    const archiveQuery = await client.query(
+    const archiveQuery = await _pool.query(
       `UPDATE post_tbl 
       SET archived=true 
       WHERE post_id = $1 AND posted_user = $2
@@ -39,7 +39,7 @@ const ArchivePost = async (req, res) => {
     );
 
     if (archiveQuery.rowCount > 0)
-      await client.query(
+      await _pool.query(
         `UPDATE user_tbl 
       SET post_count=post_count-1 
       WHERE username = $1`,
@@ -47,11 +47,8 @@ const ArchivePost = async (req, res) => {
       );
     if (!res.headersSent) res.status(200).json("post archived");
   } catch (err) {
-    if (client?.connected) client.end().catch(() => {});
-    console.error("unexpected error : ", err);
+    console.log("unexpected error : ", err);
     res.status(500).json(err);
-  } finally {
-    if (client?.connected) client.end().catch(() => {});
   }
 };
 

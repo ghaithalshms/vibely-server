@@ -6,13 +6,7 @@ const cors = require("cors");
 require("dotenv").config();
 const axios = require("axios");
 
-const {
-  postLink,
-  getLink,
-  deleteLink,
-  putLink,
-  updateLink,
-} = require("./API_LINK");
+const { postLink, getLink, deleteLink, updateLink } = require("./API_LINK");
 
 const app = express();
 app.use(cors());
@@ -165,7 +159,7 @@ const sendHttpRequest = async () => {
     );
     console.log("HTTP Request Successful:", response.data);
   } catch (error) {
-    console.error("HTTP Request Failed:", error);
+    console.log("HTTP Request Failed:", error);
   }
 };
 

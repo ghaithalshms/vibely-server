@@ -1,15 +1,9 @@
-const { Client } = require("pg");
+const _pool = require("../../../pg_pool");
+
 require("dotenv").config();
 
 const GetUserFollowers = async (req, res) => {
   const { username } = req.query;
-  const client = new Client({
-    connectionString: process.env.DATABASE_STRING,
-    connectionTimeoutMillis: 30000,
-  });
-  client.on("error", (err) => {
-    console.log("postgres erR:", err);
-  });
 
   try {
     if (!username) {
@@ -17,10 +11,8 @@ const GetUserFollowers = async (req, res) => {
       return;
     }
 
-    await client.connect();
-
     // async function handleCheckIfFollowing(username) {
-    //   const isFollowingQuery = await client.query(
+    //   const isFollowingQuery = await _pool.query(
     //     "SELECT * FROM follow_tbl WHERE follower = $1 AND following = $2",
     //     [userSigned, username]
     //   );
@@ -28,14 +20,14 @@ const GetUserFollowers = async (req, res) => {
     // }
 
     // async function handleCheckIfFollowRequested(username) {
-    //   const isFollowRequestedQuery = await client.query(
+    //   const isFollowRequestedQuery = await _pool.query(
     //     "SELECT * FROM follow_request_tbl WHERE req_follower = $1 AND req_following = $2",
     //     [userSigned, username]
     //   );
     //   return isFollowRequestedQuery.rows.length > 0;
     // }
 
-    const userListQuery = await client.query(
+    const userListQuery = await _pool.query(
       `SELECT DISTINCT username, first_name,last_name, picture, admin, verified FROM user_tbl, follow_tbl WHERE username=follower AND following=$1`,
       [username]
     );
@@ -60,11 +52,8 @@ const GetUserFollowers = async (req, res) => {
     }
     if (!res.headersSent) res.send(userList);
   } catch (err) {
-    if (client?.connected) client.end().catch(() => {});
-    console.error("unexpected error : ", err);
+    console.log("unexpected error : ", err);
     res.status(500).json(err);
-  } finally {
-    if (client?.connected) client.end().catch(() => {});
   }
 };
 

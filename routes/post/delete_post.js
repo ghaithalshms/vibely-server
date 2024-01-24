@@ -1,15 +1,8 @@
-const { Client } = require("pg");
 const checkToken = require("../../func/check_token");
+const _pool = require("../../pg_pool");
 
 const DeletePost = async (req, res) => {
   const { token, postID } = req.body;
-  const client = new Client({
-    connectionString: process.env.DATABASE_STRING,
-    connectionTimeoutMillis: 30000,
-  });
-  client.on("error", (err) => {
-    console.log("postgres erR:", err);
-  });
 
   try {
     if (!(token && postID)) {
@@ -21,7 +14,7 @@ const DeletePost = async (req, res) => {
       if (!res.headersSent) res.status(401).json("wrong token");
       return;
     }
-    await client
+    await _pool
       .connect()
       .then()
       .catch(() => {
@@ -29,14 +22,14 @@ const DeletePost = async (req, res) => {
         return;
       });
 
-    const deleteQuery = await client.query(
+    const deleteQuery = await _pool.query(
       `DELETE FROM post_tbl 
       WHERE post_id = $1 AND posted_user = $2
       RETURNING post_id`,
       [postID, tokenUsername]
     );
     if (deleteQuery.rowCount > 0)
-      await client.query(
+      await _pool.query(
         `UPDATE user_tbl 
       SET post_count=post_count-1 
       WHERE username = $1`,
@@ -44,11 +37,8 @@ const DeletePost = async (req, res) => {
       );
     if (!res.headersSent) res.status(200).json("post deleted");
   } catch (err) {
-    if (client?.connected) client.end().catch(() => {});
-    console.error("unexpected error : ", err);
+    console.log("unexpected error : ", err);
     res.status(500).json(err);
-  } finally {
-    if (client?.connected) client.end().catch(() => {});
   }
 };
 

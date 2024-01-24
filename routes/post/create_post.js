@@ -1,5 +1,5 @@
-const { Client } = require("pg");
 const checkToken = require("../../func/check_token");
+const _pool = require("../../pg_pool");
 
 const CreatePost = async (req, res) => {
   const file = req.file;
@@ -7,14 +7,6 @@ const CreatePost = async (req, res) => {
   const buffer = file ? file.buffer : null;
   const token = req.body.token;
   const description = req.body.description;
-
-  const client = new Client({
-    connectionString: process.env.DATABASE_STRING,
-    connectionTimeoutMillis: 30000,
-  });
-  client.on("error", (err) => {
-    console.log("postgres erR:", err);
-  });
 
   try {
     if (!(token && (file || description))) {
@@ -27,7 +19,7 @@ const CreatePost = async (req, res) => {
       if (!res.headersSent) res.status(401).json("wrong token");
       return;
     }
-    await client
+    await _pool
       .connect()
       .then()
       .catch(() => {
@@ -37,12 +29,12 @@ const CreatePost = async (req, res) => {
 
     // DEFINITION OF FUNCTIONS
     const handlePostComment = async () => {
-      await client.query(
+      await _pool.query(
         `INSERT INTO post_tbl (posted_user, description, post_date, file, file_type) 
           VALUES ($1,$2,$3, $4, $5)`,
         [tokenUsername, description, new Date().toISOString(), buffer, fileType]
       );
-      await client.query(
+      await _pool.query(
         `UPDATE user_tbl SET post_count = post_count+1 WHERE username =$1`,
         [tokenUsername]
       );
@@ -52,11 +44,8 @@ const CreatePost = async (req, res) => {
     // START QUERY HERE
     handlePostComment();
   } catch (err) {
-    if (client?.connected) client.end().catch(() => {});
-    console.error("unexpected error : ", err);
+    console.log("unexpected error : ", err);
     res.status(500).json(err);
-  } finally {
-    if (client?.connected) client.end().catch(() => {});
   }
 };
 

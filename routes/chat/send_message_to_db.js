@@ -1,19 +1,12 @@
 const CheckTokenNoDB = require("../../func/check_token_no_db");
-const { Client } = require("pg");
+const _pool = require("../../pg_pool");
+
 require("dotenv").config();
 
 const SendMessageToDB = async (req, res) => {
   const { token, username, message, fileType } = req.body;
   const file = req.file;
   const buffer = file ? file.buffer : null;
-
-  const client = new Client({
-    connectionString: process.env.DATABASE_STRING,
-    connectionTimeoutMillis: 30000,
-  });
-  client.on("error", (err) => {
-    console.log("postgres erR:", err);
-  });
 
   try {
     if (!(token && username && (message || file)))
@@ -28,10 +21,8 @@ const SendMessageToDB = async (req, res) => {
       return;
     }
 
-    await client.connect();
-
     const handleSendMessageToDB = async () => {
-      const idQuery = await client.query(
+      const idQuery = await _pool.query(
         `INSERT INTO message_tbl (msg_from, msg_to, message, sent_date, file, file_type) 
       VALUES ($1, $2, $3, $4, $5, $6) RETURNING msg_id as id, file`,
         [
@@ -47,11 +38,8 @@ const SendMessageToDB = async (req, res) => {
     };
     handleSendMessageToDB();
   } catch (err) {
-    if (client?.connected) client.end().catch(() => {});
-    console.error("unexpected error : ", err);
+    console.log("unexpected error : ", err);
     res.status(500).json(err);
-  } finally {
-    if (client?.connected) client.end().catch(() => {});
   }
 };
 
