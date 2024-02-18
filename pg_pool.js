@@ -2,7 +2,7 @@ const { Pool } = require("pg");
 
 let pool = new Pool({
   connectionString: process.env.DATABASE_STRING,
-  connectionTimeoutMillis: 5000,
+  connectionTimeoutMillis: 50000,
 });
 
 const _pool = () => {

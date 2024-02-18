@@ -67,9 +67,12 @@ const GetNotificationCount = require("./routes/notification/get_notifications_co
 const GetMessagesCount = require("./routes/inbox/get_messages_count");
 const SubscribeWebPush = require("./routes/web_push_notification/subscribe_web_push");
 const GetPostFile = require("./routes/post/get_post_file");
+const GetSuggestions = require("./routes/suggestions/get_suggestions");
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
+
+const connectedUsers = new Map();
 
 // *********** POST ***********
 // activate server
@@ -96,7 +99,9 @@ app.post(postLink.sendMessageToDB, upload.single("file"), SendMessageToDB);
 app.post(postLink.subscribeWebPush, SubscribeWebPush);
 // *********** GET ***********
 // USER
-app.get(getLink.getUserData, GetUserData);
+app.get(getLink.getUserData, (req, res) =>
+  GetUserData(req, res, connectedUsers)
+);
 app.get(getLink.getUserFollowers, GetFollowers);
 app.get(getLink.getUserFollowing, GetFollowing);
 app.get(getLink.getUserPicture, GetUserPicture);
@@ -116,10 +121,12 @@ app.get(getLink.getPostFile, GetPostFile);
 app.get(getLink.getNotification, GetNotifications);
 app.get(getLink.getNotificationCount, GetNotificationCount);
 // INBOX
-app.get(getLink.getInbox, GetInbox);
+app.get(getLink.getInbox, (req, res) => GetInbox(req, res, connectedUsers));
 app.get(getLink.getMessagesCount, GetMessagesCount);
 // CHAT
 app.get(getLink.getChat, GetChat);
+// SUGGESTIONS
+app.get(getLink.getSuggestions, GetSuggestions);
 
 // *********** DELETE ***********
 // POST
@@ -141,8 +148,6 @@ app.post(updateLink.setMessagesSeen, SetMessagesSeen);
 // CHAT
 app.post(updateLink.setNotificationSeen, SetNotificationSeen);
 
-const connectedUsers = new Map();
-
 connectionToSocket(io, connectedUsers);
 
 const listener = server.listen(8000 || process.env.PORT, () => {
@@ -157,7 +162,7 @@ const sendHttpRequest = async () => {
     const response = await axios.get(
       `${process.env.API_URL}/api/server/activate`
     );
-    console.log("HTTP Request Successful:", response.data);
+    // console.log("HTTP Request Successful:", response.data);
   } catch (error) {
     console.log("HTTP Request Failed:", error);
   }

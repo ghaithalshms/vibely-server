@@ -46,6 +46,8 @@ const getLink = {
   getMessagesCount: `/api/inbox/count`,
   // CHAT
   getChat: `/api/chat`,
+  // SUGGESTIONS
+  getSuggestions: `/api/suggestions`,
 };
 
 const deleteLink = {

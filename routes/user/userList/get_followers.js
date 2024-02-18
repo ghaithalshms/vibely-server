@@ -28,7 +28,7 @@ const GetUserFollowers = async (req, res) => {
     // }
 
     const userListQuery = await _pool.query(
-      `SELECT DISTINCT username, first_name,last_name, picture, admin, verified FROM user_tbl, follow_tbl WHERE username=follower AND following=$1`,
+      `SELECT DISTINCT username, first_name,last_name, admin, verified FROM user_tbl, follow_tbl WHERE username=follower AND following=$1`,
       [username]
     );
 
@@ -43,7 +43,7 @@ const GetUserFollowers = async (req, res) => {
         username: user.username ?? "",
         firstName: user.first_name ?? "",
         lastName: user.last_name ?? "",
-        picture: user.picture ?? null,
+        picture: null,
         // isFollowing,
         // isFollowRequested,
         isVerified: user.verified ?? false,

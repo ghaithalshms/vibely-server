@@ -2,7 +2,7 @@ const checkToken = require("../../func/check_token");
 const _pool = require("../../pg_pool");
 require("dotenv").config();
 
-const GetInbox = async (req, res) => {
+const GetInbox = async (req, res, connectedUsers) => {
   const { token } = req.query;
 
   try {
@@ -24,9 +24,6 @@ const GetInbox = async (req, res) => {
     u.verified,
     u.admin,
     u.last_seen,
-    f.follow_id,
-    f.follower,
-    f.following,
     m.msg_id,
     m.msg_from,
     m.msg_to,
@@ -34,20 +31,19 @@ const GetInbox = async (req, res) => {
     m.file_type,
     m.message,
     m.seen
-FROM 
-    user_tbl u
-JOIN 
-    follow_tbl f ON u.username = f.following
-LEFT JOIN 
-    message_tbl m ON (f.following = m.msg_to OR f.following = m.msg_from)
-               AND m.sent_date = (
-                    SELECT MAX(sent_date) 
-                    FROM message_tbl 
-                    WHERE (msg_to = f.following AND msg_from = $1) OR (msg_from = f.following AND msg_to = $1)
-                )
-WHERE 
-    f.follower = $1
-ORDER BY u.last_seen DESC;
+FROM user_tbl u
+JOIN message_tbl m ON (
+    (m.msg_to = u.username AND m.msg_from = $1) 
+    OR
+    (m.msg_from = u.username AND m.msg_to = $1)
+)
+WHERE m.sent_date = (
+    SELECT MAX(sent_date)
+    FROM message_tbl
+    WHERE ($1 IN (msg_from, msg_to) AND 
+           (msg_from = u.username OR msg_to = u.username))
+)
+ORDER BY m.sent_date DESC;
 `,
       [tokenUsername]
     );
@@ -63,6 +59,9 @@ ORDER BY u.last_seen DESC;
           picture: null,
           isVerified: inbox.verified ?? false,
           isAdmin: inbox.admin ?? false,
+          lastSeen: connectedUsers.has(inbox.username)
+            ? "online"
+            : inbox.last_seen,
         },
         message: {
           id: inbox.msg_id,
