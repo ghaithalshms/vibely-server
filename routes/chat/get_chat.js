@@ -20,8 +20,9 @@ const GetChat = async (req, res) => {
       `SELECT DISTINCT * FROM message_tbl
     WHERE (msg_to = $1 AND msg_from = $2) 
        OR (msg_to = $2 AND msg_from = $1)
+       ORDER BY msg_id
        LIMIT 20
-       ORDER BY msg_id`,
+       `,
       [tokenUsername, username]
     );
 
