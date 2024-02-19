@@ -17,18 +17,18 @@ const GetChat = async (req, res) => {
     }
 
     const chatQuery = await _pool.query(
-      `SELECT DISTINCT * FROM message_tbl
+      `SELECT msg_id, message, msg_from, msg_to, sent_date, seen, file_type FROM message_tbl
     WHERE (msg_to = $1 AND msg_from = $2) 
-       OR (msg_to = $2 AND msg_from = $1)
-       ORDER BY msg_id
-       LIMIT 20
-       `,
+    OR (msg_to = $2 AND msg_from = $1)
+    ORDER BY msg_id DESC
+    
+    `,
       [tokenUsername, username]
     );
 
     let chatList = [];
 
-    for (const chat of chatQuery.rows) {
+    for (const chat of chatQuery.rows.reverse()) {
       chatList.push({
         id: chat.msg_id,
         message: chat.message,
