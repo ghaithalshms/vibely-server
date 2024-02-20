@@ -21,7 +21,7 @@ const GetChat = async (req, res) => {
     WHERE (msg_to = $1 AND msg_from = $2) 
     OR (msg_to = $2 AND msg_from = $1)
     ORDER BY msg_id DESC
-    
+    LIMIT 50
     `,
       [tokenUsername, username]
     );

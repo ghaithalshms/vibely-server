@@ -11,41 +11,28 @@ const GetUserFollowers = async (req, res) => {
       return;
     }
 
-    // async function handleCheckIfFollowing(username) {
-    //   const isFollowingQuery = await _pool.query(
-    //     "SELECT * FROM follow_tbl WHERE follower = $1 AND following = $2",
-    //     [userSigned, username]
-    //   );
-    //   return isFollowingQuery.rows.length > 0;
-    // }
-
-    // async function handleCheckIfFollowRequested(username) {
-    //   const isFollowRequestedQuery = await _pool.query(
-    //     "SELECT * FROM follow_request_tbl WHERE req_follower = $1 AND req_following = $2",
-    //     [userSigned, username]
-    //   );
-    //   return isFollowRequestedQuery.rows.length > 0;
-    // }
-
     const userListQuery = await _pool.query(
-      `SELECT DISTINCT username, first_name,last_name, admin, verified FROM user_tbl, follow_tbl WHERE username=follower AND following=$1`,
+      `SELECT DISTINCT u.username, u.first_name, u.last_name, u.admin, u.verified, f2.following, fr.req_following
+      FROM user_tbl u
+      JOIN follow_tbl f1 ON u.username = f1.follower AND f1.following = $1
+      LEFT JOIN follow_tbl f2 ON u.username = f2.following AND f2.follower = $1
+      LEFT JOIN follow_request_tbl fr ON u.username = fr.req_following AND fr.req_follower = $1
+      `,
       [username]
     );
 
     let userList = [];
 
     for (const user of userListQuery.rows) {
-      //   const isFollowing = await handleCheckIfFollowing(user.username);
-      //   const isFollowRequested = await handleCheckIfFollowRequested(
-      //     user.username
-      //   );
+      const isFollowing = user.following;
+      const isFollowRequested = user.req_following;
       userList.push({
-        username: user.username ?? "",
+        username: user.username,
         firstName: user.first_name ?? "",
         lastName: user.last_name ?? "",
         picture: null,
-        // isFollowing,
-        // isFollowRequested,
+        isFollowing,
+        isFollowRequested,
         isVerified: user.verified ?? false,
         isAdmin: user.admin ?? false,
       });

@@ -15,6 +15,11 @@ const SendWebPush = async (messageData) => {
       [messageData.to]
     );
 
+    // const userDataQuery = await _pool.query(
+    //   `SELECT first_name, picture FROM user_tbl WHERE username = $1`,
+    //   [messageData.to]
+    // );
+
     const pushSubscription = {
       endpoint: web_push_query.rows[0].endpoint,
       expirationTime: null,
@@ -29,7 +34,7 @@ const SendWebPush = async (messageData) => {
         pushSubscription,
         JSON.stringify({
           title: messageData.from,
-          message: messageData.message,
+          body: messageData.message,
         })
       )
       .catch((err) => console.log(err));
