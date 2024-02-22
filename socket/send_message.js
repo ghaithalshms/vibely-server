@@ -5,7 +5,7 @@ const sendMessageSocket = (socket, connectedUsers) => {
     const userSocketID = connectedUsers.get(messageData.to)?.id;
     socket.to(userSocketID)?.emit("receive_message", messageData);
     let title = messageData.from,
-      body = messageData.message || `Sent you a ${file.fileType}`,
+      body = messageData.message || `Sent you a ${messageData.fileType}`,
       to = messageData.to;
 
     SendWebPush(title, body, to);
