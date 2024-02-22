@@ -9,7 +9,7 @@ const SubscribeWebPush = async (req, res) => {
 
   let pushSubscriptionJSON = JSON.parse(pushSubscription);
 
-  if (!(token && pushSubscriptionJSON)) {
+  if (!(token && pushSubscriptionJSON && browserID)) {
     res.status(400).json("data missing");
     return;
   }
