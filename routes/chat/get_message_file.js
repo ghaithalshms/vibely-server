@@ -27,8 +27,6 @@ const GetMessageFile = async (req, res) => {
     const file = fileQuery.rows[0].file;
     const fileType = fileQuery.rows[0].file_type;
 
-    console.log(fileType);
-
     if (!res.headersSent) {
       if (fileType === "picture") res.setHeader("Content-Type", "image/png");
       else if (fileType === "video") res.setHeader("Content-Type", "video/mp4");
