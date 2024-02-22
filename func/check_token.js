@@ -25,7 +25,6 @@ async function checkToken(token) {
       return decoded.username;
     else return false;
   } catch (err) {
-    console.log("unexpected error : ", err);
     return false;
   }
 }

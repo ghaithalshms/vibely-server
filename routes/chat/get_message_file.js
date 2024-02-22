@@ -2,10 +2,10 @@ require("dotenv").config();
 const checkToken = require("../../func/check_token");
 const _pool = require("../../pg_pool");
 
-const GetPostFile = async (req, res) => {
-  const { token, postID } = req.query;
+const GetMessageFile = async (req, res) => {
+  const { token, messageID } = req.query;
   try {
-    if (!(token && postID)) {
+    if (!(token && messageID)) {
       res.status(400).json("data missing");
       return;
     }
@@ -17,26 +17,23 @@ const GetPostFile = async (req, res) => {
     }
 
     const fileQuery = await _pool.query(
-      `SELECT DISTINCT file, file_type 
-      FROM post_tbl , user_tbl, follow_tbl
-      WHERE (
-      	(follower=$1 AND posted_user = following)
-      	   OR (privacity = false AND username = posted_user)
-      	   OR posted_user=$1
-      )
-      AND post_id = $2
+      `SELECT file, file_type FROM message_tbl 
+      WHERE msg_id = $1
+      AND (msg_from = $2 OR msg_to = $2)
 `,
-      [tokenUsername, postID]
+      [messageID, tokenUsername]
     );
 
     const file = fileQuery.rows[0].file;
     const fileType = fileQuery.rows[0].file_type;
 
+    console.log(fileType);
+
     if (!res.headersSent) {
-      res.setHeader(
-        "Content-Type",
-        fileType === "picture" ? "image/png" : "video/mp4"
-      );
+      if (fileType === "picture") res.setHeader("Content-Type", "image/png");
+      else if (fileType === "video") res.setHeader("Content-Type", "video/mp4");
+      else if (fileType === "audio") res.setHeader("Content-Type", "audio/mp3");
+
       res.send(file);
     }
   } catch (err) {
@@ -45,4 +42,4 @@ const GetPostFile = async (req, res) => {
   }
 };
 
-module.exports = GetPostFile;
+module.exports = GetMessageFile;

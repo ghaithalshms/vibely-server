@@ -4,7 +4,10 @@ const sendMessageSocket = (socket, connectedUsers) => {
   socket.on("send_message", (messageData) => {
     const userSocketID = connectedUsers.get(messageData.to)?.id;
     socket.to(userSocketID)?.emit("receive_message", messageData);
-    SendWebPush(messageData);
+    const title = messageData.from,
+      body = messageData.message,
+      to = messageData.to;
+    SendWebPush(title, body, to);
   });
 };
 module.exports = sendMessageSocket;

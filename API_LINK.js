@@ -46,6 +46,7 @@ const getLink = {
   getMessagesCount: `/api/inbox/count`,
   // CHAT
   getChat: `/api/chat`,
+  getMessageFile: `/api/chat/message-file`,
   // SUGGESTIONS
   getSuggestions: `/api/suggestions`,
 };
@@ -57,6 +58,8 @@ const deleteLink = {
   deleteComment: `/api/comment/delete`,
   // USER
   deleteFollowRequest: `/api/user/follow/request/delete`,
+  // WEB PUSH NOTIFICATIONS
+  unsubscribeWebPush: `/api/notification/unsubscribe`,
 };
 
 const updateLink = {

@@ -13,6 +13,10 @@ const signIn = async (req, res) => {
 
     const usernameOrEmailVerified = usernameOrEmail.toLowerCase().trim();
 
+    const generateUniqueBrowserID = () => {
+      return Math.random().toString(16).substring(2) + Date.now().toString(16);
+    };
+
     if (usernameOrEmailVerified && password) {
       const tokenResult = await _pool.query(
         `SELECT username, password, token_version FROM user_tbl 
@@ -33,9 +37,10 @@ const signIn = async (req, res) => {
             }
           );
 
-          res
-            .status(200)
-            .json({ token, username: tokenResult.rows[0].username });
+          const username = tokenResult.rows[0].username;
+          const browserID = generateUniqueBrowserID();
+
+          res.status(200).json({ token, username, browserID });
         } else {
           if (!res.headersSent)
             res.status(401).json("Password is not correct!");

@@ -28,16 +28,15 @@ const GetChat = async (req, res) => {
 
     let chatList = [];
 
-    for (const chat of chatQuery.rows.reverse()) {
+    for (const message of chatQuery.rows.reverse()) {
       chatList.push({
-        id: chat.msg_id,
-        message: chat.message,
-        from: chat.msg_from,
-        to: chat.msg_to,
-        sentDate: chat.sent_date,
-        file: chat.file,
-        fileType: chat.file_type,
-        seen: chat.seen,
+        id: message.msg_id,
+        message: message.message,
+        from: message.msg_from,
+        to: message.msg_to,
+        sentDate: message.sent_date,
+        fileType: message.file_type !== "null" ? message.file_type : null,
+        seen: message.seen,
       });
     }
     if (!res.headersSent) res.send(chatList);

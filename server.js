@@ -68,6 +68,8 @@ const GetMessagesCount = require("./routes/inbox/get_messages_count");
 const SubscribeWebPush = require("./routes/web_push_notification/subscribe_web_push");
 const GetPostFile = require("./routes/post/get_post_file");
 const GetSuggestions = require("./routes/suggestions/get_suggestions");
+const UnsubscribeWebPush = require("./routes/web_push_notification/unsubscribe_web_push");
+const GetMessageFile = require("./routes/chat/get_message_file");
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -125,6 +127,7 @@ app.get(getLink.getInbox, (req, res) => GetInbox(req, res, connectedUsers));
 app.get(getLink.getMessagesCount, GetMessagesCount);
 // CHAT
 app.get(getLink.getChat, GetChat);
+app.get(getLink.getMessageFile, GetMessageFile);
 // SUGGESTIONS
 app.get(getLink.getSuggestions, GetSuggestions);
 
@@ -133,6 +136,7 @@ app.get(getLink.getSuggestions, GetSuggestions);
 app.post(deleteLink.deletePost, DeletePost);
 // COMMENT
 app.post(deleteLink.deleteComment, DeleteComment);
+app.post(deleteLink.unsubscribeWebPush, UnsubscribeWebPush);
 
 // *********** UPDATE ***********
 // POST

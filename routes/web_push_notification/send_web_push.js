@@ -2,7 +2,7 @@ const webpush = require("web-push");
 const _pool = require("../../pg_pool");
 require("dotenv").config();
 
-const SendWebPush = async (messageData) => {
+const SendWebPush = async (title, body, to) => {
   try {
     webpush.setVapidDetails(
       `mailto:${process.env.ZOHO_EMAIL}`,
@@ -11,34 +11,31 @@ const SendWebPush = async (messageData) => {
     );
 
     const web_push_query = await _pool.query(
-      `SELECT * FROM subscribe_web_push WHERE username = $1`,
-      [messageData.to]
+      `SELECT * FROM subscribe_web_push WHERE username = $1 ORDER BY id`,
+      [to]
     );
 
-    // const userDataQuery = await _pool.query(
-    //   `SELECT first_name, picture FROM user_tbl WHERE username = $1`,
-    //   [messageData.to]
-    // );
-
-    const pushSubscription = {
-      endpoint: web_push_query.rows[0].endpoint,
-      expirationTime: null,
-      keys: {
-        p256dh: web_push_query.rows[0].p256dh,
-        auth: web_push_query.rows[0].auth,
-      },
-    };
-
-    webpush
-      .sendNotification(
-        pushSubscription,
-        JSON.stringify({
-          title: messageData.from,
-          body: messageData.message,
-        })
-      )
-      .catch((err) => console.log(err));
-  } catch (err) {}
+    web_push_query.rows.forEach((web_push) => {
+      webpush
+        .sendNotification(
+          {
+            endpoint: web_push?.endpoint,
+            expirationTime: null,
+            keys: {
+              p256dh: web_push?.p256dh,
+              auth: web_push?.auth,
+            },
+          },
+          JSON.stringify({
+            title,
+            body,
+          })
+        )
+        .catch((err) => console.log(err));
+    });
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 module.exports = SendWebPush;

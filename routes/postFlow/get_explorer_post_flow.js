@@ -41,7 +41,7 @@ LEFT JOIN post_save_tbl ps ON ps.post_id = p.post_id AND ps.saved_user = $1
 WHERE archived=false
 ${postIdInstructionString}
 ORDER BY p.post_id desc
-LIMIT 5`,
+LIMIT 4`,
       [tokenUsername, lastGotPostID]
     );
 

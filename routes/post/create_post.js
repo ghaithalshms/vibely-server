@@ -28,7 +28,7 @@ const CreatePost = async (req, res) => {
       });
 
     // DEFINITION OF FUNCTIONS
-    const handlePostComment = async () => {
+    const handlePost = async () => {
       await _pool.query(
         `INSERT INTO post_tbl (posted_user, description, post_date, file, file_type) 
           VALUES ($1,$2,$3, $4, $5)`,
@@ -42,7 +42,7 @@ const CreatePost = async (req, res) => {
     };
 
     // START QUERY HERE
-    handlePostComment();
+    handlePost();
   } catch (err) {
     console.log("unexpected error : ", err);
     res.status(500).json(err);

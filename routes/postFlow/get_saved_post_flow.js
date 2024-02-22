@@ -34,7 +34,7 @@ const GetSavedPostFlow = async (req, res) => {
       AND archived = 'false'
       ${postIdInstructionString}
       ORDER BY saved_id DESC
-      LIMIT 5`,
+      LIMIT 4`,
       [tokenUsername, lastGotPostID]
     );
 
