@@ -13,13 +13,13 @@ const GetPostLikedUsers = async (req, res) => {
     }
 
     const userListQuery = await client.query(
-      `SELECT DISTINCT username, first_name,last_name, admin, verified 
-FROM user_tbl
-JOIN post_like_tbl ON username=liked_user AND liked_post=$1
+      `SELECT DISTINCT u.username, u.first_name,u.last_name, u.admin, u.verified 
+FROM user_tbl u
+JOIN post_like_tbl pl ON username=pl.liked_user AND pl.liked_post=$2
 LEFT JOIN follow_tbl f2 ON u.username = f2.following AND f2.follower = $1
 LEFT JOIN follow_request_tbl fr ON u.username = fr.req_following AND fr.req_follower = $1
 `,
-      [postID, username]
+      [username, postID]
     );
 
     let userList = [];
@@ -29,7 +29,6 @@ LEFT JOIN follow_request_tbl fr ON u.username = fr.req_following AND fr.req_foll
         username: user.username ?? "",
         firstName: user.first_name ?? "",
         lastName: user.last_name ?? "",
-        picture: null,
         isVerified: user.verified ?? false,
         isAdmin: user.admin ?? false,
       });
