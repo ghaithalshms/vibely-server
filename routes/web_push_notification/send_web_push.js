@@ -17,23 +17,28 @@ const SendWebPush = async (title, body, to) => {
       [to]
     );
 
+    let pushedEndpoints = [];
+
     web_push_query.rows.forEach((web_push) => {
-      webpush
-        .sendNotification(
-          {
-            endpoint: web_push?.endpoint,
-            expirationTime: null,
-            keys: {
-              p256dh: web_push?.p256dh,
-              auth: web_push?.auth,
+      if (!pushedEndpoints.includes(web_push?.endpoint)) {
+        webpush
+          .sendNotification(
+            {
+              endpoint: web_push?.endpoint,
+              expirationTime: null,
+              keys: {
+                p256dh: web_push?.p256dh,
+                auth: web_push?.auth,
+              },
             },
-          },
-          JSON.stringify({
-            title,
-            body,
-          })
-        )
-        .catch((err) => console.log(err));
+            JSON.stringify({
+              title,
+              body,
+            })
+          )
+          .catch((err) => console.log(err));
+        pushedEndpoints.push(web_push?.endpoint);
+      }
     });
   } catch (err) {
     console.log(err);
