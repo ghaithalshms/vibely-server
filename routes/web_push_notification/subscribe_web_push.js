@@ -18,8 +18,6 @@ const SubscribeWebPush = async (req, res) => {
 
   const tokenUsername = await checkToken(token);
 
-  console.log(tokenUsername, browserID, pushSubscription);
-
   if (tokenUsername === false) {
     if (!res.headersSent) res.status(401).json("wrong token");
     return;
