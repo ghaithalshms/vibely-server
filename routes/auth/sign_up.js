@@ -2,10 +2,11 @@ const FuncIsValidUsername = require("../../func/is_valid_username");
 
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
-const _pool = require("../../pg_pool");
+const pool = require("../../pg_pool");
 
 const signUp = async (req, res) => {
   const { username, firstName, password, email } = req.body;
+  const client = await pool.connect().catch((err) => console.log(err));
 
   try {
     if (!(username && password && firstName && password && email)) {
@@ -17,12 +18,12 @@ const signUp = async (req, res) => {
 
     if (usernameVerified && firstName && password && email) {
       if (FuncIsValidUsername(usernameVerified)) {
-        const usernameQuery = await _pool.query(
+        const usernameQuery = await client.query(
           "SELECT username FROM user_tbl WHERE username =$1",
           [usernameVerified]
         );
         if (usernameQuery.rows.length === 0) {
-          await _pool.query(
+          await client.query(
             "INSERT INTO user_tbl (username, password, email, first_name, created_date)" +
               "values ($1, $2, $3, $4, $5)",
             [
@@ -60,6 +61,8 @@ const signUp = async (req, res) => {
     }
   } catch (err) {
     if (!res.headersSent) res.status(500).json(err);
+  } finally {
+    client?.release();
   }
 };
 

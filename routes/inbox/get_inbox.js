@@ -1,9 +1,10 @@
 const checkToken = require("../../func/check_token");
-const _pool = require("../../pg_pool");
+const pool = require("../../pg_pool");
 require("dotenv").config();
 
 const GetInbox = async (req, res, connectedUsers) => {
   const { token } = req.query;
+  const client = await pool.connect().catch((err) => console.log(err));
 
   try {
     if (!token) {
@@ -16,7 +17,7 @@ const GetInbox = async (req, res, connectedUsers) => {
       return;
     }
 
-    const inboxUsersArray = await _pool.query(
+    const inboxUsersArray = await client.query(
       `SELECT 
     u.username,
     u.first_name,
@@ -77,6 +78,8 @@ ORDER BY m.sent_date DESC;
     if (!res.headersSent) res.send(inboxList);
   } catch (error) {
     if (!res.headersSent) res.status(400).json(error.message);
+  } finally {
+    client?.release();
   }
 };
 

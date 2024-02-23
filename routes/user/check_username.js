@@ -1,8 +1,9 @@
 const funcIsValidUsername = require("../../func/is_valid_username");
-const _pool = require("../../pg_pool");
+const pool = require("../../pg_pool");
 
 const checkUsername = async (req, res) => {
   const { username } = req.body;
+  const client = await pool.connect().catch((err) => console.log(err));
 
   try {
     if (!username) {
@@ -16,7 +17,7 @@ const checkUsername = async (req, res) => {
       return;
     }
 
-    const result = await _pool.query(
+    const result = await client.query(
       `SELECT username FROM user_tbl WHERE username = $1`,
       [username]
     );
@@ -28,6 +29,8 @@ const checkUsername = async (req, res) => {
   } catch (err) {
     console.log("unexpected error : ", err);
     res.status(500).json(err);
+  } finally {
+    client?.release();
   }
 };
 

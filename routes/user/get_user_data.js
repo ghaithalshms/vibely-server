@@ -1,9 +1,9 @@
-const _pool = require("../../pg_pool");
-
+const pool = require("../../pg_pool");
 require("dotenv").config();
 
 const GetUserData = async (req, res, connectedUsers) => {
   const { username, userSigned } = req.query;
+  const client = await pool.connect().catch((err) => console.log(err));
 
   try {
     if (!(username && userSigned)) {
@@ -11,7 +11,7 @@ const GetUserData = async (req, res, connectedUsers) => {
       return;
     }
 
-    const dataQuery = await _pool.query(
+    const dataQuery = await client.query(
       `SELECT username, first_name, last_name, post_count, follower_count, 
       following_count, biography, link, privacity, verified, admin, 
       follow_id, req_id, last_seen
@@ -31,7 +31,6 @@ WHERE u.username = $2`,
         followerCount: dataQuery.rows[0].follower_count ?? 0,
         followingCount: dataQuery.rows[0].following_count ?? 0,
         biography: dataQuery.rows[0].biography ?? "",
-        picture: null,
         link: dataQuery.rows[0].link ?? "",
         privacity: dataQuery.rows[0].privacity ?? false,
         isFollowing: dataQuery.rows[0].follow_id > 0,
@@ -49,6 +48,8 @@ WHERE u.username = $2`,
   } catch (err) {
     console.error("unexpected error : ", err);
     res.status(500).json(err);
+  } finally {
+    client?.release();
   }
 };
 

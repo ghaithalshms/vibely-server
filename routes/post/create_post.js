@@ -1,5 +1,5 @@
 const checkToken = require("../../func/check_token");
-const _pool = require("../../pg_pool");
+const pool = require("../../pg_pool");
 
 const CreatePost = async (req, res) => {
   const file = req.file;
@@ -8,6 +8,7 @@ const CreatePost = async (req, res) => {
   const token = req.body.token;
   const description = req.body.description;
 
+  const client = await pool.connect().catch((err) => console.log(err));
   try {
     if (!(token && (file || description))) {
       res.status(400).json("data missing");
@@ -19,7 +20,7 @@ const CreatePost = async (req, res) => {
       if (!res.headersSent) res.status(401).json("wrong token");
       return;
     }
-    await _pool
+    await client
       .connect()
       .then()
       .catch(() => {
@@ -29,12 +30,12 @@ const CreatePost = async (req, res) => {
 
     // DEFINITION OF FUNCTIONS
     const handlePost = async () => {
-      await _pool.query(
+      await client.query(
         `INSERT INTO post_tbl (posted_user, description, post_date, file, file_type) 
           VALUES ($1,$2,$3, $4, $5)`,
         [tokenUsername, description, new Date().toISOString(), buffer, fileType]
       );
-      await _pool.query(
+      await client.query(
         `UPDATE user_tbl SET post_count = post_count+1 WHERE username =$1`,
         [tokenUsername]
       );
@@ -46,6 +47,8 @@ const CreatePost = async (req, res) => {
   } catch (err) {
     console.log("unexpected error : ", err);
     res.status(500).json(err);
+  } finally {
+    client?.release();
   }
 };
 

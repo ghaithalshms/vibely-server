@@ -1,11 +1,12 @@
 require("dotenv").config();
 
 const jwt = require("jsonwebtoken");
-const _pool = require("../pg_pool");
+const pool = require("../pg_pool");
 
 // !!!!!!!!!!! USE await !!!!!!!!!!!!!!!!!!!!!!!!
 
 async function checkToken(token) {
+  const client = await pool.connect().catch((err) => console.log(err));
   try {
     if (!token) return false;
 
@@ -14,7 +15,7 @@ async function checkToken(token) {
       tokenVersion: jwt.verify(token, process.env.JWT_SECRET_KEY).tokenVersion,
     };
 
-    const currentTokenVersionQuery = await _pool.query(
+    const currentTokenVersionQuery = await client.query(
       `SELECT token_version FROM user_tbl WHERE username=$1`,
       [decoded.username]
     );
@@ -26,6 +27,8 @@ async function checkToken(token) {
     else return false;
   } catch (err) {
     return false;
+  } finally {
+    client?.release();
   }
 }
 

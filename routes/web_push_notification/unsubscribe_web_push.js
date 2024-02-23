@@ -1,11 +1,13 @@
 require("dotenv").config();
 
 const CheckTokenNoDB = require("../../func/check_token_no_db");
-const _pool = require("../../pg_pool");
+const pool = require("../../pg_pool");
 require("dotenv").config();
 
 const UnsubscribeWebPush = async (req, res) => {
   const { token, browserID } = req.body;
+
+  const client = await pool.connect().catch((err) => console.log(err));
 
   if (!(token && browserID)) {
     res.status(400).json("data missing");
@@ -19,7 +21,7 @@ const UnsubscribeWebPush = async (req, res) => {
   }
 
   try {
-    await _pool
+    await client
       .query(
         `DELETE FROM subscribe_web_push WHERE browser_id = $1 AND username = $2`,
         [browserID, tokenUsername]
@@ -32,6 +34,8 @@ const UnsubscribeWebPush = async (req, res) => {
       });
   } catch (err) {
     if (!res.headersSent) res.status(500).json(err);
+  } finally {
+    client?.release();
   }
 };
 

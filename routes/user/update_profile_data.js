@@ -1,9 +1,10 @@
 const checkToken = require("../../func/check_token");
-const _pool = require("../../pg_pool");
+const pool = require("../../pg_pool");
 
 const UpdateProfileData = async (req, res) => {
   const { token, username, firstName, lastName, biography, link, privacity } =
     req.body;
+  const client = await pool.connect().catch((err) => console.log(err));
 
   try {
     if (!(token && username)) {
@@ -19,7 +20,7 @@ const UpdateProfileData = async (req, res) => {
 
     // DEFINITION OF FUNCTIONS
     const handleUpdateProfileData = async () => {
-      await _pool.query(
+      await client.query(
         `UPDATE user_tbl 
         SET username=$1,
         first_name=$2,
@@ -44,6 +45,8 @@ const UpdateProfileData = async (req, res) => {
   } catch (err) {
     console.log("unexpected error : ", err);
     res.status(500).json(err);
+  } finally {
+    client?.release();
   }
 };
 

@@ -1,9 +1,10 @@
 require("dotenv").config();
 const checkToken = require("../../func/check_token");
-const _pool = require("../../pg_pool");
+const pool = require("../../pg_pool");
 
 const GetPostComments = async (req, res) => {
   const { postID, token } = req.query;
+  const client = await pool.connect().catch((err) => console.log(err));
 
   try {
     if (!(postID && token)) {
@@ -17,7 +18,7 @@ const GetPostComments = async (req, res) => {
       return;
     }
 
-    const postCommentsQueryArray = await _pool.query(
+    const postCommentsQueryArray = await client.query(
       `SELECT DISTINCT comment_id, comment, like_count, commented_date,
       username, first_name, picture, admin, verified
       FROM comment_tbl, user_tbl
@@ -27,7 +28,7 @@ const GetPostComments = async (req, res) => {
     );
 
     const handleIsCommentLiked = async (commentID) => {
-      const result = await _pool.query(
+      const result = await client.query(
         `SELECT DISTINCT liked_user FROM comment_like_tbl 
       WHERE liked_user = $1 AND liked_comment = $2`,
         [tokenUsername, commentID]
@@ -56,6 +57,8 @@ const GetPostComments = async (req, res) => {
   } catch (err) {
     console.log("unexpected error : ", err);
     res.status(500).json(err);
+  } finally {
+    client?.release();
   }
 };
 

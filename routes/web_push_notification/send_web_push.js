@@ -1,8 +1,10 @@
 const webpush = require("web-push");
-const _pool = require("../../pg_pool");
+const pool = require("../../pg_pool");
 require("dotenv").config();
 
 const SendWebPush = async (title, body, to) => {
+  const client = await pool.connect().catch((err) => console.log(err));
+
   try {
     webpush.setVapidDetails(
       `mailto:${process.env.ZOHO_EMAIL}`,
@@ -10,7 +12,7 @@ const SendWebPush = async (title, body, to) => {
       process.env.WEB_PUSH_PRIVATE_KEY
     );
 
-    const web_push_query = await _pool.query(
+    const web_push_query = await client.query(
       `SELECT * FROM subscribe_web_push WHERE username = $1 ORDER BY id`,
       [to]
     );
@@ -35,6 +37,8 @@ const SendWebPush = async (title, body, to) => {
     });
   } catch (err) {
     console.log(err);
+  } finally {
+    client?.release();
   }
 };
 

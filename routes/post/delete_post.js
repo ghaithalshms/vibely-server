@@ -1,8 +1,9 @@
 const checkToken = require("../../func/check_token");
-const _pool = require("../../pg_pool");
+const pool = require("../../pg_pool");
 
 const DeletePost = async (req, res) => {
   const { token, postID } = req.body;
+  const client = await pool.connect().catch((err) => console.log(err));
 
   try {
     if (!(token && postID)) {
@@ -14,7 +15,7 @@ const DeletePost = async (req, res) => {
       if (!res.headersSent) res.status(401).json("wrong token");
       return;
     }
-    await _pool
+    await client
       .connect()
       .then()
       .catch(() => {
@@ -22,14 +23,14 @@ const DeletePost = async (req, res) => {
         return;
       });
 
-    const deleteQuery = await _pool.query(
+    const deleteQuery = await client.query(
       `DELETE FROM post_tbl 
       WHERE post_id = $1 AND posted_user = $2
       RETURNING post_id`,
       [postID, tokenUsername]
     );
     if (deleteQuery.rowCount > 0)
-      await _pool.query(
+      await client.query(
         `UPDATE user_tbl 
       SET post_count=post_count-1 
       WHERE username = $1`,
@@ -39,6 +40,8 @@ const DeletePost = async (req, res) => {
   } catch (err) {
     console.log("unexpected error : ", err);
     res.status(500).json(err);
+  } finally {
+    client?.release();
   }
 };
 

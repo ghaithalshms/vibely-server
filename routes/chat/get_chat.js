@@ -1,9 +1,10 @@
 const checkToken = require("../../func/check_token");
-const _pool = require("../../pg_pool");
+const pool = require("../../pg_pool");
 require("dotenv").config();
 
 const GetChat = async (req, res) => {
   const { token, username } = req.query;
+  const client = await pool.connect().catch((err) => console.log(err));
 
   try {
     if (!(token && username)) {
@@ -16,7 +17,7 @@ const GetChat = async (req, res) => {
       return;
     }
 
-    const chatQuery = await _pool.query(
+    const chatQuery = await client?.query(
       `SELECT msg_id, message, msg_from, msg_to, sent_date, seen, file_type FROM message_tbl
     WHERE (msg_to = $1 AND msg_from = $2) 
     OR (msg_to = $2 AND msg_from = $1)
@@ -43,6 +44,8 @@ const GetChat = async (req, res) => {
   } catch (err) {
     console.log("unexpected error : ", err);
     res.status(500).json(err);
+  } finally {
+    client?.release();
   }
 };
 

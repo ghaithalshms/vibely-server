@@ -1,10 +1,11 @@
 const CheckTokenNoDB = require("../../func/check_token_no_db");
-const _pool = require("../../pg_pool");
+const pool = require("../../pg_pool");
 
 require("dotenv").config();
 
 const SetNotificationSeen = async (req, res) => {
   const { token } = req.body;
+  const client = await pool.connect().catch((err) => console.log(err));
 
   try {
     if (!token)
@@ -20,7 +21,7 @@ const SetNotificationSeen = async (req, res) => {
     }
 
     const handleSetNotificationSeen = async () => {
-      await _pool.query(
+      await client.query(
         `UPDATE notification_tbl SET seen=true WHERE noti_to=$1`,
         [tokenUsername]
       );
@@ -30,6 +31,8 @@ const SetNotificationSeen = async (req, res) => {
   } catch (err) {
     console.log("unexpected error : ", err);
     res.status(500).json(err);
+  } finally {
+    client?.release();
   }
 };
 

@@ -1,9 +1,9 @@
-const _pool = require("../../pg_pool");
-
 require("dotenv").config();
+const pool = require("../../pg_pool");
 
 const GetSearchUser = async (req, res) => {
   const { username } = req.query;
+  const client = await pool.connect().catch((err) => console.log(err));
 
   try {
     if (!username) {
@@ -11,8 +11,8 @@ const GetSearchUser = async (req, res) => {
       return;
     }
 
-    const userListQuery = await _pool.query(
-      `SELECT DISTINCT username, first_name,last_name, picture, admin, verified
+    const userListQuery = await client.query(
+      `SELECT DISTINCT username, first_name,last_name, admin, verified
       FROM user_tbl 
       WHERE username ILIKE $1
       OR first_name ILIKE $1
@@ -28,7 +28,6 @@ const GetSearchUser = async (req, res) => {
         username: user.username ?? "",
         firstName: user.first_name ?? "",
         lastName: user.last_name ?? "",
-        picture: user.picture ?? null,
         isVerified: user.verified ?? false,
         isAdmin: user.admin ?? false,
       });
@@ -37,6 +36,8 @@ const GetSearchUser = async (req, res) => {
   } catch (err) {
     console.log("unexpected error : ", err);
     res.status(500).json(err);
+  } finally {
+    client?.release();
   }
 };
 

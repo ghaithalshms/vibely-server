@@ -1,16 +1,18 @@
-const _pool = require("../../pg_pool");
+const pool = require("../../pg_pool");
 require("dotenv").config();
 const fs = require("fs").promises;
 
 const GetUserPicture = async (req, res) => {
   const { username } = req.query;
+  const client = await pool.connect().catch((err) => console.log(err));
+
   try {
     if (!username) {
       res.status(400).json("data missing");
       return;
     }
 
-    const pictureQuery = await _pool.query(
+    const pictureQuery = await client.query(
       "SELECT picture FROM user_tbl WHERE username = $1",
       [username]
     );
@@ -30,6 +32,8 @@ const GetUserPicture = async (req, res) => {
   } catch (err) {
     console.log("unexpected error : ", err);
     res.status(500).json(err);
+  } finally {
+    client?.release();
   }
 };
 

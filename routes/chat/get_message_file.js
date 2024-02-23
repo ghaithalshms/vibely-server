@@ -1,9 +1,11 @@
 require("dotenv").config();
 const checkToken = require("../../func/check_token");
-const _pool = require("../../pg_pool");
+const pool = require("../../pg_pool");
 
 const GetMessageFile = async (req, res) => {
   const { token, messageID } = req.query;
+
+  const client = await pool.connect().catch((err) => console.log(err));
   try {
     if (!(token && messageID)) {
       res.status(400).json("data missing");
@@ -16,7 +18,7 @@ const GetMessageFile = async (req, res) => {
       return;
     }
 
-    const fileQuery = await _pool.query(
+    const fileQuery = await client?.query(
       `SELECT file, file_type FROM message_tbl 
       WHERE msg_id = $1
       AND (msg_from = $2 OR msg_to = $2)
@@ -37,6 +39,8 @@ const GetMessageFile = async (req, res) => {
   } catch (err) {
     console.log("unexpected error : ", err);
     res.status(500).json(err);
+  } finally {
+    client?.release();
   }
 };
 

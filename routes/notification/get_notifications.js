@@ -1,10 +1,10 @@
 require("dotenv").config();
 const checkToken = require("../../func/check_token");
-const _pool = require("../../pg_pool");
+const pool = require("../../pg_pool");
 
 const GetNotifications = async (req, res) => {
   const { token } = req.query;
-
+  const client = await pool.connect().catch((err) => console.log(err));
   try {
     if (!token) {
       res.status(401).json("data missing");
@@ -16,7 +16,7 @@ const GetNotifications = async (req, res) => {
       return;
     }
 
-    await _pool
+    await client
       .connect()
       .then()
       .catch(() => {
@@ -24,7 +24,7 @@ const GetNotifications = async (req, res) => {
         return;
       });
 
-    const notificationQuery = await _pool.query(
+    const notificationQuery = await client.query(
       `SELECT noti_from, noti_to, noti_type, noti_date, 
       username, first_name, verified, admin
       FROM user_tbl, notification_tbl
@@ -58,6 +58,8 @@ const GetNotifications = async (req, res) => {
   } catch (err) {
     console.log("unexpected error : ", err);
     res.status(500).json(err);
+  } finally {
+    client?.release();
   }
 };
 

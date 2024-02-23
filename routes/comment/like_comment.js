@@ -1,8 +1,9 @@
 const checkToken = require("../../func/check_token");
-const _pool = require("../../pg_pool");
+const pool = require("../../pg_pool");
 
 const LikeComment = async (req, res) => {
   const { token, commentID } = req.body;
+  const client = await pool.connect().catch((err) => console.log(err));
 
   try {
     if (!(token && commentID)) {
@@ -16,22 +17,22 @@ const LikeComment = async (req, res) => {
       return;
     }
 
-    const isLikedQuery = await _pool.query(
+    const isLikedQuery = await client.query(
       `SELECT liked_comment from comment_like_tbl WHERE liked_user=$1 AND liked_comment=$2`,
       [tokenUsername, commentID]
     );
 
     // DEFINITION OF FUNCTIONS
     const handleLike = async () => {
-      await _pool.query(
+      await client.query(
         `INSERT INTO comment_like_tbl (liked_comment, liked_user, liked_date) values ($1,$2,$3)`,
         [commentID, tokenUsername, new Date().toISOString()]
       );
-      const commentedUserQuery = await _pool.query(
+      const commentedUserQuery = await client.query(
         `UPDATE comment_tbl set like_count = like_count+1 WHERE comment_id=$1 RETURNING commented_user`,
         [commentID]
       );
-      await _pool.query(
+      await client.query(
         `INSERT INTO notification_tbl (noti_from, noti_to, noti_type, noti_date) values ($1,$2,$3,$4)`,
         [
           tokenUsername,
@@ -44,15 +45,15 @@ const LikeComment = async (req, res) => {
     };
 
     const handleUnlike = async () => {
-      await _pool.query(
+      await client.query(
         `DELETE FROM comment_like_tbl WHERE liked_comment=$1 AND liked_user=$2`,
         [commentID, tokenUsername]
       );
-      const commentedUserQuery = await _pool.query(
+      const commentedUserQuery = await client.query(
         `UPDATE comment_tbl set like_count = like_count-1 WHERE comment_id=$1 RETURNING commented_user`,
         [commentID]
       );
-      await _pool.query(
+      await client.query(
         `DELETE FROM notification_tbl WHERE noti_from = $1 AND noti_to = $2 AND noti_type=$3`,
         [tokenUsername, commentedUserQuery?.rows[0].posted_user, "comment like"]
       );
@@ -71,6 +72,8 @@ const LikeComment = async (req, res) => {
     }
   } catch (err) {
     if (!res.headersSent) res.status(500).json(err);
+  } finally {
+    client?.release();
   }
 };
 

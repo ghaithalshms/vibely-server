@@ -1,9 +1,10 @@
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
-const _pool = require("../../pg_pool");
+const pool = require("../../pg_pool");
 
 const signIn = async (req, res) => {
   const { usernameOrEmail, password } = req.body;
+  const client = await pool.connect().catch((err) => console.log(err));
 
   try {
     if (!(usernameOrEmail && password)) {
@@ -18,7 +19,7 @@ const signIn = async (req, res) => {
     };
 
     if (usernameOrEmailVerified && password) {
-      const tokenResult = await _pool.query(
+      const tokenResult = await client.query(
         `SELECT username, password, token_version FROM user_tbl 
         WHERE username = $1 OR email = $1`,
         [usernameOrEmailVerified]
@@ -54,6 +55,8 @@ const signIn = async (req, res) => {
   } catch (err) {
     console.log("unexpected error : ", err);
     res.status(500).json(err);
+  } finally {
+    client?.release();
   }
 };
 

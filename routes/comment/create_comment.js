@@ -1,9 +1,9 @@
 const checkToken = require("../../func/check_token");
-const _pool = require("../../pg_pool");
+const pool = require("../../pg_pool");
 
 const CreateComment = async (req, res) => {
   const { token, postID, comment } = req.body;
-
+  const client = await pool.connect().catch((err) => console.log(err));
   try {
     if (!(token && postID && comment)) {
       res.status(400).json("data missing");
@@ -18,15 +18,15 @@ const CreateComment = async (req, res) => {
 
     // DEFINITION OF FUNCTIONS
     const handleCreateComment = async () => {
-      await _pool.query(
+      await client.query(
         `INSERT INTO comment_tbl (comment, post, commented_user, commented_date) values ($1,$2,$3,$4)`,
         [comment, postID, tokenUsername, new Date().toISOString()]
       );
-      const postedUserQuery = await _pool.query(
+      const postedUserQuery = await client.query(
         `SELECT posted_user FROM post_tbl WHERE post_id = $1`,
         [postID]
       );
-      await _pool.query(
+      await client.query(
         `INSERT INTO notification_tbl (noti_from, noti_to, noti_type, noti_date) values ($1,$2,$3,$4)`,
         [
           tokenUsername,
@@ -42,6 +42,8 @@ const CreateComment = async (req, res) => {
     handleCreateComment();
   } catch (err) {
     if (!res.headersSent) res.status(500).json(err);
+  } finally {
+    client?.release();
   }
 };
 

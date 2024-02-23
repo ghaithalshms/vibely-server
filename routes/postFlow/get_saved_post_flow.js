@@ -1,9 +1,10 @@
 require("dotenv").config();
 const checkToken = require("../../func/check_token");
-const _pool = require("../../pg_pool");
+const pool = require("../../pg_pool");
 
 const GetSavedPostFlow = async (req, res) => {
   const { token, lastGotPostID } = req.query;
+  const client = await pool.connect().catch((err) => console.log(err));
 
   try {
     if (!lastGotPostID) {
@@ -24,7 +25,7 @@ const GetSavedPostFlow = async (req, res) => {
     const postIdInstructionString =
       lastGotPostID > 0 ? "AND saved_id < $2" : "AND saved_id > $2";
 
-    const likedPostFlowQuery = await _pool.query(
+    const likedPostFlowQuery = await client.query(
       `SELECT DISTINCT saved_id, post_tbl.post_id, description, file_type, like_count, comment_count, post_date,
       username, first_name, post_count, admin, verified
       FROM post_tbl, post_save_tbl, user_tbl 
@@ -39,7 +40,7 @@ const GetSavedPostFlow = async (req, res) => {
     );
 
     const handleIsPostLiked = async (postID) => {
-      const result = await _pool.query(
+      const result = await client.query(
         `SELECT DISTINCT liked_user FROM post_like_tbl
       WHERE liked_user = $1 AND liked_post = $2`,
         [tokenUsername, postID]
@@ -82,6 +83,8 @@ const GetSavedPostFlow = async (req, res) => {
   } catch (err) {
     console.log("unexpected error : ", err);
     res.status(500).json(err);
+  } finally {
+    client?.release();
   }
 };
 

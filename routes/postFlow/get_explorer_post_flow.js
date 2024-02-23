@@ -1,9 +1,10 @@
 require("dotenv").config();
 const checkToken = require("../../func/check_token");
-const _pool = require("../../pg_pool");
+const pool = require("../../pg_pool");
 
 const GetExplorerPostFlow = async (req, res) => {
   const { token, lastGotPostID } = req.query;
+  const client = await pool.connect().catch((err) => console.log(err));
 
   try {
     if (!lastGotPostID) {
@@ -23,7 +24,7 @@ const GetExplorerPostFlow = async (req, res) => {
     const postIdInstructionString =
       lastGotPostID > 0 ? "AND p.post_id < $2" : "AND p.post_id > $2";
 
-    const homePostFlowQuery = await _pool.query(
+    const homePostFlowQuery = await client.query(
       `SELECT DISTINCT p.post_id, p.description, p.file_type, p.like_count, p.comment_count, p.post_date,
 u.username, u.first_name, u.admin, u.verified,
 pl.like_id, ps.saved_id
@@ -78,6 +79,8 @@ LIMIT 4`,
   } catch (err) {
     console.log("unexpected error : ", err);
     res.status(500).json(err);
+  } finally {
+    client?.release();
   }
 };
 

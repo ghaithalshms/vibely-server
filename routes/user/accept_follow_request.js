@@ -1,8 +1,9 @@
 const checkToken = require("../../func/check_token");
-const _pool = require("../../pg_pool");
+const pool = require("../../pg_pool");
 
 const AcceptFollowRequest = async (req, res) => {
   const { token, username } = req.body;
+  const client = await pool.connect().catch((err) => console.log(err));
 
   try {
     if (!(token && username)) {
@@ -18,14 +19,14 @@ const AcceptFollowRequest = async (req, res) => {
 
     // DEFINITION OF FUNCTIONS
     const handleVerifyDeleteFollowRequest = async () => {
-      await _pool.query(
+      await client.query(
         `DELETE FROM notification_tbl 
         WHERE noti_from = $1 
         AND noti_to = $2 
         AND noti_type='request'`,
         [username, tokenUsername]
       );
-      return (userRequested = await _pool.query(
+      return (userRequested = await client.query(
         `DELETE FROM follow_request_tbl 
       WHERE req_follower = $1
       AND req_following = $2
@@ -35,19 +36,19 @@ const AcceptFollowRequest = async (req, res) => {
     };
 
     const handleAcceptFollowRequest = async () => {
-      await _pool.query(
+      await client.query(
         `INSERT INTO follow_tbl (follower, following, following_date) values ($1,$2,$3)`,
         [username, tokenUsername, new Date().toISOString()]
       );
-      await _pool.query(
+      await client.query(
         `UPDATE user_tbl set following_count = following_count+1 WHERE username=$1`,
         [username]
       );
-      await _pool.query(
+      await client.query(
         `UPDATE user_tbl set follower_count = follower_count+1 WHERE username=$1`,
         [tokenUsername]
       );
-      await _pool.query(
+      await client.query(
         `INSERT INTO notification_tbl (noti_from, noti_to, noti_type, noti_date) values ($1,$2,$3,$4)`,
         [username, tokenUsername, "follow", new Date().toISOString()]
       );
@@ -60,6 +61,8 @@ const AcceptFollowRequest = async (req, res) => {
   } catch (err) {
     console.log("unexpected error : ", err);
     res.status(500).json(err);
+  } finally {
+    client?.release();
   }
 };
 

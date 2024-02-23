@@ -1,9 +1,10 @@
-const _pool = require("../../../pg_pool");
+const pool = require("../../../pg_pool");
 
 require("dotenv").config();
 
 const GetPostLikedUsers = async (req, res) => {
   const { postID } = req.query;
+  const client = await pool.connect().catch((err) => console.log(err));
 
   try {
     if (!postID) {
@@ -11,7 +12,7 @@ const GetPostLikedUsers = async (req, res) => {
       return;
     }
 
-    const userListQuery = await _pool.query(
+    const userListQuery = await client.query(
       `SELECT DISTINCT username, first_name,last_name, admin, verified 
       FROM user_tbl, post_like_tbl 
       WHERE username=liked_user AND liked_post=$1`,
@@ -34,6 +35,8 @@ const GetPostLikedUsers = async (req, res) => {
   } catch (err) {
     console.log("unexpected error : ", err);
     res.status(500).json(err);
+  } finally {
+    client?.release();
   }
 };
 

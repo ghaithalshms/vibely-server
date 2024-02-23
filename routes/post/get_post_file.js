@@ -1,9 +1,11 @@
 require("dotenv").config();
 const checkToken = require("../../func/check_token");
-const _pool = require("../../pg_pool");
+const pool = require("../../pg_pool");
 
 const GetPostFile = async (req, res) => {
   const { token, postID } = req.query;
+  const client = await pool.connect().catch((err) => console.log(err));
+
   try {
     if (!(token && postID)) {
       res.status(400).json("data missing");
@@ -16,7 +18,7 @@ const GetPostFile = async (req, res) => {
       return;
     }
 
-    const fileQuery = await _pool.query(
+    const fileQuery = await client.query(
       `SELECT DISTINCT file, file_type 
       FROM post_tbl , user_tbl, follow_tbl
       WHERE (
@@ -42,6 +44,8 @@ const GetPostFile = async (req, res) => {
   } catch (err) {
     console.log("unexpected error : ", err);
     res.status(500).json(err);
+  } finally {
+    client?.release();
   }
 };
 

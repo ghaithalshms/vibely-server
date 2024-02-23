@@ -1,8 +1,9 @@
 const checkToken = require("../../func/check_token");
-const _pool = require("../../pg_pool");
+const pool = require("../../pg_pool");
 
 const DeleteComment = async (req, res) => {
   const { token, commentID } = req.body;
+  const client = await pool.connect().catch((err) => console.log(err));
 
   try {
     if (!(token && commentID)) {
@@ -16,13 +17,15 @@ const DeleteComment = async (req, res) => {
       return;
     }
 
-    await _pool.query(
+    await client.query(
       `DELETE FROM comment_tbl WHERE comment_id = $1 AND commented_user = $2`,
       [commentID, tokenUsername]
     );
     if (!res.headersSent) res.status(200).json("comment deleted");
   } catch (err) {
     if (!res.headersSent) res.status(500).json(err);
+  } finally {
+    client?.release();
   }
 };
 

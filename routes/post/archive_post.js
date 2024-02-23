@@ -1,15 +1,9 @@
 const checkToken = require("../../func/check_token");
-const _pool = require("../../pg_pool");
+const pool = require("../../pg_pool");
 
 const ArchivePost = async (req, res) => {
   const { token, postID } = req.body;
-  const client = new Client({
-    connectionString: process.env.DATABASE_STRING,
-    connectionTimeoutMillis: 5000,
-  });
-  client.on("error", (err) => {
-    console.log("postgres erR:", err);
-  });
+  const client = await pool.connect().catch((err) => console.log(err));
 
   try {
     if (!(token && postID)) {
@@ -22,7 +16,7 @@ const ArchivePost = async (req, res) => {
       if (!res.headersSent) res.status(401).json("wrong token");
       return;
     }
-    await _pool
+    await client
       .connect()
       .then()
       .catch(() => {
@@ -30,7 +24,7 @@ const ArchivePost = async (req, res) => {
         return;
       });
 
-    const archiveQuery = await _pool.query(
+    const archiveQuery = await client.query(
       `UPDATE post_tbl 
       SET archived=true 
       WHERE post_id = $1 AND posted_user = $2
@@ -39,7 +33,7 @@ const ArchivePost = async (req, res) => {
     );
 
     if (archiveQuery.rowCount > 0)
-      await _pool.query(
+      await client.query(
         `UPDATE user_tbl 
       SET post_count=post_count-1 
       WHERE username = $1`,
@@ -49,6 +43,8 @@ const ArchivePost = async (req, res) => {
   } catch (err) {
     console.log("unexpected error : ", err);
     res.status(500).json(err);
+  } finally {
+    client?.release();
   }
 };
 

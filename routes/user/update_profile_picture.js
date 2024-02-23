@@ -1,11 +1,12 @@
 const checkToken = require("../../func/check_token");
-const _pool = require("../../pg_pool");
+const pool = require("../../pg_pool");
 
 const UpdateProfilePicture = async (req, res) => {
   const { token } = req.body;
   const file = req.file;
   const buffer = file ? file.buffer : null;
 
+  const client = await pool.connect().catch((err) => console.log(err));
   try {
     if (!token) {
       res.status(401).json("data missing");
@@ -20,7 +21,7 @@ const UpdateProfilePicture = async (req, res) => {
 
     // DEFINITION OF FUNCTIONS
     const handleUpdateProfilePicture = async () => {
-      await _pool.query(
+      await client.query(
         `UPDATE user_tbl 
         SET picture=$1
         WHERE username=$2`,
@@ -32,6 +33,8 @@ const UpdateProfilePicture = async (req, res) => {
   } catch (err) {
     console.log("unexpected error : ", err);
     res.status(500).json(err);
+  } finally {
+    client?.release();
   }
 };
 
