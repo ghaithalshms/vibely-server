@@ -16,14 +16,6 @@ const GetNotifications = async (req, res) => {
       return;
     }
 
-    await client
-      .connect()
-      .then()
-      .catch(() => {
-        if (!res.headersSent) res.status(502).json("DB connection error");
-        return;
-      });
-
     const notificationQuery = await client.query(
       `SELECT noti_from, noti_to, noti_type, noti_date, 
       username, first_name, verified, admin
@@ -32,7 +24,7 @@ const GetNotifications = async (req, res) => {
       AND noti_from = username
       AND noti_from != $1
       ORDER BY noti_id DESC
-      LIMIT 7`,
+      LIMIT 10`,
       [tokenUsername]
     );
 

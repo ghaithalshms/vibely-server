@@ -7,8 +7,6 @@ require("dotenv").config();
 const SubscribeWebPush = async (req, res) => {
   const { token, pushSubscription, browserID } = req.body;
 
-  console.log(browserID);
-
   let pushSubscriptionJSON = JSON.parse(pushSubscription);
 
   const client = await pool.connect().catch((err) => console.log(err));
@@ -19,6 +17,9 @@ const SubscribeWebPush = async (req, res) => {
   }
 
   const tokenUsername = await checkToken(token);
+
+  console.log(tokenUsername, browserID, pushSubscription);
+
   if (tokenUsername === false) {
     if (!res.headersSent) res.status(401).json("wrong token");
     return;
