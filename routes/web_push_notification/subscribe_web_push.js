@@ -7,6 +7,8 @@ require("dotenv").config();
 const SubscribeWebPush = async (req, res) => {
   const { token, pushSubscription, browserID } = req.body;
 
+  console.log(browserID);
+
   let pushSubscriptionJSON = JSON.parse(pushSubscription);
 
   const client = await pool.connect().catch((err) => console.log(err));
