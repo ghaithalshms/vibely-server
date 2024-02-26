@@ -8,7 +8,7 @@ const sendMessageSocket = (socket, connectedUsers) => {
       body = messageData.message || `Sent you a ${messageData.fileType}`,
       to = messageData.to;
 
-    SendWebPush(title, body, to);
+    if (!userSocketID) SendWebPush(title, body, to);
   });
 };
 module.exports = sendMessageSocket;

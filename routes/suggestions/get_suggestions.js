@@ -17,8 +17,11 @@ const GetSuggestions = async (req, res, connectedUsers) => {
       return;
     }
 
-    const suggestionsArray = await client.query(
-      `SELECT u.username, u.first_name, u.last_name, u.admin, u.verified
+    let suggestionUsersList = [];
+
+    await client
+      .query(
+        `SELECT u.username, u.first_name, u.last_name, u.admin, u.verified
         FROM user_tbl u
         WHERE u.username IN (
             SELECT following 
@@ -42,21 +45,49 @@ const GetSuggestions = async (req, res, connectedUsers) => {
 		AND u.username != $1
     ORDER BY last_seen DESC
     LIMIT 5`,
-      [tokenUsername]
-    );
+        [tokenUsername]
+      )
+      .then((data) => (suggestionUsersList = data.rows))
+      .catch((err) => console.log("suggestionUsersList eRR : ", err));
+    if (suggestionUsersList.length < 4)
+      await client
+        .query(
+          `SELECT u.username, u.first_name, u.last_name, u.admin, u.verified
+        FROM user_tbl u
+        WHERE u.username NOT IN (
+			SELECT following 
+			FROM follow_tbl 
+			WHERE follower = $1
+		)
+		AND u.username NOT IN (
+			SELECT req_following 
+			FROM follow_request_tbl 
+			WHERE req_follower = $1
+		)
+		AND u.username != $1
+    ORDER BY last_seen DESC
+    LIMIT 5`,
+          [tokenUsername]
+        )
+        .then(
+          (data) =>
+            (suggestionUsersList = [...suggestionUsersList, ...data.rows])
+        )
+        .catch((err) => console.log("suggestionUsersList eRR : ", err));
 
-    let suggestionUsersList = [];
+    let suggestionUsersListToSend = [];
 
-    for (const inbox of suggestionsArray.rows) {
-      suggestionUsersList.push({
-        username: inbox.username ?? "",
-        firstName: inbox.first_name ?? "",
-        lastName: inbox.last_name ?? "",
-        isVerified: inbox.verified ?? false,
-        isAdmin: inbox.admin ?? false,
+    for (const suggestionUser of suggestionUsersList) {
+      suggestionUsersListToSend.push({
+        username: suggestionUser.username ?? "",
+        firstName: suggestionUser.first_name ?? "",
+        lastName: suggestionUser.last_name ?? "",
+        isVerified: suggestionUser.verified ?? false,
+        isAdmin: suggestionUser.admin ?? false,
       });
     }
-    if (!res.headersSent) res.send(suggestionUsersList);
+
+    if (!res.headersSent) res.send(suggestionUsersListToSend);
   } catch (error) {
     if (!res.headersSent) res.status(400).json(error.message);
   } finally {
