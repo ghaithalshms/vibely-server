@@ -9,16 +9,10 @@ const UnsubscribeWebPush = async (req, res) => {
 
   const client = await pool.connect().catch((err) => console.log(err));
 
-  if (!(token && browserID)) {
-    res.status(400).json("data missing");
-    return;
-  }
+  if (!(token && browserID)) return;
 
   const tokenUsername = await CheckTokenNoDB(token);
-  if (tokenUsername === false) {
-    if (!res.headersSent) res.status(401).json("wrong token");
-    return;
-  }
+  if (tokenUsername === false) return;
 
   try {
     await client
