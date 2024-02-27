@@ -25,10 +25,14 @@ LEFT JOIN follow_request_tbl fr ON u.username = fr.req_following AND fr.req_foll
     let userList = [];
 
     for (const user of userListQuery.rows) {
+      const isFollowing = user.following ? true : false;
+      const isFollowRequested = user.req_following ? true : false;
       userList.push({
         username: user.username ?? "",
         firstName: user.first_name ?? "",
         lastName: user.last_name ?? "",
+        isFollowing,
+        isFollowRequested,
         isVerified: user.verified ?? false,
         isAdmin: user.admin ?? false,
       });

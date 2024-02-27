@@ -23,8 +23,8 @@ const GetUserFollowers = async (req, res) => {
     let userList = [];
 
     for (const user of userListQuery.rows) {
-      const isFollowing = user.following;
-      const isFollowRequested = user.req_following;
+      const isFollowing = user.following ? true : false;
+      const isFollowRequested = user.req_following ? true : false;
       userList.push({
         username: user.username,
         firstName: user.first_name ?? "",

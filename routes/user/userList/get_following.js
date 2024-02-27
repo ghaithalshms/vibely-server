@@ -11,19 +11,25 @@ const GetUserFollowing = async (req, res) => {
       return;
     }
     const userListQuery = await client.query(
-      `SELECT DISTINCT username, first_name, last_name, admin, verified, last_seen FROM user_tbl, follow_tbl WHERE username=following AND follower=$1`,
+      `SELECT DISTINCT u.username, u.first_name, u.last_name, u.admin, u.verified, f2.following, fr.req_following
+      FROM user_tbl u
+      JOIN follow_tbl f1 ON u.username = f1.following AND f1.follower = $1
+      LEFT JOIN follow_tbl f2 ON u.username = f2.following AND f2.follower = $1
+      LEFT JOIN follow_request_tbl fr ON u.username = fr.req_following AND fr.req_follower = $1`,
       [username]
     );
 
     let userList = [];
 
     for (const user of userListQuery.rows) {
+      const isFollowing = user.following ? true : false;
+      const isFollowRequested = user.req_following ? true : false;
       userList.push({
         username: user.username ?? "",
         firstName: user.first_name ?? "",
         lastName: user.last_name ?? "",
-        isFollowing: true,
-        isFollowRequested: false,
+        isFollowing,
+        isFollowRequested,
         isVerified: user.verified ?? false,
         isAdmin: user.admin ?? false,
         lastSeen: user.last_seen,
