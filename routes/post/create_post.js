@@ -20,13 +20,6 @@ const CreatePost = async (req, res) => {
       if (!res.headersSent) res.status(401).json("wrong token");
       return;
     }
-    await client
-      .connect()
-      .then()
-      .catch(() => {
-        if (!res.headersSent) res.status(502).json("DB connection error");
-        return;
-      });
 
     // DEFINITION OF FUNCTIONS
     const handlePost = async () => {

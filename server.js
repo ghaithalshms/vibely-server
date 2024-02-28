@@ -1,10 +1,13 @@
+require("dotenv").config();
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-require("dotenv").config();
 const axios = require("axios");
+const multer = require("multer");
+
+const spotifyApi = require("./spotify_listening/spotify_api");
 
 const { postLink, getLink, deleteLink, updateLink } = require("./API_LINK");
 
@@ -35,7 +38,7 @@ const GetUserData = require("./routes/user/get_user_data");
 const Follow = require("./routes/user/follow");
 const GetFollowers = require("./routes/user/userList/get_followers");
 const GetFollowing = require("./routes/user/userList/get_following");
-const GetUserPostFlow = require("./routes/postFlow/get_user_post_flow");
+const GetUserPostFlow = require("./routes/post_flow/get_user_post_flow");
 const LikePost = require("./routes/post/like_post");
 const SavePost = require("./routes/post/save_post");
 const GetPostComments = require("./routes/post/get_post_comments");
@@ -45,15 +48,14 @@ const DeleteComment = require("./routes/comment/delete_comment");
 const GetPostLikedUsers = require("./routes/post/userList/get_post_liked_users");
 const DeletePost = require("./routes/post/delete_post");
 const ArchivePost = require("./routes/post/archive_post");
-const GetHomePostFlow = require("./routes/postFlow/get_home_post_flow");
-const GetExplorerPostFlow = require("./routes/postFlow/get_explorer_post_flow");
+const GetHomePostFlow = require("./routes/post_flow/get_home_post_flow");
+const GetExplorerPostFlow = require("./routes/post_flow/get_explorer_post_flow");
 const GetUserPicture = require("./routes/user/get_user_picture");
 const CreatePost = require("./routes/post/create_post");
-const multer = require("multer");
 const GetSearchUser = require("./routes/search/get_search_user");
-const GetLikedPostFlow = require("./routes/postFlow/get_liked_post_flow");
-const GetSavedPostFlow = require("./routes/postFlow/get_saved_post_flow");
-const GetArchivedPostFlow = require("./routes/postFlow/get_archived_post_flow");
+const GetLikedPostFlow = require("./routes/post_flow/get_liked_post_flow");
+const GetSavedPostFlow = require("./routes/post_flow/get_saved_post_flow");
+const GetArchivedPostFlow = require("./routes/post_flow/get_archived_post_flow");
 const GetNotifications = require("./routes/notification/get_notifications");
 const AcceptFollowRequest = require("./routes/user/accept_follow_request");
 const UpdateProfileData = require("./routes/user/update_profile_data");
@@ -70,6 +72,10 @@ const GetPostFile = require("./routes/post/get_post_file");
 const GetSuggestions = require("./routes/suggestions/get_suggestions");
 const UnsubscribeWebPush = require("./routes/web_push_notification/unsubscribe_web_push");
 const GetMessageFile = require("./routes/chat/get_message_file");
+const SpotifyLogin = require("./spotify_listening/spotify_login");
+const SpotifyPlay = require("./spotify_listening/spotify_play");
+const SpotifySearch = require("./spotify_listening/spotify_search");
+const SpotifyCallback = require("./spotify_listening/spotify_callback");
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -130,6 +136,15 @@ app.get(getLink.getChat, GetChat);
 app.get(getLink.getMessageFile, GetMessageFile);
 // SUGGESTIONS
 app.get(getLink.getSuggestions, GetSuggestions);
+// SPOTIFY API
+app.get(getLink.spotifyLogin, (req, res) => SpotifyLogin(req, res, spotifyApi));
+app.get(getLink.spotifyCallback, (req, res) =>
+  SpotifyCallback(req, res, spotifyApi)
+);
+app.get(getLink.spotifySearch, (req, res) =>
+  SpotifySearch(req, res, spotifyApi)
+);
+app.get(getLink.spotifyPlay, (req, res) => SpotifyPlay(req, res, spotifyApi));
 
 // *********** DELETE ***********
 // POST

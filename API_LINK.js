@@ -49,6 +49,11 @@ const getLink = {
   getMessageFile: `/api/chat/message-file`,
   // SUGGESTIONS
   getSuggestions: `/api/suggestions`,
+  // SPOTIFY API
+  spotifyLogin: "/spotify-login",
+  spotifyCallback: "/spotify-callback",
+  spotifySearch: "/spotify-search",
+  spotifyPlay: "/spotify-play",
 };
 
 const deleteLink = {
