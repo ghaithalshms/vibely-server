@@ -22,11 +22,14 @@ const GetMessagesCount = async (req, res) => {
 
     const handleGetMessagesCount = async () => {
       const countQuery = await client.query(
-        `SELECT COUNT(seen) FROM message_tbl WHERE msg_to=$1 AND seen=false
+        `SELECT COUNT(DISTINCT msg_from) AS unseen_count
+        FROM message_tbl
+        WHERE msg_to = $1 AND seen = false;
+
 `,
         [tokenUsername]
       );
-      if (!res.headersSent) res.send(countQuery.rows[0].count);
+      if (!res.headersSent) res.send(countQuery.rows[0].unseen_count);
     };
     handleGetMessagesCount();
   } catch (err) {
