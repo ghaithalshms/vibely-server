@@ -55,6 +55,15 @@ const GetSuggestions = async (req, res, connectedUsers) => {
           `SELECT u.username, u.first_name, u.last_name, u.admin, u.verified
         FROM user_tbl u
         WHERE u.username NOT IN (
+            SELECT following 
+            FROM follow_tbl 
+            WHERE follower IN (
+                SELECT following 
+                FROM follow_tbl 
+                WHERE follower = $1
+            )
+        ) 
+		AND u.username NOT IN (
 			SELECT following 
 			FROM follow_tbl 
 			WHERE follower = $1
