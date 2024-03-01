@@ -25,7 +25,7 @@ const SendMessageToDB = async (req, res) => {
     const handleSendMessageToDB = async () => {
       const idQuery = await client.query(
         `INSERT INTO message_tbl (msg_from, msg_to, message, sent_date, file, file_type) 
-      VALUES ($1, $2, $3, $4, $5, $6) RETURNING msg_id as id, file`,
+      VALUES ($1, $2, $3, $4, $5, $6) RETURNING msg_id as id`,
         [
           tokenUsername,
           username,
