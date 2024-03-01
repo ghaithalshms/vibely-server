@@ -44,12 +44,12 @@ const GetSuggestions = async (req, res, connectedUsers) => {
 		)
 		AND u.username != $1
     ORDER BY last_seen DESC
-    LIMIT 5`,
+    LIMIT 6`,
         [tokenUsername]
       )
       .then((data) => (suggestionUsersList = data.rows))
       .catch((err) => console.log("suggestionUsersList eRR : ", err));
-    if (suggestionUsersList.length < 4)
+    if (suggestionUsersList.length < 6)
       await client
         .query(
           `SELECT u.username, u.first_name, u.last_name, u.admin, u.verified
@@ -75,8 +75,8 @@ const GetSuggestions = async (req, res, connectedUsers) => {
 		)
 		AND u.username != $1
     ORDER BY last_seen DESC
-    LIMIT 5`,
-          [tokenUsername]
+    LIMIT $2`,
+          [tokenUsername, 6 - suggestionUsersList.length]
         )
         .then(
           (data) =>
