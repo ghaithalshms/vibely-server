@@ -1,13 +1,20 @@
 const pool = require("../../pg_pool");
+const CheckTokenNoDB = require("../../func/check_token_no_db");
 require("dotenv").config();
 
 const GetUserData = async (req, res, connectedUsers) => {
-  const { username, userSigned } = req.query;
+  const { username, token } = req.query;
   const client = await pool.connect().catch((err) => console.log(err));
 
   try {
-    if (!(username && userSigned)) {
+    if (!(username && token)) {
       res.status(400).json("data missing");
+      return;
+    }
+
+    const tokenUsername = await CheckTokenNoDB(token);
+    if (tokenUsername === false) {
+      if (!res.headersSent) res.status(401).json("wrong token");
       return;
     }
 
@@ -19,12 +26,18 @@ FROM user_tbl u
 LEFT JOIN follow_tbl f ON f.follower = $1 AND f.following = u.username
 LEFT JOIN follow_request_tbl fr ON fr.req_follower = $2 AND fr.req_following = u.username
 WHERE u.username = $2`,
-      [userSigned, username]
+      [tokenUsername, username]
     );
+
+    if (tokenUsername !== username)
+      await client.query(
+        `INSERT INTO profile_views_tbl (viewer_user, viewed_user, viewed_time) VALUES ($1,$2,$3)`,
+        [tokenUsername, username, new Date().toISOString()]
+      );
 
     if (dataQuery.rows.length > 0) {
       const userData = {
-        username: dataQuery.rows[0].username ?? "",
+        username: dataQuery.rows[0].username,
         firstName: dataQuery.rows[0].first_name ?? "",
         lastName: dataQuery.rows[0].last_name ?? "",
         postCount: dataQuery.rows[0].post_count ?? 0,
