@@ -35,10 +35,7 @@ const GetPostFile = async (req, res) => {
     const fileType = fileQuery.rows[0].file_type;
 
     if (!res.headersSent) {
-      res.setHeader(
-        "Content-Type",
-        fileType === "picture" ? "image/png" : "video/mp4"
-      );
+      res.setHeader("Content-Type", fileType);
       res.send(file);
     }
   } catch (err) {
