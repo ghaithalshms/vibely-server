@@ -14,10 +14,10 @@ const { postLink, getLink, deleteLink, updateLink } = require("./API_LINK");
 const app = express();
 app.use(cors());
 
-app.use(bodyParser.json({ limit: "2mb" }));
-app.use(bodyParser.urlencoded({ limit: "2mb", extended: true }));
-app.use(express.json({ limit: "2mb" }));
-app.use(express.urlencoded({ extended: true, limit: "2mb" }));
+app.use(bodyParser.json({ limit: "3mb" }));
+app.use(bodyParser.urlencoded({ limit: "3mb", extended: true }));
+app.use(express.json({ limit: "3mb" }));
+app.use(express.urlencoded({ extended: true, limit: "3mb" }));
 
 const server = http.createServer(app);
 
