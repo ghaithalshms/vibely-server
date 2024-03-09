@@ -16,13 +16,6 @@ const SavePost = async (req, res) => {
       if (!res.headersSent) res.status(401).json("wrong token");
       return;
     }
-    await client
-      .connect()
-      .then()
-      .catch(() => {
-        if (!res.headersSent) res.status(502).json("DB connection error");
-        return;
-      });
 
     const isSavedQuery = await client.query(
       `SELECT DISTINCT post_id from post_save_tbl WHERE saved_user=$1 AND post_id=$2`,

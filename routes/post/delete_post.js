@@ -15,13 +15,6 @@ const DeletePost = async (req, res) => {
       if (!res.headersSent) res.status(401).json("wrong token");
       return;
     }
-    await client
-      .connect()
-      .then()
-      .catch(() => {
-        if (!res.headersSent) res.status(502).json("DB connection error");
-        return;
-      });
 
     const deleteQuery = await client.query(
       `DELETE FROM post_tbl 
