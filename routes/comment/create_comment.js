@@ -23,7 +23,7 @@ const CreateComment = async (req, res) => {
         [comment, postID, tokenUsername, new Date().toISOString()]
       );
       const postedUserQuery = await client.query(
-        `SELECT posted_user FROM post_tbl WHERE post_id = $1`,
+        `UPDATE post_tbl set comment_count=comment_count+1 WHERE post_id = $1 RETURNING posted_user`,
         [postID]
       );
       await client.query(

@@ -21,6 +21,11 @@ const DeleteComment = async (req, res) => {
       `DELETE FROM comment_tbl WHERE comment_id = $1 AND commented_user = $2`,
       [commentID, tokenUsername]
     );
+    await client.query(
+      `UPDATE post_tbl set comment_count=comment_count-1 WHERE post_id = $1`,
+      [postID]
+    );
+
     if (!res.headersSent) res.status(200).json("comment deleted");
   } catch (err) {
     if (!res.headersSent) res.status(500).json(err);
