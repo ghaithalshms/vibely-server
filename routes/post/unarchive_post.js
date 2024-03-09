@@ -16,13 +16,6 @@ const UnarchivePost = async (req, res) => {
       if (!res.headersSent) res.status(401).json("wrong token");
       return;
     }
-    await client
-      .connect()
-      .then()
-      .catch(() => {
-        if (!res.headersSent) res.status(502).json("DB connection error");
-        return;
-      });
 
     const unarchiveQuery = await client.query(
       `UPDATE post_tbl 
