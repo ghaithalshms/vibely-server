@@ -48,6 +48,7 @@ const DeleteComment = require("./routes/comment/delete_comment");
 const GetPostLikedUsers = require("./routes/post/userList/get_post_liked_users");
 const DeletePost = require("./routes/post/delete_post");
 const ArchivePost = require("./routes/post/archive_post");
+const UnarchivePost = require("./routes/post/unarchive_post");
 const GetHomePostFlow = require("./routes/post_flow/get_home_post_flow");
 const GetExplorerPostFlow = require("./routes/post_flow/get_explorer_post_flow");
 const GetUserPicture = require("./routes/user/get_user_picture");
@@ -156,6 +157,7 @@ app.post(deleteLink.unsubscribeWebPush, UnsubscribeWebPush);
 // *********** UPDATE ***********
 // POST
 app.post(updateLink.archivePost, ArchivePost);
+app.post(updateLink.unarchivePost, UnarchivePost);
 app.post(updateLink.updateProfileData, UpdateProfileData);
 app.post(
   updateLink.updateProfilePicture,
