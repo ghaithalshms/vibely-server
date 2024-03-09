@@ -62,7 +62,7 @@ LIMIT 4`,
     for (const post of userPostFlowQuery.rows) {
       postFlowArray.push({
         postID: post.post_id,
-        postedUser: post.posted_user,
+        username: post.posted_user,
         description: post.description,
         fileType: post.file_type,
         likeCount: post.like_count,
