@@ -72,6 +72,7 @@ const GetArchivedPostFlow = async (req, res) => {
           postDate: post.post_date,
           isLiked,
           isSaved,
+          isArchived: true,
         },
         user: {
           username: post.username,
