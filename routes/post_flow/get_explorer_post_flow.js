@@ -25,7 +25,7 @@ const GetExplorerPostFlow = async (req, res) => {
       lastGotPostID > 0 ? "AND p.post_id < $2" : "AND p.post_id > $2";
 
     const homePostFlowQuery = await client.query(
-      `SELECT DISTINCT p.post_id, p.description, p.file_type, p.like_count, p.comment_count, p.post_date,
+      `SELECT DISTINCT p.post_id, p.description, p.file_type, p.like_count, p.comment_count, p.post_date, p.view_count,
 u.username, u.first_name, u.admin, u.verified,
 pl.like_id, ps.saved_id
 FROM post_tbl p
@@ -58,6 +58,7 @@ LIMIT 4`,
           likeCount: post.like_count,
           commentCount: post.comment_count,
           postDate: post.post_date,
+          viewCount: post.view_count,
           isLiked: post.like_id > 0,
           isSaved: post.saved_id > 0,
         },

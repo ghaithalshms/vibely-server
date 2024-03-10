@@ -24,52 +24,44 @@ const GetLikedPostFlow = async (req, res) => {
     }
 
     const postIdInstructionString =
-      lastGotPostID > 0 ? "AND like_id < $2" : "AND like_id > $2";
+      lastGotPostID > 0 ? "AND pl.like_id < $2" : "AND pl.like_id > $2";
 
     const likedPostFlowQuery = await client.query(
-      `SELECT DISTINCT like_id, post_id, description, file_type, like_count, comment_count, post_date,
-      username, first_name, post_count, admin, verified
-      FROM post_tbl, user_tbl, post_like_tbl 
-      WHERE liked_user = $1
+      `SELECT DISTINCT pl.like_id, p.post_id, p.description, p.file_type, p.like_count, 
+      p.comment_count, p.post_date, p.view_count,
+      u.username, u.first_name, u.post_count, u.admin, u.verified, 
+      ps.saved_id
+      FROM post_tbl p
+      JOIN user_tbl u ON u.username = p.posted_user
+      JOIN post_like_tbl pl ON pl.liked_post = p.post_id AND pl.liked_user = $1 ${postIdInstructionString}
+      LEFT JOIN post_save_tbl ps ON ps.post_id = p.post_id AND ps.saved_user = $1
       AND username = posted_user
-      AND post_id = liked_post
+      AND p.post_id = pl.liked_post
       AND archived = 'false'
-      ${postIdInstructionString}
-      ORDER BY like_id DESC
+      ORDER BY pl.like_id DESC
       LIMIT 4`,
       [tokenUsername, lastGotPostID]
     );
 
-    const handleIsPostSaved = async (postID) => {
-      const result = await client.query(
-        `SELECT DISTINCT saved_user FROM post_save_tbl 
-      WHERE saved_user = $1 AND post_id = $2`,
-        [tokenUsername, postID]
-      );
-      return result.rowCount > 0;
-    };
-
     let postFlowArray = [];
 
     for (const post of likedPostFlowQuery.rows) {
-      const isSaved = await handleIsPostSaved(post.post_id);
       postFlowArray.push({
         post: {
           postID: post.post_id,
           orderID: post.like_id,
           description: post.description,
-          file: null,
           fileType: post.file_type,
           likeCount: post.like_count,
           commentCount: post.comment_count,
           postDate: post.post_date,
+          viewCount: post.view_count,
           isLiked: true,
-          isSaved,
+          isSaved: post.saved_id > 0,
         },
         user: {
           username: post.username,
           firstName: post.first_name,
-          picture: null,
           postCount: post.post_count,
           isAdmin: post.admin,
           isVerified: post.verified,

@@ -23,61 +23,44 @@ const GetArchivedPostFlow = async (req, res) => {
     }
 
     const postIdInstructionString =
-      lastGotPostID > 0 ? "AND post_id < $2" : "AND post_id > $2";
+      lastGotPostID > 0 ? "AND p.post_id < $2" : "AND p.post_id > $2";
 
     const likedPostFlowQuery = await client.query(
-      `SELECT DISTINCT post_id, description, file, file_type, like_count, comment_count, post_date,
-      username, first_name, post_count, user_tbl.picture as user_picture, admin, verified
-      FROM post_tbl, user_tbl
+      `SELECT DISTINCT p.post_id, p.description, p.file_type, p.like_count, p.comment_count, p.post_date, p.view_count,
+      u.username, u.first_name, u.post_count, u.admin, u.verified,
+      pl.like_id, ps.saved_id
+      FROM post_tbl p
+      JOIN user_tbl u ON u.username = p.posted_user
+      LEFT JOIN post_like_tbl pl ON pl.liked_post = p.post_id AND pl.liked_user =$1
+      LEFT JOIN post_save_tbl ps ON ps.post_id = p.post_id AND ps.saved_user = $1
       WHERE posted_user = $1
       AND username = posted_user
       AND archived = 'true'
       ${postIdInstructionString}
-      ORDER BY post_id DESC
+      ORDER BY p.post_id DESC
       LIMIT 4`,
       [tokenUsername, lastGotPostID]
     );
 
-    const handleIsPostLiked = async (postID) => {
-      const result = await client.query(
-        `SELECT DISTINCT liked_user FROM post_like_tbl
-      WHERE liked_user = $1 AND liked_post = $2`,
-        [tokenUsername, postID]
-      );
-      return result.rowCount > 0;
-    };
-
-    const handleIsPostSaved = async (postID) => {
-      const result = await client.query(
-        `SELECT DISTINCT saved_user FROM post_save_tbl
-      WHERE saved_user = $1 AND post_id = $2`,
-        [tokenUsername, postID]
-      );
-      return result.rowCount > 0;
-    };
-
     let postFlowArray = [];
 
     for (const post of likedPostFlowQuery.rows) {
-      const isLiked = await handleIsPostLiked(post.post_id);
-      const isSaved = await handleIsPostSaved(post.post_id);
       postFlowArray.push({
         post: {
           postID: post.post_id,
           description: post.description,
-          file: post.file,
           fileType: post.file_type,
           likeCount: post.like_count,
           commentCount: post.comment_count,
           postDate: post.post_date,
-          isLiked,
-          isSaved,
+          viewCount: post.view_count,
+          isLiked: post.like_id > 0,
+          isSaved: post.saved_id > 0,
           isArchived: true,
         },
         user: {
           username: post.username,
           firstName: post.first_name,
-          picture: post.user_picture,
           postCount: post.post_count,
           isAdmin: post.admin,
           isVerified: post.verified,
