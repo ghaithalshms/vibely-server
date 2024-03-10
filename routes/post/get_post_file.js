@@ -19,20 +19,26 @@ const GetPostFile = async (req, res) => {
     }
 
     const fileQuery = await client.query(
-      `SELECT DISTINCT file, file_type 
-      FROM post_tbl , user_tbl, follow_tbl
+      `SELECT file, file_type, posted_user
+      FROM post_tbl, user_tbl, follow_tbl
       WHERE (
       	(follower=$1 AND posted_user = following)
       	   OR (privacity = false AND username = posted_user)
       	   OR posted_user=$1
       )
-      AND post_id = $2
-`,
+      AND post_id = $2`,
       [tokenUsername, postID]
     );
 
     const file = fileQuery.rows[0].file;
     const fileType = fileQuery.rows[0].file_type;
+    const postedUser = fileQuery.rows[0].posted_user;
+
+    if (tokenUsername !== postedUser)
+      await client.query(
+        `UPDATE post_tbl set view_count = view_count + 1 WHERE post_id = $1`,
+        [postID]
+      );
 
     if (!res.headersSent) {
       res.setHeader("Content-Type", fileType);
