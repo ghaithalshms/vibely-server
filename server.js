@@ -6,7 +6,6 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const axios = require("axios");
 const multer = require("multer");
-
 const spotifyApi = require("./spotify_listening/spotify_api");
 
 const { postLink, getLink, deleteLink, updateLink } = require("./API_LINK");
@@ -77,6 +76,8 @@ const SpotifyLogin = require("./spotify_listening/spotify_login");
 const SpotifyPlay = require("./spotify_listening/spotify_play");
 const SpotifySearch = require("./spotify_listening/spotify_search");
 const SpotifyCallback = require("./spotify_listening/spotify_callback");
+const ForgotPassword = require("./routes/auth/forgot_password");
+const ResetPassword = require("./routes/auth/reset_password");
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -156,6 +157,8 @@ app.post(deleteLink.unsubscribeWebPush, UnsubscribeWebPush);
 
 // *********** UPDATE ***********
 // POST
+app.post(updateLink.forgotPassword, ForgotPassword);
+app.post(updateLink.resetPassword, ResetPassword);
 app.post(updateLink.archivePost, ArchivePost);
 app.post(updateLink.unarchivePost, UnarchivePost);
 app.post(updateLink.updateProfileData, UpdateProfileData);
