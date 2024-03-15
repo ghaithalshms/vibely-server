@@ -1,6 +1,6 @@
+const { GetFileFireBase } = require("../../firebase/file_process");
 const pool = require("../../pg_pool");
 require("dotenv").config();
-const fs = require("fs").promises;
 
 const GetUserPicture = async (req, res) => {
   const { username } = req.query;
@@ -13,20 +13,27 @@ const GetUserPicture = async (req, res) => {
     }
 
     const pictureQuery = await client.query(
-      "SELECT picture FROM user_tbl WHERE username = $1",
+      "SELECT pfp_path FROM user_tbl WHERE username = $1",
       [username]
     );
-    const pfp = pictureQuery.rows[0].picture;
+    const pfpPath = pictureQuery.rows[0].pfp_path;
 
     if (!res.headersSent) {
-      res.setHeader("Content-Type", "image/png");
-      if (pfp) {
-        res.send(pfp);
+      if (pfpPath) {
+        GetFileFireBase(pfpPath)
+          .then((url) => {
+            res.redirect(url);
+          })
+          .catch((err) => {
+            res.redirect(
+              "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg"
+            );
+            console.log(err);
+          });
       } else {
-        const defaultPicture = await fs.readFile(
-          `${__dirname}/default_profile_picture.jpg`
+        res.redirect(
+          "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg"
         );
-        res.send(defaultPicture);
       }
     }
   } catch (err) {

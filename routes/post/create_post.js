@@ -1,12 +1,10 @@
+const { UploadFileFireBase } = require("../../firebase/file_process");
 const checkToken = require("../../func/check_token");
 const pool = require("../../pg_pool");
 
 const CreatePost = async (req, res) => {
   const file = req.file;
-  const fileType = req.body.fileType;
-  const buffer = file ? file.buffer : null;
-  const token = req.body.token;
-  const description = req.body.description;
+  const { fileType, token, description } = req.body;
 
   const client = await pool.connect().catch((err) => console.log(err));
   try {
@@ -21,12 +19,25 @@ const CreatePost = async (req, res) => {
       return;
     }
 
+    const fileUrl = await UploadFileFireBase(file, fileType);
+    if (fileUrl === false) {
+      if (!res.headersSent)
+        res.status(500).json("unexpected error while uploading file");
+      return;
+    }
+
     // DEFINITION OF FUNCTIONS
     const handlePost = async () => {
       await client.query(
-        `INSERT INTO post_tbl (posted_user, description, post_date, file, file_type) 
+        `INSERT INTO post_tbl (posted_user, description, post_date, file_name, file_type) 
           VALUES ($1,$2,$3, $4, $5)`,
-        [tokenUsername, description, new Date().toISOString(), buffer, fileType]
+        [
+          tokenUsername,
+          description,
+          new Date().toISOString(),
+          fileUrl,
+          fileType,
+        ]
       );
       await client.query(
         `UPDATE user_tbl SET post_count = post_count+1 WHERE username =$1`,

@@ -1,4 +1,5 @@
 require("dotenv").config();
+const { GetFileFireBase } = require("../../firebase/file_process");
 const checkToken = require("../../func/check_token");
 const pool = require("../../pg_pool");
 
@@ -19,7 +20,7 @@ const GetPostFile = async (req, res) => {
     }
 
     const fileQuery = await client.query(
-      `SELECT file, file_type, posted_user
+      `SELECT file_path, posted_user
       FROM post_tbl, user_tbl, follow_tbl
       WHERE (
       	(follower=$1 AND posted_user = following)
@@ -30,8 +31,7 @@ const GetPostFile = async (req, res) => {
       [tokenUsername, postID]
     );
 
-    const file = fileQuery.rows[0].file;
-    const fileType = fileQuery.rows[0].file_type;
+    const filePath = fileQuery.rows[0].file_path;
     const postedUser = fileQuery.rows[0].posted_user;
 
     if (tokenUsername !== postedUser)
@@ -41,8 +41,11 @@ const GetPostFile = async (req, res) => {
       );
 
     if (!res.headersSent) {
-      res.setHeader("Content-Type", fileType);
-      res.send(file);
+      GetFileFireBase(filePath)
+        .then((url) => {
+          res.redirect(url);
+        })
+        .catch((err) => console.log(err));
     }
   } catch (err) {
     console.log("unexpected error : ", err);
