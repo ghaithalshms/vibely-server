@@ -1,6 +1,6 @@
 const { v4: uuidv4 } = require("uuid");
 require("dotenv").config();
-const serviceAccount = require("./service_account.json");
+const serviceAccount = require("./service_account.js");
 const admin = require("firebase-admin");
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),

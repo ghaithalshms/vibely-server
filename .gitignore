@@ -1,5 +1,4 @@
 .vscode
-firebase/service_account.json
 postgres_file_to_firebase.js
 # Logs
 logs
