@@ -22,7 +22,7 @@ const SendMessageToDB = async (req, res) => {
     }
 
     const filePath = file
-      ? await UploadFileFireBase(file, fileType, "post")
+      ? await UploadFileFireBase(file, fileType, "chat")
       : null;
     if (filePath === false) {
       if (!res.headersSent)
