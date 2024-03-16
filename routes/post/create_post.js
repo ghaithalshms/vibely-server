@@ -19,8 +19,10 @@ const CreatePost = async (req, res) => {
       return;
     }
 
-    const fileUrl = await UploadFileFireBase(file, fileType);
-    if (fileUrl === false) {
+    const filePath = file
+      ? await UploadFileFireBase(file, fileType, "post")
+      : null;
+    if (filePath === false) {
       if (!res.headersSent)
         res.status(500).json("unexpected error while uploading file");
       return;
@@ -29,13 +31,13 @@ const CreatePost = async (req, res) => {
     // DEFINITION OF FUNCTIONS
     const handlePost = async () => {
       await client.query(
-        `INSERT INTO post_tbl (posted_user, description, post_date, file_name, file_type) 
+        `INSERT INTO post_tbl (posted_user, description, post_date, file_path, file_type) 
           VALUES ($1,$2,$3, $4, $5)`,
         [
           tokenUsername,
           description,
           new Date().toISOString(),
-          fileUrl,
+          filePath,
           fileType,
         ]
       );
