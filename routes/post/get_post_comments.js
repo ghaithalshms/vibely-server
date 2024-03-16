@@ -33,7 +33,6 @@ const GetPostComments = async (req, res) => {
     let postCommentsArray = [];
 
     for (const comment of postCommentsQueryArray.rows) {
-      const isLiked = await handleIsCommentLiked(comment.comment_id);
       postCommentsArray.push({
         commentID: comment.comment_id,
         comment: comment.comment,
@@ -43,7 +42,7 @@ const GetPostComments = async (req, res) => {
         commentDate: comment.commented_date,
         isAdmin: comment.admin,
         isVerified: comment.verified,
-        isLiked,
+        isLiked: comment.like_id > 0,
       });
     }
     if (!res.headersSent) res.send(postCommentsArray);
