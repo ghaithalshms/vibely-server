@@ -40,7 +40,7 @@ const SendMessageToDB = async (req, res) => {
           username,
           message,
           filePath,
-          fileType,
+          fileType || "text/plain",
           new Date().toISOString(),
         ]
       );

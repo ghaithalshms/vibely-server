@@ -37,7 +37,7 @@ const CreatePost = async (req, res) => {
           tokenUsername,
           description,
           new Date().toISOString(),
-          filePath,
+          filePath || "text/plain",
           fileType,
         ]
       );
