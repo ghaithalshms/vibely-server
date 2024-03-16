@@ -5,6 +5,7 @@ const pool = require("../../pg_pool");
 require("dotenv").config();
 
 const SendMessageToDB = async (req, res) => {
+  const file = req.file;
   const { token, username, message, fileType } = req.body;
   const client = await pool.connect().catch((err) => console.log(err));
 
