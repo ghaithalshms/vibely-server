@@ -29,10 +29,7 @@ WHERE u.username = $2`,
       [tokenUsername, username]
     );
 
-    if (
-      dataQuery.rows[0].username &&
-      tokenUsername !== dataQuery.rows[0].username
-    )
+    if (dataQuery.rows.length > 0 && tokenUsername !== username)
       await client.query(
         `INSERT INTO profile_views_tbl (viewer_user, viewed_user, viewed_time) VALUES ($1,$2,$3)`,
         [tokenUsername, username, new Date().toISOString()]
