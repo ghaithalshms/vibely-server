@@ -1,3 +1,4 @@
+const { UploadFileFireBase } = require("../../firebase/file_process");
 const CheckTokenNoDB = require("../../func/check_token_no_db");
 const pool = require("../../pg_pool");
 
@@ -5,8 +6,6 @@ require("dotenv").config();
 
 const SendMessageToDB = async (req, res) => {
   const { token, username, message, fileType } = req.body;
-  const file = req.file;
-  const buffer = file ? file.buffer : null;
   const client = await pool.connect().catch((err) => console.log(err));
 
   try {
@@ -22,17 +21,26 @@ const SendMessageToDB = async (req, res) => {
       return;
     }
 
+    const filePath = file
+      ? await UploadFileFireBase(file, fileType, "post")
+      : null;
+    if (filePath === false) {
+      if (!res.headersSent)
+        res.status(500).json("unexpected error while uploading file");
+      return;
+    }
+
     const handleSendMessageToDB = async () => {
       const idQuery = await client.query(
-        `INSERT INTO message_tbl (msg_from, msg_to, message, sent_date, file, file_type) 
+        `INSERT INTO message_tbl (msg_from, msg_to, message,file_path, file_type,sent_date) 
       VALUES ($1, $2, $3, $4, $5, $6) RETURNING msg_id as id`,
         [
           tokenUsername,
           username,
           message,
-          new Date().toISOString(),
-          buffer,
+          filePath,
           fileType,
+          new Date().toISOString(),
         ]
       );
       if (!res.headersSent) res.status(200).json(idQuery.rows[0]);
