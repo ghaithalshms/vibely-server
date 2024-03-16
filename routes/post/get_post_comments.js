@@ -37,7 +37,7 @@ const GetPostComments = async (req, res) => {
         commentID: comment.comment_id,
         comment: comment.comment,
         username: comment.username,
-        picture: comment.picture,
+        firstName: comment.first_name,
         likeCount: comment.like_count,
         commentDate: comment.commented_date,
         isAdmin: comment.admin,
