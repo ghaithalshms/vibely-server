@@ -19,22 +19,16 @@ const GetPostComments = async (req, res) => {
     }
 
     const postCommentsQueryArray = await client.query(
-      `SELECT DISTINCT comment_id, comment, like_count, commented_date,
-      username, first_name, picture, admin, verified
-      FROM comment_tbl, user_tbl
-      WHERE post=$1 
-      AND username=commented_user`,
-      [postID]
+      `SELECT DISTINCT c.comment_id, c.comment, c.like_count, c.commented_date,
+        u.username, u.first_name, u.admin, u.verified,
+        cl.like_id
+        FROM comment_tbl c
+        JOIN user_tbl u ON u.username = c.commented_user
+        LEFT JOIN comment_like_tbl cl ON cl.liked_user = $2 AND cl.liked_comment = c.comment_id
+        WHERE c.post = $1
+`,
+      [postID, tokenUsername]
     );
-
-    const handleIsCommentLiked = async (commentID) => {
-      const result = await client.query(
-        `SELECT DISTINCT liked_user FROM comment_like_tbl 
-      WHERE liked_user = $1 AND liked_comment = $2`,
-        [tokenUsername, commentID]
-      );
-      return result.rowCount > 0;
-    };
 
     let postCommentsArray = [];
 
@@ -44,7 +38,6 @@ const GetPostComments = async (req, res) => {
         commentID: comment.comment_id,
         comment: comment.comment,
         username: comment.username,
-        firstName: comment.first_name,
         picture: comment.picture,
         likeCount: comment.like_count,
         commentDate: comment.commented_date,
