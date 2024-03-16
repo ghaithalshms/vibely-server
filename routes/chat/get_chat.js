@@ -36,7 +36,7 @@ const GetChat = async (req, res) => {
         from: message.msg_from,
         to: message.msg_to,
         sentDate: message.sent_date,
-        fileType: message.file_type !== "null" ? message.file_type : null,
+        fileType: message.file_type,
         seen: message.seen,
       });
     }
