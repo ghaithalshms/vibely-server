@@ -37,7 +37,7 @@ LEFT JOIN post_save_tbl ps ON ps.post_id = p.post_id AND ps.saved_user = $1
 WHERE archived=false
 ${postIdInstructionString}
 ORDER BY p.post_id desc
-LIMIT 4`,
+LIMIT 3`,
       [tokenUsername, lastGotPostID]
     );
 
@@ -48,7 +48,6 @@ LIMIT 4`,
         post: {
           postID: post.post_id,
           description: post.description,
-          file: null,
           fileType: post.file_type,
           likeCount: post.like_count,
           commentCount: post.comment_count,
@@ -60,7 +59,6 @@ LIMIT 4`,
         user: {
           username: post.username,
           firstName: post.first_name,
-          picture: null,
           postCount: post.post_count,
           isAdmin: post.admin,
           isVerified: post.verified,

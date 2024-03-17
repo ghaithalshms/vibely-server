@@ -39,7 +39,7 @@ const GetLikedPostFlow = async (req, res) => {
       AND p.post_id = pl.liked_post
       AND archived = 'false'
       ORDER BY pl.like_id DESC
-      LIMIT 4`,
+      LIMIT 3`,
       [tokenUsername, lastGotPostID]
     );
 

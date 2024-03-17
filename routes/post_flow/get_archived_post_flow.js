@@ -38,7 +38,7 @@ const GetArchivedPostFlow = async (req, res) => {
       AND archived = 'true'
       ${postIdInstructionString}
       ORDER BY p.post_id DESC
-      LIMIT 4`,
+      LIMIT 3`,
       [tokenUsername, lastGotPostID]
     );
 

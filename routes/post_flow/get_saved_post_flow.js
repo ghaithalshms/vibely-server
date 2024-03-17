@@ -35,7 +35,7 @@ const GetSavedPostFlow = async (req, res) => {
       AND archived = 'false'
       ${postIdInstructionString}
       ORDER BY saved_id DESC
-      LIMIT 4`,
+      LIMIT 3`,
       [tokenUsername, lastGotPostID]
     );
 
@@ -57,7 +57,6 @@ const GetSavedPostFlow = async (req, res) => {
           postID: post.post_id,
           orderID: post.saved_id,
           description: post.description,
-          file: null,
           fileType: post.file_type,
           likeCount: post.like_count,
           commentCount: post.comment_count,
@@ -68,7 +67,6 @@ const GetSavedPostFlow = async (req, res) => {
         user: {
           username: post.username,
           firstName: post.first_name,
-          picture: null,
           postCount: post.post_count,
           isAdmin: post.admin,
           isVerified: post.verified,
