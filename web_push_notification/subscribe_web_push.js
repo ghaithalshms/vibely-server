@@ -1,7 +1,7 @@
 require("dotenv").config();
 
-const checkToken = require("../../func/check_token");
-const pool = require("../../pg_pool");
+const checkToken = require("../func/check_token");
+const pool = require("../pg_pool");
 require("dotenv").config();
 
 const SubscribeWebPush = async (req, res) => {

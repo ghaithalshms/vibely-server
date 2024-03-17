@@ -1,7 +1,7 @@
 require("dotenv").config();
 
-const CheckTokenNoDB = require("../../func/check_token_no_db");
-const pool = require("../../pg_pool");
+const CheckTokenNoDB = require("../func/check_token_no_db");
+const pool = require("../pg_pool");
 require("dotenv").config();
 
 const UnsubscribeWebPush = async (req, res) => {

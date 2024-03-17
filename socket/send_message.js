@@ -1,4 +1,4 @@
-const SendWebPush = require("../routes/web_push_notification/send_web_push");
+const SendWebPush = require("../web_push_notification/send_web_push");
 
 const sendMessageSocket = (socket, connectedUsers) => {
   socket.on("send_message", (messageData) => {

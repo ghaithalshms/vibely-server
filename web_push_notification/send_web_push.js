@@ -1,5 +1,5 @@
 const webpush = require("web-push");
-const pool = require("../../pg_pool");
+const pool = require("../pg_pool");
 require("dotenv").config();
 
 const SendWebPush = async (title, body, to) => {
