@@ -7,6 +7,7 @@ const UpdateProfilePicture = async (req, res) => {
   const buffer = file ? file.buffer : null;
 
   const client = await pool.connect().catch((err) => console.log(err));
+  client.on("error", (err) => console.log(err));
   try {
     if (!token) {
       res.status(401).json("data missing");

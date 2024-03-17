@@ -4,6 +4,7 @@ const pool = require("../../pg_pool");
 const checkUsername = async (req, res) => {
   const { username } = req.body;
   const client = await pool.connect().catch((err) => console.log(err));
+  client.on("error", (err) => console.log(err));
 
   try {
     if (!username) {

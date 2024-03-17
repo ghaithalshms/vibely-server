@@ -18,6 +18,7 @@ async function handleCheckToken(token) {
 const ResetPassword = async (req, res) => {
   const { password, token } = req.body;
   const client = await pool.connect().catch((err) => console.log(err));
+  client.on("error", (err) => console.log(err));
 
   try {
     if (!(password && token)) {

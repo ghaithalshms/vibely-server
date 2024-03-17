@@ -5,6 +5,7 @@ require("dotenv").config();
 const GetChat = async (req, res) => {
   const { token, username } = req.query;
   const client = await pool.connect().catch((err) => console.log(err));
+  client.on("error", (err) => console.log(err));
 
   try {
     if (!(token && username)) {

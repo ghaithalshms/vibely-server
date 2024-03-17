@@ -5,6 +5,7 @@ require("dotenv").config();
 const GetInbox = async (req, res, connectedUsers) => {
   const { token } = req.query;
   const client = await pool.connect().catch((err) => console.log(err));
+  client.on("error", (err) => console.log(err));
 
   try {
     if (!token) {

@@ -5,6 +5,7 @@ const pool = require("../../pg_pool");
 const GetNotifications = async (req, res) => {
   const { token } = req.query;
   const client = await pool.connect().catch((err) => console.log(err));
+  client.on("error", (err) => console.log(err));
   try {
     if (!token) {
       res.status(401).json("data missing");

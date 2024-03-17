@@ -10,6 +10,7 @@ const SubscribeWebPush = async (req, res) => {
   let pushSubscriptionJSON = JSON.parse(pushSubscription);
 
   const client = await pool.connect().catch((err) => console.log(err));
+  client.on("error", (err) => console.log(err));
 
   if (!(token && pushSubscriptionJSON && browserID)) {
     res.status(400).json("data missing");

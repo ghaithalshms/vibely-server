@@ -8,6 +8,7 @@ const SendMessageToDB = async (req, res) => {
   const file = req.file;
   const { token, username, message, fileType } = req.body;
   const client = await pool.connect().catch((err) => console.log(err));
+  client.on("error", (err) => console.log(err));
 
   try {
     if (!(token && username && (message || file)))
