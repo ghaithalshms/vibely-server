@@ -4,7 +4,7 @@ const pool = require("../../../pg_pool");
 require("dotenv").config();
 
 const GetUserFollowing = async (req, res) => {
-  const { username } = req.query;
+  const { username, token } = req.query;
   const client = await pool.connect().catch((err) => console.log(err));
   try {
     if (!username) {
