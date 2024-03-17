@@ -7,7 +7,7 @@ const CreatePost = async (req, res) => {
   const { fileType, token, description } = req.body;
 
   const client = await pool.connect().catch((err) => console.log(err));
-  client.on("error", (err) => console.log(err));
+
   try {
     if (!(token && (file || description))) {
       res.status(400).json("data missing");

@@ -8,7 +8,6 @@ const UnsubscribeWebPush = async (req, res) => {
   const { token, browserID } = req.body;
 
   const client = await pool.connect().catch((err) => console.log(err));
-  client.on("error", (err) => console.log(err));
 
   if (!(token && browserID)) return;
 

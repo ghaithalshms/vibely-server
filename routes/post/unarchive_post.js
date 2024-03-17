@@ -4,7 +4,6 @@ const pool = require("../../pg_pool");
 const UnarchivePost = async (req, res) => {
   const { token, postID } = req.body;
   const client = await pool.connect().catch((err) => console.log(err));
-  client.on("error", (err) => console.log(err));
 
   try {
     if (!(token && postID)) {

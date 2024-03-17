@@ -5,7 +5,6 @@ require("dotenv").config();
 const GetUserData = async (req, res, connectedUsers) => {
   const { username, token } = req.query;
   const client = await pool.connect().catch((err) => console.log(err));
-  client.on("error", (err) => console.log(err));
 
   try {
     if (!(username && token)) {

@@ -4,7 +4,6 @@ const pool = require("../../pg_pool");
 const DeleteComment = async (req, res) => {
   const { token, commentID } = req.body;
   const client = await pool.connect().catch((err) => console.log(err));
-  client.on("error", (err) => console.log(err));
 
   try {
     if (!(token && commentID)) {

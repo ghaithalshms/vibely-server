@@ -4,7 +4,7 @@ const pool = require("../../pg_pool");
 const CreateComment = async (req, res) => {
   const { token, postID, comment } = req.body;
   const client = await pool.connect().catch((err) => console.log(err));
-  client.on("error", (err) => console.log(err));
+
   try {
     if (!(token && postID && comment)) {
       res.status(400).json("data missing");

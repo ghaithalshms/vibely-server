@@ -6,7 +6,6 @@ require("dotenv").config();
 const SetNotificationSeen = async (req, res) => {
   const { token } = req.body;
   const client = await pool.connect().catch((err) => console.log(err));
-  client.on("error", (err) => console.log(err));
 
   try {
     if (!token)

@@ -5,7 +5,6 @@ const pool = require("../../pg_pool");
 const GetPostComments = async (req, res) => {
   const { postID, token } = req.query;
   const client = await pool.connect().catch((err) => console.log(err));
-  client.on("error", (err) => console.log(err));
 
   try {
     if (!(postID && token)) {

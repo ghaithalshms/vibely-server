@@ -6,7 +6,7 @@ require("dotenv").config();
 const GetUserFollowing = async (req, res) => {
   const { username, token } = req.query;
   const client = await pool.connect().catch((err) => console.log(err));
-  client.on("error", (err) => console.log(err));
+
   try {
     if (!username) {
       res.status(400).json("data missing");

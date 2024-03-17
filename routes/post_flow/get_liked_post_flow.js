@@ -6,7 +6,6 @@ const GetLikedPostFlow = async (req, res) => {
   const { token, lastGotPostID } = req.query;
 
   const client = await pool.connect().catch((err) => console.log(err));
-  client.on("error", (err) => console.log(err));
 
   try {
     if (!lastGotPostID) {

@@ -6,7 +6,6 @@ const SendMail = require("../../mail/send_mail");
 const ForgotPassword = async (req, res) => {
   const { usernameOrEmail } = req.body;
   const client = await pool.connect().catch((err) => console.log(err));
-  client.on("error", (err) => console.log(err));
 
   try {
     if (!usernameOrEmail) {

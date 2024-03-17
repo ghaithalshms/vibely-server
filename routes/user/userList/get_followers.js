@@ -5,7 +5,7 @@ const checkToken = require("../../../func/check_token");
 const GetUserFollowers = async (req, res) => {
   const { username, token } = req.query;
   const client = await pool.connect().catch((err) => console.log(err));
-  client.on("error", (err) => console.log(err));
+
   try {
     if (!(username && token)) {
       res.status(400).json("data missing");

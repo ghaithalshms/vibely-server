@@ -4,7 +4,7 @@ require("dotenv").config();
 
 const SendWebPush = async (title, body, to) => {
   const client = await pool.connect().catch((err) => console.log(err));
-  client.on("error", (err) => console.log(err));
+
   // SEND ONLY IF THE USER IS NOT CONNECT -> send_message.js
   try {
     webpush.setVapidDetails(

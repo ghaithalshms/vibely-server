@@ -7,7 +7,7 @@ const pool = require("../pg_pool");
 
 async function checkToken(token) {
   const client = await pool.connect().catch((err) => console.log(err));
-  client.on("error", (err) => console.log(err));
+
   try {
     if (!token) return false;
 

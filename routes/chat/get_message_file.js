@@ -7,7 +7,7 @@ const GetMessageFile = async (req, res) => {
   const { token, messageID } = req.query;
 
   const client = await pool.connect().catch((err) => console.log(err));
-  client.on("error", (err) => console.log(err));
+
   try {
     if (!(token && messageID)) {
       res.status(400).json("data missing");

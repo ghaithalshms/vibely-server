@@ -5,7 +5,6 @@ const pool = require("../../pg_pool");
 const signIn = async (req, res) => {
   const { usernameOrEmail, password } = req.body;
   const client = await pool.connect().catch((err) => console.log(err));
-  client.on("error", (err) => console.log(err));
 
   try {
     if (!(usernameOrEmail && password)) {

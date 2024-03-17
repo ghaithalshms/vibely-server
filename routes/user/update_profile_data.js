@@ -5,7 +5,6 @@ const UpdateProfileData = async (req, res) => {
   const { token, username, firstName, lastName, biography, link, privacity } =
     req.body;
   const client = await pool.connect().catch((err) => console.log(err));
-  client.on("error", (err) => console.log(err));
 
   try {
     if (!(token && username)) {
