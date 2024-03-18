@@ -5,10 +5,12 @@ const sendMessageSocket = (socket, connectedUsers) => {
     const userSocketID = connectedUsers.get(messageData.to)?.id;
     socket.to(userSocketID)?.emit("receive_message", messageData);
     let title = messageData.from,
-      body =
-        messageData.message ||
-        `Sent you a ${messageData.fileType.split("/")[0]}`,
-      to = messageData.to;
+      body = message.fileType.startsWith("text")
+        ? message.message
+        : `Sent you ${
+            message.fileType.split("/").charAt(0) === "v" ? "a" : "an"
+          }` + message.fileType.split("/")[0];
+    to = messageData.to;
 
     if (!userSocketID) SendWebPush(title, body, to);
   });
