@@ -6,10 +6,10 @@ const sendMessageSocket = (socket, connectedUsers) => {
     socket.to(userSocketID)?.emit("receive_message", messageData);
     let title = messageData.from,
       body = messageData.fileType.startsWith("text")
-        ? message.message
+        ? messageData.message
         : `Sent you ${
-            message.fileType.split("/").charAt(0) === "v" ? "a" : "an"
-          }` + message.fileType.split("/")[0];
+            messageData.fileType.split("/").charAt(0) === "v" ? "a" : "an"
+          }` + messageData.fileType.split("/")[0];
     to = messageData.to;
 
     if (!userSocketID) SendWebPush(title, body, to);
