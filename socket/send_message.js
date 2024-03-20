@@ -5,7 +5,7 @@ const sendMessageSocket = (socket, connectedUsers) => {
     const userSocketID = connectedUsers.get(messageData.to)?.id;
     socket.to(userSocketID)?.emit("receive_message", messageData);
     let title = messageData.from,
-      body = message.fileType.startsWith("text")
+      body = messageData.fileType.startsWith("text")
         ? message.message
         : `Sent you ${
             message.fileType.split("/").charAt(0) === "v" ? "a" : "an"
