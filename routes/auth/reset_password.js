@@ -32,7 +32,7 @@ const ResetPassword = async (req, res) => {
     }
 
     await client.query(
-      `UPDATE user_tbl SET password = $2
+      `UPDATE user_tbl SET password = $2, token_version = token_version+1
     WHERE username = $1`,
       [tokenUsername, password]
     );
