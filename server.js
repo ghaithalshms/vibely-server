@@ -4,32 +4,12 @@ const http = require("http");
 const { Server } = require("socket.io");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const axios = require("axios");
 const multer = require("multer");
 const spotifyApi = require("./spotify_listening/spotify_api");
 
+// Import Routes
 const { postLink, getLink, deleteLink, updateLink } = require("./API_LINK");
 
-const app = express();
-app.use(cors());
-
-app.use(bodyParser.json({ limit: "30mb" }));
-app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
-app.use(express.json({ limit: "30mb" }));
-app.use(express.urlencoded({ extended: true, limit: "30mb" }));
-
-const server = http.createServer(app);
-
-const io = new Server(server, {
-  maxHttpBufferSize: 2e6,
-  cors: {
-    origin: process.env.CLIENT_URL,
-    methods: ["GET", "POST", "DELETE"],
-  },
-});
-
-const connectionToSocket = require("./socket/connection");
-// IMPORT ROUTES
 const SignIn = require("./routes/auth/sign_in");
 const SignUp = require("./routes/auth/sign_up");
 const CheckUsername = require("./routes/user/check_username");
@@ -78,10 +58,28 @@ const SpotifyCallback = require("./spotify_listening/spotify_callback");
 const ForgotPassword = require("./routes/auth/forgot_password");
 const ResetPassword = require("./routes/auth/reset_password");
 
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  maxHttpBufferSize: 2e6,
+  cors: {
+    origin: process.env.CLIENT_URL,
+    methods: ["GET", "POST", "DELETE"],
+  },
+});
+
+const connectionToSocket = require("./socket/connection");
+const axios = require("axios");
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 const connectedUsers = new Map();
+
+app.use(cors());
+app.use(bodyParser.json({ limit: "30mb" }));
+app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
+app.use(express.json({ limit: "30mb" }));
+app.use(express.urlencoded({ extended: true, limit: "30mb" }));
 
 // *********** POST ***********
 // activate server
