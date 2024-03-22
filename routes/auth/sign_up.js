@@ -1,69 +1,82 @@
 const FuncIsValidUsername = require("../../func/is_valid_username");
-
-require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const pool = require("../../pg_pool");
 
+require("dotenv").config();
+
 const signUp = async (req, res) => {
   const { username, firstName, password, email } = req.body;
-  const client = await pool.connect().catch((err) => console.log(err));
+
+  if (!(username && firstName && password && email)) {
+    return res.status(400).json("Missing required data");
+  }
+
+  const client = await pool.connect().catch(handleError(res));
 
   try {
-    if (!(username && password && firstName && password && email)) {
-      res.status(400).json("data missing");
-      return;
+    const usernameVerified = validateUsername(username);
+
+    if (!usernameVerified) {
+      return res.status(400).json("Invalid username");
     }
 
-    const usernameVerified = username.toLowerCase().trim();
-
-    if (usernameVerified && firstName && password && email) {
-      if (FuncIsValidUsername(usernameVerified)) {
-        const usernameQuery = await client.query(
-          "SELECT username FROM user_tbl WHERE username =$1",
-          [usernameVerified]
-        );
-        if (usernameQuery.rows.length === 0) {
-          await client.query(
-            "INSERT INTO user_tbl (username, password, email, first_name, created_date)" +
-              "values ($1, $2, $3, $4, $5)",
-            [
-              usernameVerified,
-              password,
-              email,
-              firstName,
-              new Date().toISOString(),
-            ]
-          );
-          const token = jwt.sign(
-            {
-              username: usernameVerified,
-              tokenVersion: 1,
-            },
-            process.env.JWT_SECRET_KEY,
-            {
-              expiresIn: "1000d",
-            }
-          );
-          if (!res.headersSent)
-            res.status(201).json({
-              token,
-              username: usernameVerified,
-              message: "Your account has been created, welcome to Vibely!",
-            });
-        } else {
-          if (!res.headersSent)
-            res.status(409).json("Username is already taken.");
-        }
-      } else {
-        if (!res.headersSent)
-          res.status(400).json("Username is not available.");
-      }
+    if (await isUsernameTaken(client, usernameVerified)) {
+      return res.status(409).json("Username is already taken");
     }
+
+    await createUser(client, usernameVerified, password, email, firstName);
+
+    const token = generateToken(usernameVerified);
+
+    const browserID = generateUniqueBrowserID();
+
+    res.status(201).json({
+      token,
+      username: usernameVerified,
+      browserID,
+      message: "Your account has been created, welcome to Vibely!",
+    });
   } catch (err) {
-    if (!res.headersSent) res.status(500).json(err);
+    handleError(res)(err);
   } finally {
     client?.release();
   }
+};
+
+const handleError = (res) => (err) => {
+  console.error(err);
+  res.status(500).json(err);
+};
+
+const validateUsername = (username) => {
+  const usernameVerified = username.toLowerCase().trim();
+  return FuncIsValidUsername(usernameVerified) ? usernameVerified : null;
+};
+
+const isUsernameTaken = async (client, username) => {
+  const usernameQuery = await client.query(
+    "SELECT username FROM user_tbl WHERE username =$1",
+    [username]
+  );
+  return usernameQuery.rows.length > 0;
+};
+
+const createUser = async (client, username, password, email, firstName) => {
+  await client.query(
+    "INSERT INTO user_tbl (username, password, email, first_name, created_date)" +
+      "values ($1, $2, $3, $4, $5)",
+    [username, password, email, firstName, new Date().toISOString()]
+  );
+};
+
+const generateToken = (username) => {
+  return jwt.sign({ username, tokenVersion: 1 }, process.env.JWT_SECRET_KEY, {
+    expiresIn: "1000d",
+  });
+};
+
+const generateUniqueBrowserID = () => {
+  return Math.random().toString(16).substring(2) + Date.now().toString(16);
 };
 
 module.exports = signUp;

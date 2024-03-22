@@ -4,66 +4,96 @@ require("dotenv").config();
 
 const GetUserData = async (req, res, connectedUsers) => {
   const { username, token } = req.query;
-  const client = await pool.connect().catch((err) => console.log(err));
+
+  if (!(username && token)) {
+    return res.status(400).json("Data missing");
+  }
+
+  const client = await pool.connect().catch(handleError(res));
 
   try {
-    if (!(username && token)) {
-      res.status(400).json("data missing");
-      return;
+    const tokenUsername = await verifyToken(token);
+
+    if (!tokenUsername) {
+      return res.status(401).json("Invalid token");
     }
 
-    const tokenUsername = await CheckTokenNoDB(token);
-    if (tokenUsername === false) {
-      if (!res.headersSent) res.status(401).json("wrong token");
-      return;
-    }
-
-    const dataQuery = await client.query(
-      `SELECT username, first_name, last_name, post_count, follower_count, 
-      following_count, biography, link, privacity, verified, admin, 
-      follow_id, req_id, last_seen
-FROM user_tbl u
-LEFT JOIN follow_tbl f ON f.follower = $1 AND f.following = u.username
-LEFT JOIN follow_request_tbl fr ON fr.req_follower = $2 AND fr.req_following = u.username
-WHERE u.username = $2`,
-      [tokenUsername, username]
+    const userData = await fetchUserData(
+      client,
+      username,
+      tokenUsername,
+      connectedUsers
     );
 
-    if (dataQuery.rows.length > 0 && tokenUsername !== username)
-      await client.query(
-        `INSERT INTO profile_views_tbl (viewer_user, viewed_user, viewed_time) VALUES ($1,$2,$3)`,
-        [tokenUsername, username, new Date().toISOString()]
-      );
-
-    if (dataQuery.rows.length > 0) {
-      const userData = {
-        username: dataQuery.rows[0].username,
-        firstName: dataQuery.rows[0].first_name ?? "",
-        lastName: dataQuery.rows[0].last_name ?? "",
-        postCount: dataQuery.rows[0].post_count ?? 0,
-        followerCount: dataQuery.rows[0].follower_count ?? 0,
-        followingCount: dataQuery.rows[0].following_count ?? 0,
-        biography: dataQuery.rows[0].biography ?? "",
-        link: dataQuery.rows[0].link ?? "",
-        privacity: dataQuery.rows[0].privacity ?? false,
-        isFollowing: dataQuery.rows[0].follow_id > 0,
-        isFollowRequested: dataQuery.rows[0].req_id > 0,
-        isVerified: dataQuery.rows[0].verified ?? false,
-        isAdmin: dataQuery.rows[0].admin ?? false,
-        lastSeen: connectedUsers.has(username)
-          ? "online"
-          : dataQuery.rows[0].last_seen,
-      };
-      if (!res.headersSent) res.send(userData);
-    } else {
-      if (!res.headersSent) res.status(404).json("User not found");
+    if (!userData) {
+      return res.status(404).json("User not found");
     }
+
+    res.send(userData);
   } catch (err) {
-    console.error("unexpected error : ", err);
-    res.status(500).json(err);
+    handleError(res)(err);
   } finally {
     client?.release();
   }
+};
+
+const handleError = (res) => (err) => {
+  console.error("Unexpected error:", err);
+  res.status(500).json(err);
+};
+
+const verifyToken = async (token) => {
+  return await CheckTokenNoDB(token);
+};
+
+const fetchUserData = async (
+  client,
+  requestedUsername,
+  tokenUsername,
+  connectedUsers
+) => {
+  const dataQuery = await client.query(
+    `SELECT username, first_name, last_name, post_count, follower_count, 
+    following_count, biography, link, privacity, verified, admin, 
+    follow_id, req_id, last_seen
+    FROM user_tbl u
+    LEFT JOIN follow_tbl f ON f.follower = $1 AND f.following = u.username
+    LEFT JOIN follow_request_tbl fr ON fr.req_follower = $2 AND fr.req_following = u.username
+    WHERE u.username = $3`,
+    [tokenUsername, tokenUsername, requestedUsername]
+  );
+
+  if (dataQuery.rows.length > 0 && tokenUsername !== requestedUsername) {
+    await client.query(
+      `INSERT INTO profile_views_tbl (viewer_user, viewed_user, viewed_time) VALUES ($1,$2,$3)`,
+      [tokenUsername, requestedUsername, new Date().toISOString()]
+    );
+  }
+
+  return extractUserData(dataQuery.rows[0], connectedUsers, requestedUsername);
+};
+
+const extractUserData = (userData, connectedUsers, requestedUsername) => {
+  if (!userData) return null;
+
+  return {
+    username: userData.username,
+    firstName: userData.first_name ?? "",
+    lastName: userData.last_name ?? "",
+    postCount: userData.post_count,
+    followerCount: userData.follower_count,
+    followingCount: userData.following_count,
+    biography: userData.biography ?? "",
+    link: userData.link ?? "",
+    privacity: userData.privacity ?? false,
+    isFollowing: userData.follow_id > 0,
+    isFollowRequested: userData.req_id > 0,
+    isVerified: userData.verified ?? false,
+    isAdmin: userData.admin ?? false,
+    lastSeen: connectedUsers.has(requestedUsername)
+      ? "online"
+      : userData.last_seen,
+  };
 };
 
 module.exports = GetUserData;

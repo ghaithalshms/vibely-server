@@ -6,41 +6,39 @@ const GetUserPicture = async (req, res) => {
   const { username } = req.query;
   const client = await pool.connect().catch((err) => console.log(err));
 
-  try {
-    if (!username) {
-      res.status(400).json("data missing");
-      return;
-    }
+  if (!username) {
+    res.status(400).json("Data missing");
+    return;
+  }
 
+  try {
     const pictureQuery = await client.query(
       "SELECT pfp_path FROM user_tbl WHERE username = $1",
       [username]
     );
-    const pfpPath = pictureQuery.rows[0].pfp_path;
+    const pfpPath = pictureQuery.rows[0]?.pfp_path;
 
-    if (!res.headersSent) {
-      if (pfpPath) {
-        GetFileFireBase(pfpPath)
-          .then((url) => {
-            res.redirect(url);
-          })
-          .catch((err) => {
-            res.redirect(
-              "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg"
-            );
-            console.log(err);
-          });
-      } else {
-        res.redirect(
-          "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg"
-        );
-      }
+    if (pfpPath) {
+      GetFileFireBase(pfpPath)
+        .then((url) => {
+          res.redirect(url);
+        })
+        .catch((err) => {
+          res.redirect(
+            "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg"
+          );
+          console.error("Error getting user picture:", err);
+        });
+    } else {
+      res.redirect(
+        "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg"
+      );
     }
   } catch (err) {
-    console.log("unexpected error : ", err);
+    console.error("Unexpected error:", err);
     res.status(500).json(err);
   } finally {
-    client?.release();
+    client.release();
   }
 };
 

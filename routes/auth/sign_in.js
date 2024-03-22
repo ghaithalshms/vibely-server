@@ -3,7 +3,10 @@ const jwt = require("jsonwebtoken");
 const pool = require("../../pg_pool");
 
 const signIn = async (req, res) => {
-  const client = await pool.connect();
+  const client = await pool.connect().catch((err) => {
+    console.log(err);
+    res.status(500).json("Database connection error");
+  });
   try {
     const { usernameOrEmail, password } = req.body;
     if (!usernameOrEmail || !password) {

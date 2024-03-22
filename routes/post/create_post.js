@@ -6,56 +6,74 @@ const CreatePost = async (req, res) => {
   const file = req.file;
   const { fileType, token, description } = req.body;
 
-  const client = await pool.connect().catch((err) => console.log(err));
+  const client = await pool.connect();
 
   try {
     if (!(token && (file || description))) {
-      res.status(400).json("data missing");
-      return;
+      return res.status(400).json("Data missing");
     }
 
-    const tokenUsername = await checkToken(token);
-    if (tokenUsername === false) {
-      if (!res.headersSent) res.status(401).json("wrong token");
-      return;
+    const tokenUsername = await validateToken(token);
+    if (!tokenUsername) {
+      return res.status(401).json("Wrong token");
     }
 
-    const filePath = file
-      ? await UploadFileFireBase(file, fileType, "post")
-      : null;
+    const filePath = file ? await uploadFile(file, fileType) : null;
     if (filePath === false) {
-      if (!res.headersSent)
-        res.status(500).json("unexpected error while uploading file");
-      return;
+      return res.status(500).json("Unexpected error while uploading file");
     }
 
-    // DEFINITION OF FUNCTIONS
-    const handlePost = async () => {
-      await client.query(
-        `INSERT INTO post_tbl (posted_user, description, post_date, file_path, file_type) 
-          VALUES ($1,$2,$3, $4, $5)`,
-        [
-          tokenUsername,
-          description,
-          new Date().toISOString(),
-          filePath || "text/plain",
-          fileType,
-        ]
-      );
-      await client.query(
-        `UPDATE user_tbl SET post_count = post_count+1 WHERE username =$1`,
-        [tokenUsername]
-      );
-      if (!res.headersSent) res.status(200).json("post created");
-    };
+    await createPost(client, tokenUsername, description, filePath, fileType);
 
-    // START QUERY HERE
-    handlePost();
-  } catch (err) {
-    console.log("unexpected error : ", err);
-    res.status(500).json(err);
+    return res.status(200).json("Post created");
+  } catch (error) {
+    console.error("Unexpected error:", error);
+    return res.status(500).json(error);
   } finally {
-    client?.release();
+    client.release();
+  }
+};
+
+const validateToken = async (token) => {
+  return await checkToken(token);
+};
+
+const uploadFile = async (file, fileType) => {
+  try {
+    return await UploadFileFireBase(file, fileType, "post");
+  } catch (error) {
+    console.error("Error uploading file:", error);
+    return false;
+  }
+};
+
+const createPost = async (
+  client,
+  username,
+  description,
+  filePath,
+  fileType
+) => {
+  try {
+    await client.query(
+      `INSERT INTO post_tbl (posted_user, description, post_date, file_path, file_type) 
+      VALUES ($1, $2, $3, $4, $5)`,
+      [
+        username,
+        description,
+        new Date().toISOString(),
+        filePath || "text/plain",
+        fileType,
+      ]
+    );
+
+    await client.query(
+      `UPDATE user_tbl SET post_count = post_count + 1 WHERE username = $1`,
+      [username]
+    );
+  } catch (error) {
+    console.error("Error creating post:", error);
+    throw error;
   }
 };
 

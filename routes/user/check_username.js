@@ -3,35 +3,51 @@ const pool = require("../../pg_pool");
 
 const checkUsername = async (req, res) => {
   const { username } = req.body;
-  const client = await pool.connect().catch((err) => console.log(err));
+
+  if (!username) {
+    return res.status(400).json("Data missing");
+  }
+
+  const client = await pool.connect().catch(handleError(res));
 
   try {
-    if (!username) {
-      res.status(400).json("data missing");
-      return;
+    const isValid = validateUsername(username);
+
+    if (!isValid) {
+      return res
+        .status(400)
+        .json("Only letters, numbers, and underscores are allowed.");
     }
 
-    if (!funcIsValidUsername(username)) {
-      if (!res.headersSent)
-        res.json("Only letters, numbers, and underscores are allowed.");
-      return;
-    }
+    const isTaken = await isUsernameTaken(client, username);
 
-    const result = await client.query(
-      `SELECT username FROM user_tbl WHERE username = $1`,
-      [username]
-    );
-    if (result.rows.length === 0) {
-      if (!res.headersSent) res.status(200).json("This username is available.");
+    if (!isTaken) {
+      return res.status(200).json("This username is available.");
     } else {
-      if (!res.headersSent) res.json("This username is already taken.");
+      return res.json("This username is already taken.");
     }
   } catch (err) {
-    console.log("unexpected error : ", err);
-    res.status(500).json(err);
+    handleError(res)(err);
   } finally {
     client?.release();
   }
+};
+
+const handleError = (res) => (err) => {
+  console.error("Unexpected error:", err);
+  res.status(500).json(err);
+};
+
+const validateUsername = (username) => {
+  return funcIsValidUsername(username);
+};
+
+const isUsernameTaken = async (client, username) => {
+  const result = await client.query(
+    `SELECT username FROM user_tbl WHERE username = $1`,
+    [username]
+  );
+  return result.rows.length > 0;
 };
 
 module.exports = checkUsername;

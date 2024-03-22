@@ -1,37 +1,70 @@
 const checkToken = require("../../func/check_token");
 const pool = require("../../pg_pool");
 
-const DeleteComment = async (req, res) => {
-  const { token, commentID } = req.body;
-  const client = await pool.connect().catch((err) => console.log(err));
+const deleteComment = async (req, res) => {
+  const client = await pool.connect(); // Create the client only once
 
   try {
-    if (!(token && commentID)) {
-      res.status(400).json("data missing");
-      return;
+    const { token, commentID } = req.body;
+    if (!isValidData(token, commentID)) {
+      return res.status(400).json("Data missing");
     }
 
-    const tokenUsername = await checkToken(token);
-    if (tokenUsername === false) {
-      if (!res.headersSent) res.status(401).json("wrong token");
-      return;
+    const tokenUsername = await validateToken(token);
+    if (!tokenUsername) {
+      return res.status(401).json("Wrong token");
     }
 
-    await client.query(
-      `DELETE FROM comment_tbl WHERE comment_id = $1 AND commented_user = $2`,
-      [commentID, tokenUsername]
-    );
-    await client.query(
-      `UPDATE post_tbl set comment_count=comment_count-1 WHERE post_id = $1`,
-      [postID]
-    );
-
-    if (!res.headersSent) res.status(200).json("comment deleted");
-  } catch (err) {
-    if (!res.headersSent) res.status(500).json(err);
+    const deleted = await deleteCommentFromDB(client, commentID, tokenUsername);
+    if (deleted) {
+      return res.status(200).json("Comment deleted");
+    } else {
+      return res.status(404).json("Comment not found or unauthorized");
+    }
+  } catch (error) {
+    console.log("Error in deleteComment:", error);
+    return res.status(500).json("Internal server error");
   } finally {
-    client?.release();
+    client.release(); // Release the client connection in the finally block
   }
 };
 
-module.exports = DeleteComment;
+const isValidData = (token, commentID) => {
+  return token && commentID;
+};
+
+const validateToken = async (token) => {
+  return await checkToken(token);
+};
+
+const deleteCommentFromDB = async (client, commentID, tokenUsername) => {
+  try {
+    const result = await client.query(
+      `DELETE FROM comment_tbl WHERE comment_id = $1 AND commented_user = $2 RETURNING *`,
+      [commentID, tokenUsername]
+    );
+    if (result.rowCount === 1) {
+      await decrementCommentCount(client, result.rows[0].post_id);
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    console.log("Error in deleteCommentFromDB:", error);
+    throw error;
+  }
+};
+
+const decrementCommentCount = async (client, postID) => {
+  try {
+    await client.query(
+      `UPDATE post_tbl SET comment_count = comment_count - 1 WHERE post_id = $1`,
+      [postID]
+    );
+  } catch (error) {
+    console.log("Error in decrementCommentCount:", error);
+    throw error;
+  }
+};
+
+module.exports = deleteComment;
