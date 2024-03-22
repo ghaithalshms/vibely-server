@@ -59,7 +59,6 @@ const GetArchivedPostFlow = require("./routes/post_flow/get_archived_post_flow")
 const GetNotifications = require("./routes/notification/get_notifications");
 const AcceptFollowRequest = require("./routes/user/accept_follow_request");
 const UpdateProfileData = require("./routes/user/update_profile_data");
-const UpdateProfilePicture = require("./routes/user/update_profile_picture");
 const GetInbox = require("./routes/inbox/get_inbox");
 const GetChat = require("./routes/chat/get_chat");
 const SendMessageToDB = require("./routes/chat/send_message_to_db");
@@ -161,11 +160,10 @@ app.post(updateLink.forgotPassword, ForgotPassword);
 app.post(updateLink.resetPassword, ResetPassword);
 app.post(updateLink.archivePost, ArchivePost);
 app.post(updateLink.unarchivePost, UnarchivePost);
-app.post(updateLink.updateProfileData, UpdateProfileData);
 app.post(
-  updateLink.updateProfilePicture,
+  updateLink.updateProfileData,
   upload.single("file"),
-  UpdateProfilePicture
+  UpdateProfileData
 );
 // CHAT
 app.post(updateLink.setMessagesSeen, SetMessagesSeen);
