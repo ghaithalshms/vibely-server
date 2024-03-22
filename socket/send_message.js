@@ -9,7 +9,7 @@ const sendMessageSocket = (socket, connectedUsers) => {
         body = messageData.fileType.startsWith("text")
           ? messageData.message
           : `Sent you ${
-              messageData.fileType.split("/").charAt(0) === "v" ? "a" : "an"
+              messageData.fileType.split("/")[0].charAt(0) === "v" ? "a" : "an"
             }` + messageData.fileType.split("/")[0];
       to = messageData.to;
 
