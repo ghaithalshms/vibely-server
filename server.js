@@ -51,10 +51,10 @@ const GetPostFile = require("./routes/post/get_post_file");
 const GetSuggestions = require("./routes/suggestions/get_suggestions");
 const UnsubscribeWebPush = require("./web_push_notification/unsubscribe_web_push");
 const GetMessageFile = require("./routes/chat/get_message_file");
-const SpotifyLogin = require("./spotify_listening/spotify_login");
-const SpotifyPlay = require("./spotify_listening/spotify_play");
-const SpotifySearch = require("./spotify_listening/spotify_search");
-const SpotifyCallback = require("./spotify_listening/spotify_callback");
+// const SpotifyLogin = require("./spotify_listening/spotify_login");
+// const SpotifyPlay = require("./spotify_listening/spotify_play");
+// const SpotifySearch = require("./spotify_listening/spotify_search");
+// const SpotifyCallback = require("./spotify_listening/spotify_callback");
 const ForgotPassword = require("./routes/auth/forgot_password");
 const ResetPassword = require("./routes/auth/reset_password");
 
@@ -135,15 +135,15 @@ app.get(getLink.getChat, GetChat);
 app.get(getLink.getMessageFile, GetMessageFile);
 // SUGGESTIONS
 app.get(getLink.getSuggestions, GetSuggestions);
-// SPOTIFY API
-app.get(getLink.spotifyLogin, (req, res) => SpotifyLogin(req, res, spotifyApi));
-app.get(getLink.spotifyCallback, (req, res) =>
-  SpotifyCallback(req, res, spotifyApi)
-);
-app.get(getLink.spotifySearch, (req, res) =>
-  SpotifySearch(req, res, spotifyApi)
-);
-app.get(getLink.spotifyPlay, (req, res) => SpotifyPlay(req, res, spotifyApi));
+// // SPOTIFY API
+// app.get(getLink.spotifyLogin, (req, res) => SpotifyLogin(req, res, spotifyApi));
+// app.get(getLink.spotifyCallback, (req, res) =>
+//   SpotifyCallback(req, res, spotifyApi)
+// );
+// app.get(getLink.spotifySearch, (req, res) =>
+//   SpotifySearch(req, res, spotifyApi)
+// );
+// app.get(getLink.spotifyPlay, (req, res) => SpotifyPlay(req, res, spotifyApi));
 
 // *********** DELETE ***********
 // POST
