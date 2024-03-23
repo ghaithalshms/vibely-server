@@ -5,7 +5,7 @@ const UnarchivePost = async (req, res) => {
   const { token, postID } = req.body;
 
   try {
-    const client = await pool.connect();
+    const client = await pool.connect().catch((err) => console.log(err));
     if (!(token && postID)) {
       return res.status(400).json("Data missing");
     }

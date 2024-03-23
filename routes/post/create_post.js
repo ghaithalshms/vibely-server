@@ -6,7 +6,7 @@ const CreatePost = async (req, res) => {
   const file = req.file;
   const { fileType, token, description } = req.body;
 
-  const client = await pool.connect();
+  const client = await pool.connect().catch((err) => console.log(err));
 
   try {
     if (!(token && (file || description))) {

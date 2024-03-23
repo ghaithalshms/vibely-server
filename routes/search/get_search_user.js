@@ -3,7 +3,7 @@ const pool = require("../../pg_pool");
 
 const GetSearchUser = async (req, res) => {
   const { username } = req.query;
-  const client = await pool.connect();
+  const client = await pool.connect().catch((err) => console.log(err));
 
   try {
     if (!username) {

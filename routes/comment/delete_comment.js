@@ -2,7 +2,7 @@ const checkToken = require("../../func/check_token");
 const pool = require("../../pg_pool");
 
 const deleteComment = async (req, res) => {
-  const client = await pool.connect(); // Create the client only once
+  const client = await pool.connect().catch((err) => console.log(err)); // Create the client only once
 
   try {
     const { token, commentID } = req.body;
