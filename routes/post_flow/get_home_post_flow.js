@@ -9,7 +9,7 @@ const GetHomePostFlow = async (req, res) => {
     const client = await pool.connect().catch((err) => console.log(err));
 
     if (!lastGotPostID) {
-      return res.json("No post flow");
+      return res.json({ postFlowArray: [] });
     }
 
     if (!token) {

@@ -6,7 +6,7 @@ const handleUserPostFlow = async (req, res) => {
   const { username, token, lastGotPostID } = req.query;
 
   if (!lastGotPostID) {
-    res.json("no post flow");
+    res.json({ postFlowArray: [] });
     return;
   }
 

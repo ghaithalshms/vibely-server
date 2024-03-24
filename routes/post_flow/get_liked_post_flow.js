@@ -8,7 +8,7 @@ const GetLikedPostFlow = async (req, res) => {
 
   try {
     if (!lastGotPostID) {
-      return res.json("No post flow");
+      return res.json({ postFlowArray: [] });
     }
     if (!token) {
       return res.status(401).json("Data missing");
