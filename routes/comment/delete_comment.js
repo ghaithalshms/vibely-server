@@ -51,7 +51,6 @@ const deleteCommentFromDB = async (client, commentID, tokenUsername) => {
     }
   } catch (error) {
     console.log("Error in deleteCommentFromDB:", error);
-    throw error;
   }
 };
 
@@ -63,7 +62,6 @@ const decrementCommentCount = async (client, postID) => {
     );
   } catch (error) {
     console.log("Error in decrementCommentCount:", error);
-    throw error;
   }
 };
 

@@ -3,8 +3,8 @@ const { Pool } = require("pg");
 let pool = new Pool({
   connectionString: process.env.DATABASE_STRING,
   max: 20,
-  idleTimeoutMillis: 0,
-  connectionTimeoutMillis: 0,
+  idleTimeoutMillis: 10 * 1000,
+  connectionTimeoutMillis: 10 * 1000,
 });
 
 pool.on("error", (err, client) => {

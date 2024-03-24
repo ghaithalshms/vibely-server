@@ -6,7 +6,6 @@ const GetPostLikedUsers = async (req, res) => {
   const { postID, token } = req.query;
   const client = await pool.connect().catch((err) => {
     console.log(err);
-    throw err;
   });
 
   try {

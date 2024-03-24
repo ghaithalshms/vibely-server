@@ -73,7 +73,6 @@ const createPost = async (
     );
   } catch (error) {
     console.error("Error creating post:", error);
-    throw error;
   }
 };
 
