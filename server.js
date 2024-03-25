@@ -6,6 +6,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const multer = require("multer");
 const spotifyApi = require("./spotify_listening/spotify_api");
+const logger = require("./log/logger");
 
 // Import Routes
 const { postLink, getLink, deleteLink, updateLink } = require("./API_LINK");
@@ -80,6 +81,7 @@ app.use(bodyParser.json({ limit: "30mb" }));
 app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
 app.use(express.json({ limit: "30mb" }));
 app.use(express.urlencoded({ extended: true, limit: "30mb" }));
+app.use(logger);
 
 // *********** POST ***********
 // activate server
