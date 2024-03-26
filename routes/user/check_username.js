@@ -15,7 +15,7 @@ const checkUsername = async (req, res) => {
 
     if (!isValid) {
       return res
-        .status(400)
+        .status(200)
         .json("Only letters, numbers, and underscores are allowed.");
     }
 
