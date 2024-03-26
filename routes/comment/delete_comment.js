@@ -40,11 +40,11 @@ const validateToken = async (token) => {
 const deleteCommentFromDB = async (client, commentID, tokenUsername) => {
   try {
     const result = await client.query(
-      `DELETE FROM comment_tbl WHERE comment_id = $1 AND commented_user = $2 RETURNING *`,
+      `DELETE FROM comment_tbl WHERE comment_id = $1 AND commented_user = $2 RETURNING post`,
       [commentID, tokenUsername]
     );
     if (result.rowCount === 1) {
-      await decrementCommentCount(client, result.rows[0].post_id);
+      await decrementCommentCount(client, result.rows[0].post);
       return true;
     } else {
       return false;
