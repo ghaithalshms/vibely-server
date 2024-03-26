@@ -40,7 +40,7 @@ const GetFileFireBase = async (filename) => {
   const file = bucket.file(`${filename}`);
   const url = await file.getSignedUrl({
     action: "read",
-    expires: Date.now() + 60 * 60 * 1000, // 1 hour
+    expires: Date.now() + 10 * 60 * 1000, // 10 min
   });
 
   return url[0];
