@@ -19,7 +19,7 @@ const logger = (req, res, next) => {
     date: formattedDate,
   };
 
-  fs.readFile("log.json", "utf8", (err, data) => {
+  fs.readFile("log/log.json", "utf8", (err, data) => {
     if (err) {
       console.error("Dosya okunurken bir hata oluştu:", err);
       return;
@@ -37,7 +37,7 @@ const logger = (req, res, next) => {
 
     const jsonData = JSON.stringify(logArray, null, 2);
 
-    fs.writeFile("log.json", jsonData, (err) => {
+    fs.writeFile("log/log.json", jsonData, (err) => {
       if (err) {
         console.error("Dosya yazılırken bir hata oluştu:", err);
         return;
