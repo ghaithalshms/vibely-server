@@ -60,11 +60,7 @@ const GetMessageFile = async (req, res) => {
     if (!res.headersSent) {
       GetFileFireBase(filePath)
         .then((url) => {
-          if (!fileType.startsWith("audio/")) {
-            res.redirect(url);
-          } else {
-            fetchAndStreamAudio(res, url);
-          }
+          res.redirect(url);
         })
         .catch((error) => {
           console.error(error);
