@@ -85,6 +85,9 @@ app.use(express.urlencoded({ extended: true, limit: "30mb" }));
 
 // *********** POST ***********
 // activate server
+app.get("", (req, res) => {
+  res.status(200).json("Welcome to Vibely API !");
+});
 app.get(getLink.activateServer, (req, res) => {
   res.status(200).json("hey");
 });
