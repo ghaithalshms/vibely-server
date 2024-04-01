@@ -21,6 +21,11 @@ Welcome to the Vibely social media server application! This Node.js application 
      - [Get User Followers Route](#get-user-followers-route)
      - [Get User Following Route](#get-user-following-route)
      - [Get Post's Liked Users Route](#get-post's-liked-users-route)
+4. [Post Flow Routes](#post-flow-routes)
+   - [Home Post Flow Route](#home-post-flow-route)
+   - [User Post Flow Route](#user-post-flow-route)
+   - [Explorer Post Flow Route](#explorer-post-flow-route)
+   - [Archived/Liked/Saved Post Flows Routes](#archived/liked/saved-post-flow-route)
 
 ## Error Codes
 
@@ -361,7 +366,7 @@ axios
 - **Method:** GET
 - **Endpoint:** `/api/post/liked-users`
 - **Query Parameters:**
-  - `postID`: ID of the post to retrieve liked users for (String)
+  - `postID`: ID of the post to retrieve liked users for (Integer)
   - `token`: Authentication token (String)
 
 **Example:**
@@ -372,6 +377,122 @@ axios
     params: {
       postID: "postIDToRetrieveLikedUsersFor",
       token: "authenticationToken",
+    },
+  })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
+
+### Post Flow Routes
+
+These routes handle the flow of posts within the application.
+
+#### Home Post Flow Route
+
+- **Description:** Retrieves the post flow for the home page.
+- **Method:** GET
+- **Endpoint:** `/api/post-flow/home`
+- **Query Parameters:**
+  - `token`: Authentication token (String)
+  - `lastGotPostID`: ID of the last post received (Integer)
+
+**Example:**
+
+```javascript
+axios
+  .get("/api/post-flow/home", {
+    params: {
+      token: "authenticationToken",
+      lastGotPostID: "lastReceivedPostID",
+    },
+  })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
+
+#### User Post Flow Route
+
+- **Description:** Retrieves the post flow for a specific user.
+- **Method:** GET
+- **Endpoint:** `/api/post-flow/user`
+- **Query Parameters:**
+  - `username`: Username of the user whose posts are being retrieved (String)
+  - `token`: Authentication token (String)
+  - `lastGotPostID`: ID of the last post received (Integer)
+
+**Example:**
+
+```javascript
+axios
+  .get("/api/post-flow/user", {
+    params: {
+      username: "usernameToRetrievePostsFor",
+      token: "authenticationToken",
+      lastGotPostID: "lastReceivedPostID",
+    },
+  })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
+
+#### Explorer Post Flow Route
+
+- **Description:** Retrieves the post flow for the explorer page.
+- **Method:** GET
+- **Endpoint:** `/api/post-flow/explorer`
+- **Query Parameters:**
+  - `token`: Authentication token (String)
+  - `lastGotPostID`: ID of the last post received (Integer)
+
+**Example:**
+
+```javascript
+axios
+  .get("/api/post-flow/explorer", {
+    params: {
+      token: "authenticationToken",
+      lastGotPostID: "lastReceivedPostID",
+    },
+  })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
+
+#### Archived/Liked/Saved Post Flows Routes
+
+These routes handle retrieving post flows for archived, liked, and saved posts.
+
+- **Description:** Retrieves the post flow for archived posts.
+- **Method:** GET
+- **Endpoint:** `/api/post-flow/archived|liked|saved`
+- **Query Parameters:**
+  - `token`: Authentication token (String)
+  - `lastGotPostID`: ID of the last post received (Integer)
+
+**Example:**
+
+```javascript
+axios
+  .get("/api/post-flow/archived|liked|saved", {
+    params: {
+      token: "authenticationToken",
+      lastGotPostID: "lastReceivedPostID",
     },
   })
   .then((response) => {
