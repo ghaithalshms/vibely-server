@@ -20,8 +20,16 @@ Welcome to the Vibely social media server application! This Node.js application 
    - [User List Routes](#user-list-routes)
      - [Get User Followers Route](#get-user-followers-route)
      - [Get User Following Route](#get-user-following-route)
-     - [Get Post's Liked Users Route](#get-post's-liked-users-route)
-4. [Post Flow Routes](#post-flow-routes)
+4. [Post Routes](#post-routes)
+   - [Create Post Route](#create-post-route)
+   - [Like Post Route](#like-post-route)
+   - [Save Post Route](#save-post-route)
+   - [Delete Post Route](#delete-post-route)
+   - [Archive Post Route](#archive-post-route)
+   - [Get Post File](#get-post-file)
+   - [Get Post Liked Users Route](#get-post-liked-users-route)
+   - [Get Post Comments File](#get-post-comments-file)
+5. [Post Flow Routes](#post-flow-routes)
    - [Home Post Flow Route](#home-post-flow-route)
    - [User Post Flow Route](#user-post-flow-route)
    - [Explorer Post Flow Route](#explorer-post-flow-route)
@@ -360,7 +368,168 @@ axios
   });
 ```
 
-#### Get Post's Liked Users Route
+### Post Routes
+
+These routes handle various operations related to posts within the application.
+
+#### Create Post Route
+
+- **Description:** Creates a new post.
+- **Method:** POST
+- **Endpoint:** `/api/post/create`
+- **Request Body:**
+  - `file`: File to be uploaded (File)
+  - `fileType`: Type of the file (String)
+  - `token`: Authentication token (String)
+  - `description`: Description of the post (String)
+
+**Example:**
+
+```javascript
+axios
+  .post("/api/post/create", formData, {
+    params: {
+      token: "authenticationToken",
+      description: "Post description",
+      fileType: "image",
+    },
+  })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
+
+#### Like Post Route
+
+- **Description:** Handles liking/unliking a post.
+- **Method:** POST
+- **Endpoint:** `/api/post/like`
+- **Request Body:**
+  - `token`: Authentication token (String)
+  - `postID`: ID of the post to be liked/unliked (Integer)
+
+**Example:**
+
+```javascript
+axios
+  .post("/api/post/like", {
+    token: "authenticationToken",
+    postID: 12345,
+  })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
+
+#### Save Post Route
+
+- **Description:** Handles saving/unsaving a post.
+- **Method:** POST
+- **Endpoint:** `/api/post/save`
+- **Request Body:**
+  - `token`: Authentication token (String)
+  - `postID`: ID of the post to be saved/unsaved (Integer)
+
+**Example:**
+
+```javascript
+axios
+  .post("/api/post/save", {
+    token: "authenticationToken",
+    postID: 12345,
+  })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
+
+#### Delete Post Route
+
+- **Description:** Deletes a post.
+- **Method:** POST
+- **Endpoint:** `/api/post/delete`
+- **Request Body:**
+  - `token`: Authentication token (String)
+  - `postID`: ID of the post to be deleted (Integer)
+
+```javascript
+axios
+  .post("/api/post/delete", {
+    data: {
+      token: "authenticationToken",
+      postID: 12345,
+    },
+  })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
+
+#### Archive Post Route
+
+- **Description:** Archives a post.
+- **Method:** POST
+- **Endpoint:** `/api/post/archive`
+- **Request Body:**
+  - `token`: Authentication token (String)
+  - `postID`: ID of the post to be archived (Integer)
+
+**Example:**
+
+```javascript
+axios
+  .post("/api/post/archive", {
+    token: "authenticationToken",
+    postID: 12345,
+  })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
+
+#### Get Post File
+
+- **Description:** Retrieves the file associated with a post.
+- **Method:** GET
+- **Endpoint:** `/api/post/file`
+- **Query Parameters:**
+  - `token`: Authentication token (String)
+  - `postID`: ID of the post (Integer)
+
+**Example:**
+
+```javascript
+axios
+  .get("/api/post/file", {
+    params: {
+      token: "authenticationToken",
+      postID: 12345,
+    },
+  })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
+
+#### Get Post Liked Users Route
 
 - **Description:** Retrieves the list of users who liked a post.
 - **Method:** GET
@@ -375,8 +544,35 @@ axios
 axios
   .get("/api/post/liked-users", {
     params: {
-      postID: "postIDToRetrieveLikedUsersFor",
+      postID: 12345,
       token: "authenticationToken",
+    },
+  })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
+
+#### Get Post Comments File
+
+- **Description:** Retrieves the comments associated with a post.
+- **Method:** GET
+- **Endpoint:** `/api/post/comments`
+- **Query Parameters:**
+  - `token`: Authentication token (String)
+  - `postID`: ID of the post (Integer)
+
+**Example:**
+
+```javascript
+axios
+  .get("/api/post/comments", {
+    params: {
+      token: "authenticationToken",
+      postID: 12345,
     },
   })
   .then((response) => {
@@ -407,7 +603,7 @@ axios
   .get("/api/post-flow/home", {
     params: {
       token: "authenticationToken",
-      lastGotPostID: "lastReceivedPostID",
+      lastGotPostID: 12345,
     },
   })
   .then((response) => {
@@ -436,7 +632,7 @@ axios
     params: {
       username: "usernameToRetrievePostsFor",
       token: "authenticationToken",
-      lastGotPostID: "lastReceivedPostID",
+      lastGotPostID: 12345,
     },
   })
   .then((response) => {
@@ -463,7 +659,7 @@ axios
   .get("/api/post-flow/explorer", {
     params: {
       token: "authenticationToken",
-      lastGotPostID: "lastReceivedPostID",
+      lastGotPostID: 12345,
     },
   })
   .then((response) => {
@@ -492,7 +688,7 @@ axios
   .get("/api/post-flow/archived|liked|saved", {
     params: {
       token: "authenticationToken",
-      lastGotPostID: "lastReceivedPostID",
+      lastGotPostID: 12345,
     },
   })
   .then((response) => {
