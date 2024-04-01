@@ -1,5 +1,6 @@
 .vscode
 postgres_file_to_firebase.js
+.VSCodeCounter
 # Logs
 logs
 *.log
