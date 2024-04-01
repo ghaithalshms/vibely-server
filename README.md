@@ -2,6 +2,8 @@
 
 Welcome to the Vibely social media server application! This Node.js application serves as the backend for the Vibely social media platform, providing essential functionalities:
 
+<a href="https://vibely-backend-fkpv.onrender.com">Deployed API URL</a>
+
 # Table of Contents
 
 1. [Error Codes](#error-codes)
