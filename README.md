@@ -2,212 +2,382 @@
 
 Welcome to the Vibely social media server application! This Node.js application serves as the backend for the Vibely social media platform, providing essential functionalities:
 
-- [Authentication Routes](#authentication-routes)
-  - [Sign Up](#sign-up-root)
-  - [Sign In](#sign-in-root)
-  - [Forgot Password](#forgot-password-root)
-  - [Reset Password](#reset-password-root)
-- [User Routes](#user-routes)
-  - [Check Username](#check-usernames-root)
-  - [Follow User](#follow-user-root)
-  - [Accept User Follow Request](#accept-user-follow-request-root)
-  - [Update User Profile Data](#update-user-profile-data-root)
-  - [Get User Data](#get-user-data-root)
-  - [Get User Picture](#get-user-picture-root)
-  - [Get User List](#get-user-list-root)
-    - [Get User Followers](#get-user-followers-root)
-    - [Get User Following](#get-user-following-root)
-    - [Get Post's Liked Users](#get-post-liked-users-root)
+# Table of Contents
+
+1. [Error Codes](#error-codes)
+2. [Authentication Routes](#authentication-routes)
+   - [Sign In Route](#sign-in-route)
+   - [Sign Up Route](#sign-up-route)
+   - [Forgot Password Route](#forgot-password-route)
+   - [Reset Password Route](#reset-password-route)
+3. [User Routes](#user-routes)
+   - [Follow User Route](#follow-user-route)
+   - [Accept Follow Request Route](#accept-follow-request-route)
+   - [Check Username Route](#check-username-route)
+   - [Get User Data Route](#get-user-data-route)
+   - [Get User Profile Picture Route](#get-user-profile-picture-picture-route)
+   - [Update User Profile Data Route](#update-user-profile-data-route)
+   - [User List Routes](#user-list-routes)
+     - [Get User Followers Route](#get-user-followers-route)
+     - [Get User Following Route](#get-user-following-route)
+     - [Get Post's Liked Users Route](#get-post's-liked-users-route)
+
+## Error Codes
+
+| Status Code                            | Description                                                                                                                                   |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| <span style="color:#008000">200</span> | OK - The request has succeeded. The information returned with the response is dependent on the method used in the request.                    |
+| <span style="color:#008000">201</span> | Created - The request has been fulfilled, resulting in the creation of a new resource.                                                        |
+| <span style="color:#FF0000">400</span> | Bad Request - The server cannot or will not process the request due to something that is perceived to be a client error.                      |
+| <span style="color:#FF0000">401</span> | Unauthorized - The request has not been applied because it lacks valid authentication credentials for the target resource.                    |
+| <span style="color:#FFA500">409</span> | Conflict - Indicates that the request could not be completed due to a conflict with the current state of the resource.                        |
+| <span style="color:#FF0000">500</span> | Internal Server Error - A generic error message, given when an unexpected condition was encountered and no more specific message is suitable. |
 
 ## Authentication Routes
 
-#### Common Functionality:
+These routes handle user authentication and related functionalities.
 
-1. **Database Connection**:
+### Sign In Route
 
-   - The server establishes a connection to the PostgreSQL database using a connection pool.
+- **Description:** Authenticates a user based on provided username/email and password.
+- **Method:** POST
+- **Endpoint:** `/api/auth/sign-in`
+- **Request Body:**
+  - `usernameOrEmail`: Username or email of the user (String)
+  - `password`: Password of the user (String)
 
-2. **Input Validation**:
+**Example:**
 
-   - Checks for the presence of required fields in the request body (e.g., `username`, `firstName`, `password`, `email`).
-   - If any required field is missing, it returns a 400 status code along with a "Missing required data" error message.
+```javascript
+const axios = require("axios");
 
-3. **JWT Token Generation**:
+axios
+  .post("/api/auth/sign-in", {
+    usernameOrEmail: "exampleUser",
+    password: "examplePassword",
+  })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
 
-   - Generates a JWT token for the user using the `generateToken` function.
-   - The token includes the `username` and `tokenVersion` of the user.
-   - Specifies an expiration time of 1000 days for the token.
+### Sign Up Route
 
-4. **Unique Browser ID Generation**:
+- **Description:** Registers a new user.
+- **Method:** POST
+- **Endpoint:** `/api/auth/sign-up`
+- **Request Body:**
+  - `username`: Username of the new user (String)
+  - `firstName`: First name of the new user (String)
+  - `password`: Password of the new user (String)
+  - `email`: Email address of the new user (String)
 
-   - Generates a unique browser ID using the `generateUniqueBrowserID` function.
-   - The browser ID is concatenated from a random hexadecimal string and the current timestamp.
+**Example:**
 
-5. **Response Handling**:
-   - Handles response generation for successful and error scenarios.
-   - Sends appropriate status codes and response messages.
+```javascript
+axios
+  .post("/api/auth/sign-up", {
+    username: "newUser",
+    firstName: "John",
+    password: "newPassword",
+    email: "john@example.com",
+  })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
 
-### Sign Up Root
+### Forgot Password Route
 
-This root handles the sign up process for new users.
+- **Description:** Sends a password reset email to the user.
+- **Method:** POST
+- **Endpoint:** `/api/auth/forgot-password`
+- **Request Body:**
+  - `usernameOrEmail`: Username or email of the user (String)
 
-#### Variables:
+**Example:**
 
-- `req.body.username`:
-  - This variable contains the username provided by the user during signup.
-- `req.body.firstName`:
-  - This variable contains the first name provided by the user during signup.
-- `req.body.password`:
-  - This variable contains the password provided by the user during signup.
-- `req.body.email`:
-  - This variable contains the email provided by the user during signup.
+```javascript
+axios
+  .post("/api/auth/forgot-password", {
+    usernameOrEmail: "userToReset",
+  })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
 
-#### Functionality
+### Reset Password Route
 
-1. **Username Validation**:
+- **Description:** Resets the user's password.
+- **Method:** POST
+- **Endpoint:** `/api/auth/reset-password`
+- **Request Body:**
+  - `password`: New password for the user (String)
+  - `token`: Reset password token (String)
 
-   - Validates the format of the username using the `validateUsername` function.
-   - Converts the username to lowercase and trims any leading or trailing whitespace.
-   - If the username is invalid, it returns a 400 status code with an "Invalid username" error message.
+**Example:**
 
-2. **Username Availability Check**:
-
-   - Queries the database to check if the username is already taken using the `isUsernameTaken` function.
-   - If the username is already taken, it returns a 409 status code with a "Username is already taken" error message.
-
-3. **User Creation**:
-
-   - Inserts a new user record into the `user_tbl` table in the database using the `createUser` function.
-   - Includes the username, password, email, first name, and the current date as the created date.
-
-4. **Welcome Message**:
-
-   - Sends a welcome message along with the JWT token, username, and browser ID in the response body upon successful user creation.
-
-### Sign In Root
-
-This root handles the sign-in process for users.
-
-#### Variables:
-
-- `req.body.usernameOrEmail`:
-
-  - This variable contains the username or email provided by the user during sign-in.
-
-- `req.body.password`:
-  - This variable contains the password provided by the user during sign-in.
-
-#### Functionality
-
-1. **User Retrieval**:
-
-   - Queries the database to retrieve user information based on the provided `usernameOrEmail`.
-   - If the user is not found, it returns a 404 status code with an error message.
-
-2. **Password Validation**:
-
-   - Compares the provided password with the password stored in the database.
-   - If the password is incorrect, it returns a 401 status code with an error message.
-
-### Forgot Password Root
-
-This root handles the process for users who have forgotten their passwords and need to reset them.
-
-#### Variables:
-
-- `req.body.usernameOrEmail`:
-  - This variable contains the username or email provided by the user who has forgotten their password.
-
-#### Functionality
-
-1. **Data Validation**:
-
-   - Checks if the `usernameOrEmail` field is provided in the request body.
-   - If the field is missing, it returns a 400 status code with a "Data missing" error message.
-
-2. **Email Retrieval**:
-
-   - Queries the database to retrieve the email associated with the provided `usernameOrEmail`.
-   - If the email is found, it proceeds to the next step; otherwise, it stops execution and does not send a reset password link.
-
-3. **Token Generation**:
-
-   - Generates a JWT token for resetting the password using the `generateResetPasswordToken` function.
-   - The token includes the `resetPasswordUsername` payload with the `usernameOrEmailVerified`.
-   - Specifies an expiration time of 10 minutes for the token.
-
-4. **Email Composition**:
-
-   - Composes an email body with a reset password link using the `composeEmailBody` function.
-   - The email contains instructions and a link to reset the password.
-
-5. **Email Sending**:
-
-   - Sends the composed email to the retrieved email address using the `SendMail` function.
-   - If the email is successfully sent, it responds with a 200 status code and the email address.
-   - If there's an error during any step of the process, it returns a 500 status code with an error message.
-
-### Reset Password Root
-
-This root handles the process for users resetting their passwords using a token sent via email.
-
-#### Variables:
-
-- `req.body.password`:
-  - This variable contains the new password provided by the user for resetting.
-- `req.body.token`:
-  - This variable contains the token sent to the user's email for password reset verification.
-
-#### Functionality
-
-1. **Data Validation**:
-
-   - Checks if both `password` and `token` fields are provided in the request body.
-   - If any field is missing, it returns a 400 status code with a "Data missing" error message.
-
-2. **Token Verification**:
-
-   - Verifies the token received in the request body using the `verifyTokenAndGetUsername` function.
-   - If the token is invalid or expired, it returns a 400 status code with a "Wrong token" error message.
-
-3. **Password Update**:
-
-   - Updates the user's password in the database using the `updateUserPassword` function.
-   - Increments the `token_version` in the `user_tbl` table to invalidate any existing tokens.
-   - Uses the username obtained from the verified token to identify the user.
-
-4. **Response**:
-
-   - If the password is changed successfully, it responds with a 200 status code and a "Password changed successfully" message.
-   - If there's an error during any step of the process, it returns a 500 status code with an error message.
+```javascript
+axios
+  .post("/api/auth/reset-password", {
+    password: "newPassword",
+    token: "resetToken",
+  })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
 
 ## User Routes
 
-#### Common Functionality:
+These routes handle user-related operations.
 
-### Check Username Root
+### Follow User Route
 
-This route checks the availability of a username.
+- **Description:** Handles following/unfollowing a user.
+- **Method:** POST
+- **Endpoint:** `/api/user/follow`
+- **Request Body:**
+  - `token`: Authentication token (String)
+  - `username`: Username of the user to follow (String)
 
-#### Variables:
+**Example:**
 
-- `req.body.username`:
-  - This variable contains the username to be checked for availability.
+```javascript
+axios
+  .post("/api/user/follow", {
+    token: "authenticationToken",
+    username: "userToFollow",
+  })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
 
-#### Functionality
+### Accept Follow Request Route
 
-1. **Data Validation**:
+- **Description:** Accepts a follow request from a user.
+- **Method:** POST
+- **Endpoint:** `/api/user/follow/request/accept`
+- **Request Body:**
+  - `token`: Authentication token (String)
+  - `username`: Username of the user whose follow request is accepted (String)
 
-   - Checks if the `username` field is provided in the request body.
-   - If the field is missing, it returns a 400 status code with a "Data missing" error message.
+**Example:**
 
-2. **Username Format Validation**:
+```javascript
+axios
+  .post("/api/user/follow/request/accept", {
+    token: "authenticationToken",
+    username: "userToAccept",
+  })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
 
-   - Validates the format of the username.
-   - If the username contains invalid characters, it responds with a 200 status code and an appropriate error message.
+### Check Username Route
 
-3. **Username Availability Check**:
+- **Description:** Checks the availability of a username.
+- **Method:** POST
+- **Endpoint:** `/api/user/check-username`
+- **Request Body:**
+  - `username`: Username to check (String)
 
-   - Queries the database to check if the username is already taken.
-   - If the username is available, it responds with a 200 status code and a message indicating availability.
-   - If the username is already taken, it responds with a message indicating that the username is taken.
+**Example:**
+
+```javascript
+axios
+  .post("/api/user/check-username", {
+    username: "usernameToCheck",
+  })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
+
+### Get User Data Route
+
+- **Description:** Retrieves data of a user.
+- **Method:** GET
+- **Endpoint:** `/api/user/data`
+- **Query Parameters:**
+  - `token`: Authentication token (String)
+  - `username`: Username of the user to retrieve data for (String)
+
+**Example:**
+
+```javascript
+axios
+  .get("/api/user/data", {
+    params: {
+      token: "authenticationToken",
+      username: "userToRetrieveDataFor",
+    },
+  })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
+
+### Get User Profile Picture Route
+
+- **Description:** Retrieves the profile picture of a user.
+- **Method:** GET
+- **Endpoint:** `/api/user/update/picture`
+- **Query Parameters:**
+  - `username`: Username of the user to retrieve the profile picture for (String)
+
+**Example:**
+
+```javascript
+axios
+  .get("/api/user/update/picture", {
+    params: {
+      username: "userToRetrieveProfilePictureFor",
+    },
+  })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
+
+### Update User Profile Data Route
+
+- **Description:** Updates profile data of a user.
+- **Method:** POST
+- **Endpoint:** `/api/user/update/data`
+- **Request Body:**
+  - `token`: Authentication token (String)
+  - `username`: Username of the user to update profile data for (String)
+  - Other profile data fields (String)
+
+**Example:**
+
+```javascript
+axios
+  .post("/api/user/update/data", {
+    token: "authenticationToken",
+    username: "userToUpdateProfileDataFor",
+    // Other profile data fields
+  })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
+
+### User List Routes
+
+These routes handle retrieving lists of users.
+
+#### Get User Followers Route
+
+- **Description:** Retrieves the list of followers for a user.
+- **Method:** GET
+- **Endpoint:** `/api/user/followers`
+- **Query Parameters:**
+  - `token`: Authentication token (String)
+  - `username`: Username of the user to retrieve followers for (String)
+
+**Example:**
+
+```javascript
+axios
+  .get("/api/user/followers", {
+    params: {
+      token: "authenticationToken",
+      username: "userToRetrieveFollowersFor",
+    },
+  })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
+
+#### Get User Following Route
+
+- **Description:** Retrieves the list of users a user is following.
+- **Method:** GET
+- **Endpoint:** `/api/user/following`
+- **Query Parameters:**
+  - `token`: Authentication token (String)
+  - `username`: Username of the user to retrieve following for (String)
+
+**Example:**
+
+```javascript
+axios
+  .get("/api/user/following", {
+    params: {
+      token: "authenticationToken",
+      username: "userToRetrieveFollowingFor",
+    },
+  })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
+
+#### Get Post's Liked Users Route
+
+- **Description:** Retrieves the list of users who liked a post.
+- **Method:** GET
+- **Endpoint:** `/api/post/liked-users`
+- **Query Parameters:**
+  - `postID`: ID of the post to retrieve liked users for (String)
+  - `token`: Authentication token (String)
+
+**Example:**
+
+```javascript
+axios
+  .get("/api/post/liked-users", {
+    params: {
+      postID: "postIDToRetrieveLikedUsersFor",
+      token: "authenticationToken",
+    },
+  })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
