@@ -2,7 +2,7 @@ const checkToken = require("../../func/check_token");
 const pool = require("../../pg_pool");
 
 const deleteComment = async (req, res) => {
-  const client = await pool.connect().catch((err) => console.log(err)); // Create the client only once
+  const client = await pool.connect().catch((err) => console.log(err));
 
   try {
     const { token, commentID } = req.body;
@@ -15,8 +15,12 @@ const deleteComment = async (req, res) => {
       return res.status(401).json("Wrong token");
     }
 
-    const deleted = await deleteCommentFromDB(client, commentID, tokenUsername);
-    if (deleted) {
+    const isCommentDeleted = await deleteCommentFromDB(
+      client,
+      commentID,
+      tokenUsername
+    );
+    if (isCommentDeleted) {
       return res.status(200).json("Comment deleted");
     } else {
       return res.status(404).json("Comment not found or unauthorized");
@@ -25,7 +29,7 @@ const deleteComment = async (req, res) => {
     console.log("Error in deleteComment:", error);
     return res.status(500).json("Internal server error");
   } finally {
-    client.release(); // Release the client connection in the finally block
+    client.release();
   }
 };
 
