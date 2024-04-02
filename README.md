@@ -2,7 +2,12 @@
 
 Welcome to the Vibely social media server application! This Node.js application serves as the backend for the Vibely social media platform, providing essential functionalities:
 
-<a href="https://vibely-backend-fkpv.onrender.com">Deployed API URL</a>
+<a target="_blank" href="https://vibely-backend-fkpv.onrender.com">Deployed API URL</a>
+
+- **Example User For Testing:**
+  - `username`: test_user
+  - `password`: test
+  - `token`: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3RfdXNlciIsInRva2VuVmVyc2lvbiI6MSwiaWF0IjoxNzEyMDcyNTkzLCJleHAiOjE3OTg0NzI1OTN9.EeqDIqc8U4ctCoubdUyl9KQOM0A6y8GV-2cAcZNunzE
 
 # Table of Contents
 
@@ -41,21 +46,29 @@ Welcome to the Vibely social media server application! This Node.js application 
    - [Unsubscribe Web Push Function](#unsubscribe-web-push-function)
    - [Send Web Push Function](#send-web-push-function)
 8. [Suggested Users Route](#suggested-users-route)
-9. [Post Routes](#post-routes)
-   - [Create Post Route](#create-post-route)
-   - [Like Post Route](#like-post-route)
-   - [Save Post Route](#save-post-route)
-   - [Delete Post Route](#delete-post-route)
-   - [Archive Post Route](#archive-post-route)
-   - [Get Post File](#get-post-file)
-   - [Get Post Liked Users Route](#get-post-liked-users-route)
-   - [Get Post Comments File](#get-post-comments-file)
-10. [Post Flow Routes](#post-flow-routes)
-
-- [Home Post Flow Route](#home-post-flow-route)
-- [User Post Flow Route](#user-post-flow-route)
-- [Explorer Post Flow Route](#explorer-post-flow-route)
-- [Archived/Liked/Saved Post Flows Routes](#archived/liked/saved-post-flow-route)
+9. [Search Users Route](#search-users-route)
+10. [Post Routes](#post-routes)
+    - [Create Post Route](#create-post-route)
+    - [Like Post Route](#like-post-route)
+    - [Save Post Route](#save-post-route)
+    - [Delete Post Route](#delete-post-route)
+    - [Archive Post Route](#archive-post-route)
+    - [Get Post File](#get-post-file)
+    - [Get Post Liked Users Route](#get-post-liked-users-route)
+    - [Get Post Comments File](#get-post-comments-file)
+11. [Post Flow Routes](#post-flow-routes)
+    - [Home Post Flow Route](#home-post-flow-route)
+    - [User Post Flow Route](#user-post-flow-route)
+    - [Explorer Post Flow Route](#explorer-post-flow-route)
+    - [Archived/Liked/Saved Post Flows Routes](#archived/liked/saved-post-flow-route)
+12. [Comment Routes](#comment-routes)
+    - [Create Comment Route](#create-comment-route)
+    - [Delete Comment Route](#delete-comment-route)
+    - [Like Comment Route](#like-comment-route)
+13. [Other Functions](#other-functions)
+    - [Check Token Function](#check-token-function)
+    - [Is Valid Username Function](#is-valid-username-function)
+    - [Send Mail Function](#send-mail-function)
 
 ## Error Codes
 
@@ -706,6 +719,31 @@ axios
 5.  Transforms the suggested users' data into a standardized format.
 6.  Sends the list of suggested users as a response.
 
+### Search Users Route
+
+- **Description:** Searches for users based on provided criteria such as username, first name, or last name.
+- **Method:** GET
+- **Endpoint:** `/api/user/search`
+- **Query Parameters:**
+  - `username`: The username to search for (String)
+
+**Example:**
+
+```javascript
+axios
+  .get("/api/user/search", {
+    params: {
+      username: usernameToSearch,
+    },
+  })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
+
 ### Post Routes
 
 These routes handle various operations related to posts within the application.
@@ -1036,3 +1074,101 @@ axios
     console.error(error.response.data);
   });
 ```
+
+### Comment Routes
+
+#### Create Comment Route
+
+- **Description:** Creates a new comment on a post.
+- **Method:** POST
+- **Endpoint:** `/api/comment/create`
+- **Request Body:**
+  - `token`: Authentication token (String)
+  - `postID`: ID of the post to comment on (String)
+  - `comment`: Content of the comment (String)
+
+**Example:**
+
+```javascript
+axios
+  .post("/api/comment/create", {
+    token: "authenticationToken",
+    postID: "postIDToCommentOn",
+    comment: "Comment content",
+  })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
+
+#### Delete Comment Route
+
+- **Description:** Deletes a comment from a post.
+- **Method:** POST
+- **Endpoint:** `/api/comment/delete`
+- **Request Body:**
+  - `token`: Authentication token (String)
+  - `commentID`: ID of the comment to delete (String)
+
+**Example:**
+
+```javascript
+axios
+  .post("/api/comment/delete", {
+    token: "authenticationToken",
+    commentID: "commentIDToDelete",
+  })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
+
+#### Like Comment Route
+
+- **Description:** Likes or unlikes a comment.
+- **Method:** POST
+- **Endpoint:** `/api/comment/like`
+- **Request Body:**
+  - `token`: Authentication token (String)
+  - `commentID`: ID of the comment to like/unlike (String)
+
+**Example:**
+
+```javascript
+axios
+  .post("/api/comment/like", {
+    token: "authenticationToken",
+    commentID: "commentIDToLikeUnlike",
+  })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
+
+### Other Functions
+
+#### Check Token Function
+
+- **Description:** Checks the validity of a JWT token.
+- **Usage:** This function is used to validate JWT tokens for authentication purposes.
+- **Dependencies:** `jsonwebtoken`, `pg_pool`, `dotenv`
+
+#### Is Valid Username Function
+
+- **Description:** Validates if a username follows a specific pattern.
+- **Usage:** This function checks if a username contains only lowercase letters, numbers, and underscores.
+
+#### Send Mail Function
+
+- **Description:** Sends an email using nodemailer.
+- **Usage:** This function is used to send emails with a specified subject and content.
+- **Dependencies:** `nodemailer`, `dotenv`
