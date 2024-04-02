@@ -65,6 +65,8 @@ const deleteLink = {
   deleteFollowRequest: `/api/user/follow/request/delete`,
   // WEB PUSH NOTIFICATIONS
   unsubscribeWebPush: `/api/notification/unsubscribe`,
+  // Chat
+  deleteMessage: `/api/chat/delete-message`,
 };
 
 const updateLink = {

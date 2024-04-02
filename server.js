@@ -58,6 +58,7 @@ const GetMessageFile = require("./routes/chat/get_message_file");
 // const SpotifyCallback = require("./spotify_listening/spotify_callback");
 const ForgotPassword = require("./routes/auth/forgot_password");
 const ResetPassword = require("./routes/auth/reset_password");
+const DeleteMessageFromDB = require("./routes/chat/delete_message");
 
 const app = express();
 const server = http.createServer(app);
@@ -156,7 +157,7 @@ app.post(deleteLink.deletePost, DeletePost);
 // COMMENT
 app.post(deleteLink.deleteComment, DeleteComment);
 app.post(deleteLink.unsubscribeWebPush, UnsubscribeWebPush);
-
+app.post(deleteLink.deleteMessage, DeleteMessageFromDB);
 // *********** UPDATE ***********
 // POST
 app.post(updateLink.forgotPassword, ForgotPassword);
