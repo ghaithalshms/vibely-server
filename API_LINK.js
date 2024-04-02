@@ -66,7 +66,7 @@ const deleteLink = {
   // WEB PUSH NOTIFICATIONS
   unsubscribeWebPush: `/api/notification/unsubscribe`,
   // Chat
-  deleteMessage: `/api/chat/delete-message`,
+  deleteMessage: `/api/chat/message/delete`,
 };
 
 const updateLink = {
