@@ -31,8 +31,17 @@ Welcome to the Vibely social media server application! This Node.js application 
    - [Get Message File Route](#get-message-file-route)
    - [Set Messages Seen Route](#set-messages-seen-route)
    - [Delete Message Route](#delete-message-route)
-6. [Suggested Users Route](#suggested-users-route)
-7. [Post Routes](#post-routes)
+6. [Socket IO Functions](#socket-io-functions)
+   - [Set User Socket Function](#set-user-socket-function)
+   - [Connection Function](#connection-function)
+   - [Send Message Function](#send-message-function)
+   - [Disconnection Function](#disconnection-function)
+7. [Web Push API Functions](#web-push-api-functions)
+   - [Subscribe Web Push Function](#subscribe-web-push-function)
+   - [Unsubscribe Web Push Function](#unsubscribe-web-push-function)
+   - [Send Web Push Function](#send-web-push-function)
+8. [Suggested Users Route](#suggested-users-route)
+9. [Post Routes](#post-routes)
    - [Create Post Route](#create-post-route)
    - [Like Post Route](#like-post-route)
    - [Save Post Route](#save-post-route)
@@ -41,11 +50,12 @@ Welcome to the Vibely social media server application! This Node.js application 
    - [Get Post File](#get-post-file)
    - [Get Post Liked Users Route](#get-post-liked-users-route)
    - [Get Post Comments File](#get-post-comments-file)
-8. [Post Flow Routes](#post-flow-routes)
-   - [Home Post Flow Route](#home-post-flow-route)
-   - [User Post Flow Route](#user-post-flow-route)
-   - [Explorer Post Flow Route](#explorer-post-flow-route)
-   - [Archived/Liked/Saved Post Flows Routes](#archived/liked/saved-post-flow-route)
+10. [Post Flow Routes](#post-flow-routes)
+
+- [Home Post Flow Route](#home-post-flow-route)
+- [User Post Flow Route](#user-post-flow-route)
+- [Explorer Post Flow Route](#explorer-post-flow-route)
+- [Archived/Liked/Saved Post Flows Routes](#archived/liked/saved-post-flow-route)
 
 ## Error Codes
 
@@ -591,6 +601,74 @@ axios
     console.error(error.response.data);
   });
 ```
+
+### Socket IO Functions
+
+These functions are responsible for handling socket-related operations, including setting up user sockets, managing connections, disconnections, and sending messages.
+
+#### Set User Socket Function
+
+- **Description:** Sets up a user's socket connection.
+- **Parameters:**
+  - `socket`: Socket object representing the user's connection
+  - `connectedUsers`: Map of connected users where usernames are keys and sockets are values
+
+#### Connection Function
+
+- **Description:** Manages socket connections.
+- **Parameters:**
+
+  - `io`: Socket.io server instance
+  - `connectedUsers`: Map of connected users where usernames are keys and sockets are values
+
+  #### Disconnection Function
+
+- **Description:** Manages socket disconnections.
+- **Parameters:**
+  - `socket`: Socket object representing the user's connection
+  - `connectedUsers`: Map of connected users where usernames are keys and sockets are values
+
+#### Send Message Function
+
+- **Description:** Handles sending messages via sockets.
+- **Parameters:**
+  - `socket`: Socket object representing the user's connection
+  - `connectedUsers`: Map of connected users where usernames are keys and sockets are values
+
+### Web Push API Functions
+
+These functions handle interactions with the Web Push API, including subscribing, unsubscribing, and sending push notifications.
+
+#### Subscribe Web Push Function
+
+- **Description:** Allows users to subscribe to push notifications.
+- **Parameters:**
+  - `req`: Request object containing the user's subscription data, including:
+    - `token`: Authentication token for verifying the user
+    - `pushSubscription`: Push subscription object containing endpoint, keys, etc.
+    - `browserID`: Identifier for the user's browser
+  - `res`: Response object for sending back the result
+- **Returns:** Upon successful subscription, it returns a success message indicating that the subscription was added or updated.
+
+#### Unsubscribe Web Push Function
+
+- **Description:** Allows users to unsubscribe from push notifications.
+- **Parameters:**
+  - `req`: Request object containing the user's subscription data, including:
+    - `token`: Authentication token for verifying the user
+    - `browserID`: Identifier for the user's browser
+  - `res`: Response object for sending back the result
+- **Data Required:** Requires the user's authentication token and browser ID to identify the subscription to be removed.
+- **Returns:** Upon successful unsubscription, it returns a success message indicating that the subscription was deleted.
+
+#### Send Web Push Function
+
+- **Description:** Sends push notifications to subscribed users.
+- **Parameters:**
+  - `title`: Title of the push notification
+  - `body`: Body of the push notification
+  - `to`: Username of the recipient
+- **Data Required:** Requires the title and body of the push notification, along with the username of the recipient.
 
 ### Suggested Users Route
 
