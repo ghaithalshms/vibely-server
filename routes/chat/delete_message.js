@@ -1,4 +1,3 @@
-const { UploadFileFireBase } = require("../../firebase/file_process");
 const CheckTokenNoDB = require("../../func/check_token_no_db");
 const pool = require("../../pg_pool");
 
@@ -11,32 +10,23 @@ const DeleteMessageFromDB = async (req, res) => {
   try {
     if (!(token && messageID))
       if (!res.headersSent) {
-        res.status(400).json("missing data");
-        return;
+        return res.status(400).json("missing data");
       }
-
     const tokenUsername = await CheckTokenNoDB(token);
     if (tokenUsername === false) {
-      if (!res.headersSent) res.status(401).json("wrong token");
-      return;
+      if (!res.headersSent) return res.status(401).json("wrong token");
     }
-
-    const handleSendMessageToDB = async () => {
-      const idQuery = await client.query(
-        `INSERT INTO message_tbl (msg_from, msg_to, message,file_path, file_type,sent_date) 
-      VALUES ($1, $2, $3, $4, $5, $6) RETURNING msg_id as id`,
-        [
-          tokenUsername,
-          username,
-          message,
-          filePath,
-          fileType,
-          new Date().toISOString(),
-        ]
-      );
-      if (!res.headersSent) res.status(200).json(idQuery.rows[0]);
-    };
-    handleSendMessageToDB();
+    verifyMessageSentByUser(client, messageID, tokenUsername).then(
+      async (isMsgSentByUser) => {
+        if (isMsgSentByUser) {
+          await deleteMessageFromDB(client, messageID);
+          if (!res.headersSent) res.status(200).json(result);
+        } else {
+          if (!res.headersSent)
+            res.status(400).json("This message sas not sent by you!");
+        }
+      }
+    );
   } catch (err) {
     console.log("unexpected error : ", err);
     res.status(500).json(err);
@@ -46,3 +36,15 @@ const DeleteMessageFromDB = async (req, res) => {
 };
 
 module.exports = DeleteMessageFromDB;
+
+async function verifyMessageSentByUser(client, tokenUsername, messageID) {
+  const result = await client.query(
+    "SELECT msg_id, msg_from FROM message_tbl WHERE msg_id = $1 AND msg_from = $2",
+    [messageID, tokenUsername]
+  );
+  return result.rows.count > 0;
+}
+
+async function deleteMessageFromDB(client, messageID) {
+  await client.query("DELETE FROM message_tbl WHERE msg_id = $1", [messageID]);
+}

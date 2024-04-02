@@ -22,7 +22,17 @@ Welcome to the Vibely social media server application! This Node.js application 
    - [User List Routes](#user-list-routes)
      - [Get User Followers Route](#get-user-followers-route)
      - [Get User Following Route](#get-user-following-route)
-4. [Post Routes](#post-routes)
+4. [Inbox Routes](#inbox-routes)
+   - [Get Inbox Users Route](#get-inbox-users-route)
+   - [Get Inbox Messages Count Route](#get-inbox-users-route)
+5. [Chat Routes](#chat-routes)
+   - [Send Message To Database Route](#send-message-to-database-route)
+   - [Get Chat Route](#get-chat-route)
+   - [Get Message File Route](#get-message-file-route)
+   - [Set Messages Seen Route](#set-messages-seen-route)
+   - [Delete Message Route](#delete-message-route)
+6. [Suggested Users Route](#suggested-users-route)
+7. [Post Routes](#post-routes)
    - [Create Post Route](#create-post-route)
    - [Like Post Route](#like-post-route)
    - [Save Post Route](#save-post-route)
@@ -31,7 +41,7 @@ Welcome to the Vibely social media server application! This Node.js application 
    - [Get Post File](#get-post-file)
    - [Get Post Liked Users Route](#get-post-liked-users-route)
    - [Get Post Comments File](#get-post-comments-file)
-5. [Post Flow Routes](#post-flow-routes)
+8. [Post Flow Routes](#post-flow-routes)
    - [Home Post Flow Route](#home-post-flow-route)
    - [User Post Flow Route](#user-post-flow-route)
    - [Explorer Post Flow Route](#explorer-post-flow-route)
@@ -370,6 +380,254 @@ axios
   });
 ```
 
+### Inbox Routes
+
+These routes handle operations related to user inboxes, such as retrieving inbox users and message counts.
+
+#### Get Inbox Users Route
+
+- **Description:** Retrieves a list of users with their last message for the authenticated user's inbox.
+- **Method:** GET
+- **Endpoint:** `/api/inbox`
+- **Query Parameters:**
+  - `token`: Authentication token (String)
+
+**Example:**
+
+```javascript
+axios
+  .get("/api/inbox", {
+    params: {
+      token: "authenticationToken",
+    },
+  })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
+
+#### Functionality
+
+1. Retrieves users with their last message for the authenticated user's inbox.
+2. Ensures the provided token is valid.
+3. Retrieves inbox users and their last messages from the database.
+4. Formats the retrieved data into a standardized format.
+5. Sends the formatted list of inbox users as a response.
+
+#### Get Inbox Messages Count Route
+
+- **Description:** Retrieves the count of unseen messages in the authenticated user's inbox.
+- **Method:** GET
+- **Endpoint:** `/api/inbox/count`
+- **Query Parameters:**
+  - `token`: Authentication token (String)
+
+**Example:**
+
+```javascript
+axios
+  .get("/api/inbox/count", {
+    params: {
+      token: "authenticationToken",
+    },
+  })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
+
+#### Functionality
+
+1. Retrieves the count of unseen messages in the authenticated user's inbox.
+2. Validates the provided token.
+3. Retrieves inbox users and their last messages from the database.
+4. Retrieves the count of unseen messages from the database.
+5. Sends the count of unseen messages as a response.
+
+### Chat Routes
+
+These routes handle various operations related to chatting, including sending messages, retrieving chat history, fetching message files, marking messages as seen, and deleting messages.
+
+#### Send Message To Database Route
+
+- **Description:** Sends a message to the database.
+- **Method:** POST
+- **Endpoint:** `/api/chat/send-message`
+- **Body Parameters:**
+  - `token`: Authentication token (String)
+  - `username`: Username of the recipient (String)
+  - `message`: Content of the message (String)
+  - `file`: File to be sent (image, video or audio (can be null))
+  - `fileType`: Type of the file (String)
+
+**Example:**
+
+```javascript
+const formData = new FormData();
+formData.append("token", "authenticationToken");
+formData.append("username", "recipientUsername");
+formData.append("message", "Your message here");
+formData.append("file", file);
+formData.append("fileType", "image/jpeg | video/mp4 | audio/mp3");
+
+axios
+  .post("/api/chat/send-message", formData)
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
+
+#### Get Chat Route
+
+- **Description:** Retrieves chat history with a specific user.
+- **Method:** GET
+- **Endpoint:** `/api/chat`
+- **Query Parameters:**
+  - `token`: Authentication token (String)
+  - `username`: Username of the chat partner (String)
+
+**Example:**
+
+```javascript
+axios
+  .get("/api/chat", {
+    params: {
+      token: "authenticationToken",
+      username: "chatPartnerUsername",
+    },
+  })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
+
+#### Get Message File Route
+
+- **Description:** Retrieves the file attached to a specific message.
+- **Method:** GET
+- **Endpoint:** `/api/chat/message-file`
+- **Query Parameters:**
+  - `token`: Authentication token (String)
+  - `messageID`: ID of the message (String)
+
+**Example:**
+
+```javascript
+axios
+  .get("/api/chat/message-file", {
+    params: {
+      token: "authenticationToken",
+      messageID: "messageID",
+    },
+  })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
+
+#### Set Messages Seen Route
+
+- **Description:** Marks messages as seen between the authenticated user and a specific user.
+- **Method:** POST
+- **Endpoint:** `/api/chat/seen`
+- **Body Parameters:**
+  - `token`: Authentication token (String)
+  - `username`: Username of the chat partner (String)
+
+**Example:**
+
+```javascript
+axios
+  .post("/api/chat/seen", {
+    token: "authenticationToken",
+    username: "chatPartnerUsername",
+  })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
+
+#### Delete Message Route
+
+- **Description:** Deletes a specific message from the database.
+- **Method:** DELETE
+- **Endpoint:** `/api/chat/message/delete`
+- **Body Parameters:**
+  - `token`: Authentication token (String)
+  - `messageID`: ID of the message to delete (String)
+
+**Example:**
+
+```javascript
+axios
+  .delete("/api/chat/message/delete", {
+    data: {
+      token: "authenticationToken",
+      messageID: "messageIDToDelete",
+    },
+  })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
+
+### Suggested Users Route
+
+This route retrieves a list of suggested users for the authenticated user.
+
+- **Description:** Retrieves a list of suggested users for the authenticated user.
+- **Method:** GET
+- **Endpoint:** `/api/suggested-users`
+- **Query Parameters:**
+  - `token`: Authentication token (String)
+
+**Example:**
+
+```javascript
+axios
+  .get("/api/suggestions", {
+    params: {
+      token: "authenticationToken",
+    },
+  })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data);
+  });
+```
+
+#### Functionality
+
+1.  Checks the validity of the provided token.
+2.  Retrieves suggested users based on the user's network activity.
+3.  Excludes users already followed by the authenticated user and users who have sent follow requests to the authenticated user.
+4.  Limits the number of suggested users to a maximum of 6.
+5.  Transforms the suggested users' data into a standardized format.
+6.  Sends the list of suggested users as a response.
+
 ### Post Routes
 
 These routes handle various operations related to posts within the application.
@@ -676,7 +934,7 @@ axios
 
 These routes handle retrieving post flows for archived, liked, and saved posts.
 
-- **Description:** Retrieves the post flow for archived posts.
+- **Description:** Retrieves the post flow for archived/liked/saved posts.
 - **Method:** GET
 - **Endpoint:** `/api/post-flow/archived|liked|saved`
 - **Query Parameters:**
