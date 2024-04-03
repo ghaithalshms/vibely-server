@@ -6,7 +6,6 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const multer = require("multer");
 const spotifyApi = require("./spotify_listening/spotify_api");
-const logger = require("./log/logger");
 
 // Import Routes
 const { postLink, getLink, deleteLink, updateLink } = require("./API_LINK");
