@@ -40,6 +40,11 @@ const formatInboxUsers = (inboxUsersArray, connectedUsers) => {
   let inboxList = [];
 
   for (const inbox of inboxUsersArray.rows) {
+    let shortMessage = inbox.message?.slice(0, 30);
+    shortMessage =
+      shortMessage?.length < inbox.message?.length
+        ? shortMessage + "..."
+        : shortMessage;
     inboxList.push({
       user: {
         username: inbox.username,
@@ -53,7 +58,7 @@ const formatInboxUsers = (inboxUsersArray, connectedUsers) => {
       },
       message: {
         id: inbox.msg_id,
-        message: inbox.message,
+        message: shortMessage,
         from: inbox.msg_from,
         to: inbox.msg_to,
         sentDate: inbox.sent_date,
