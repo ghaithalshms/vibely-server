@@ -1,4 +1,4 @@
-const { UploadFileFireBase } = require("../../firebase/file_process");
+const { UploadFileToFireBase } = require("../../firebase/upload_file.js");
 const CheckTokenNoDB = require("../../func/check_token_no_db");
 const pool = require("../../pg_pool");
 require("dotenv").config();
@@ -48,7 +48,7 @@ const SendMessageToDB = async (req, res) => {
     }
 
     const filePath = file
-      ? await UploadFileFireBase(file, fileType, "chat")
+      ? await UploadFileToFireBase(file, fileType, "chat")
       : null;
     if (filePath === false) {
       if (!res.headersSent) {

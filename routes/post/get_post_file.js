@@ -1,5 +1,5 @@
 require("dotenv").config();
-const { GetFileFireBase } = require("../../firebase/file_process");
+const { GetFileFromFireBase } = require("../../firebase/get_file.js");
 const checkToken = require("../../func/check_token");
 const pool = require("../../pg_pool");
 
@@ -55,7 +55,7 @@ const GetPostFile = async (req, res) => {
     }
 
     if (!res.headersSent) {
-      const url = await GetFileFireBase(filePath);
+      const url = await GetFileFromFireBase(filePath);
       res.redirect(url);
     }
   } catch (err) {

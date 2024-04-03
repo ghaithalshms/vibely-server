@@ -1,26 +1,35 @@
+const { DeleteFileFromFirebase } = require("../../firebase/delete_file");
 const checkToken = require("../../func/check_token");
 const pool = require("../../pg_pool");
 
 const DeletePost = async (req, res) => {
-  const { token, postID } = req.body;
-
   try {
-    const client = await pool.connect().catch((err) => console.log(err));
+    const { token, postID } = req.body;
 
-    if (!(token && postID)) {
+    if (!token || !postID) {
       return res.status(400).json("Data missing");
     }
 
-    const tokenUsername = await validateToken(token);
+    const tokenUsername = await checkToken(token);
 
     if (!tokenUsername) {
       return res.status(401).json("Wrong token");
     }
 
-    const deleteResult = await deletePost(client, postID, tokenUsername);
+    const filePath = await getFilePath(postID, tokenUsername);
 
-    if (deleteResult.rowCount > 0) {
-      await decrementPostCount(client, tokenUsername);
+    if (filePath && !filePath.startsWith("text")) {
+      const isDeletedFromFirebase = await DeleteFileFromFirebase(filePath);
+
+      if (!isDeletedFromFirebase) {
+        return res.status(404).json("Post not found or unauthorized");
+      }
+    }
+
+    const deleteResult = await deletePost(postID, tokenUsername);
+
+    if (deleteResult) {
+      await decrementPostCount(tokenUsername);
       return res.status(200).json("Post deleted");
     } else {
       return res.status(404).json("Post not found or unauthorized");
@@ -31,21 +40,36 @@ const DeletePost = async (req, res) => {
   }
 };
 
-const validateToken = async (token) => {
-  return await checkToken(token);
-};
-
-const deletePost = async (client, postID, tokenUsername) => {
-  return await client.query(
-    `DELETE FROM post_tbl 
-    WHERE post_id = $1 AND posted_user = $2
-    RETURNING post_id`,
+const getFilePath = async (postID, tokenUsername) => {
+  const result = await pool.query(
+    `SELECT file_path FROM post_tbl WHERE post_id = $1 AND posted_user = $2`,
     [postID, tokenUsername]
   );
+  return result.rows[0]?.file_path;
 };
 
-const decrementPostCount = async (client, username) => {
-  await client.query(
+const deletePost = async (postID, tokenUsername) => {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const deleteResult = await client.query(
+      `DELETE FROM post_tbl 
+      WHERE post_id = $1 AND posted_user = $2
+      RETURNING post_id`,
+      [postID, tokenUsername]
+    );
+    await client.query("COMMIT");
+    return deleteResult.rowCount > 0;
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+const decrementPostCount = async (username) => {
+  await pool.query(
     `UPDATE user_tbl 
     SET post_count = post_count - 1 
     WHERE username = $1`,

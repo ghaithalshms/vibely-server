@@ -1,4 +1,4 @@
-const { GetFileFireBase } = require("../../firebase/file_process");
+const { GetFileFromFireBase } = require("../../firebase/get_file.js");
 const pool = require("../../pg_pool");
 require("dotenv").config();
 
@@ -19,7 +19,7 @@ const GetUserPicture = async (req, res) => {
     const pfpPath = pictureQuery.rows[0]?.pfp_path;
 
     if (pfpPath) {
-      GetFileFireBase(pfpPath)
+      GetFileFromFireBase(pfpPath)
         .then((url) => {
           res.redirect(url);
         })

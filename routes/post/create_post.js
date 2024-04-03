@@ -1,4 +1,4 @@
-const { UploadFileFireBase } = require("../../firebase/file_process");
+const { UploadFileToFireBase } = require("../../firebase/upload_file.js");
 const checkToken = require("../../func/check_token");
 const pool = require("../../pg_pool");
 
@@ -40,7 +40,7 @@ const validateToken = async (token) => {
 
 const uploadFile = async (file, fileType) => {
   try {
-    return await UploadFileFireBase(file, fileType, "post");
+    return await UploadFileToFireBase(file, fileType, "post");
   } catch (error) {
     console.error("Error uploading file:", error);
     return false;
@@ -62,8 +62,8 @@ const createPost = async (
         username,
         description,
         new Date().toISOString(),
-        filePath || "text/plain",
-        fileType,
+        filePath,
+        fileType || "text/plain",
       ]
     );
 

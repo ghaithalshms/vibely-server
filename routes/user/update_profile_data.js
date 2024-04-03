@@ -1,4 +1,4 @@
-const { UploadFileFireBase } = require("../../firebase/file_process");
+const { UploadFileToFireBase } = require("../../firebase/upload_file.js");
 const checkToken = require("../../func/check_token");
 const pool = require("../../pg_pool");
 
@@ -15,7 +15,7 @@ const updateProfileData = async (client, req, res, tokenUsername) => {
   const file = req.file;
 
   const filePath = file
-    ? await UploadFileFireBase(file, fileType, "pfp")
+    ? await UploadFileToFireBase(file, fileType, "pfp")
     : null;
   if (filePath === false) {
     if (!res.headersSent)
