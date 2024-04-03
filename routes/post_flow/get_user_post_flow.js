@@ -10,7 +10,7 @@ const handleUserPostFlow = async (req, res) => {
     return;
   }
 
-  if (!token) {
+  if (!(token && username)) {
     res.status(401).json("data missing");
     return;
   }
