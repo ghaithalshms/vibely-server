@@ -94,7 +94,7 @@ const GetInbox = async (req, res, connectedUsers) => {
   } catch (error) {
     if (!res.headersSent) res.status(400).json(error.message);
   } finally {
-    client?.end();
+    await client?.end();
   }
 };
 

@@ -30,7 +30,7 @@ async function checkToken(token) {
   } catch (err) {
     return false;
   } finally {
-    client?.end();
+    await client?.end();
   }
 }
 

@@ -34,7 +34,7 @@ const GetUserData = async (req, res, connectedUsers) => {
   } catch (err) {
     handleError(res)(err);
   } finally {
-    client?.end();
+    await client?.end();
   }
 };
 

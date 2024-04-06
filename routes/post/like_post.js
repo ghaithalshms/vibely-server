@@ -31,7 +31,7 @@ const handleLikePost = async (req, res) => {
     console.log("unexpected error : ", err);
     res.status(500).json(err);
   } finally {
-    client?.end();
+    await client?.end();
   }
 };
 

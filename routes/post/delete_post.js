@@ -65,7 +65,7 @@ const deletePost = async (postID, tokenUsername) => {
     await client.query("ROLLBACK");
     throw error;
   } finally {
-    client?.end();
+    await client?.end();
   }
 };
 

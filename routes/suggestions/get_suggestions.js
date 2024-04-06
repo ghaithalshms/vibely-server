@@ -80,7 +80,7 @@ const GetSuggestions = async (req, res) => {
       res.status(400).json(error.message);
     }
   } finally {
-    client?.end();
+    await client?.end();
   }
 };
 

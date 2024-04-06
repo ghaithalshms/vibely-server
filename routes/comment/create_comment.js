@@ -25,7 +25,7 @@ const createComment = async (req, res) => {
       res.status(500).json(err);
     }
   } finally {
-    client?.end();
+    await client?.end();
   }
 };
 

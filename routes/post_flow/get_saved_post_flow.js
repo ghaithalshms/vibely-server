@@ -62,7 +62,7 @@ const GetSavedPostFlow = async (req, res) => {
     console.error("Unexpected error:", error);
     return res.status(500).json(error);
   } finally {
-    client?.end();
+    await client?.end();
   }
 };
 

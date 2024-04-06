@@ -33,7 +33,7 @@ const UnsubscribeWebPush = async (req, res) => {
     console.log("unexpected error:", err);
     if (!res.headersSent) res.status(500).json(err);
   } finally {
-    client?.end();
+    await client?.end();
   }
 };
 

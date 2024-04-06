@@ -26,7 +26,7 @@ const GetUserFollowing = async (req, res) => {
   } catch (err) {
     handleError(res)(err);
   } finally {
-    client?.end();
+    await client?.end();
   }
 };
 

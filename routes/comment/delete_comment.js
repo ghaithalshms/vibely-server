@@ -30,7 +30,7 @@ const deleteComment = async (req, res) => {
     console.log("Error in deleteComment:", error);
     return res.status(500).json("Internal server error");
   } finally {
-    client?.end();
+    await client?.end();
   }
 };
 

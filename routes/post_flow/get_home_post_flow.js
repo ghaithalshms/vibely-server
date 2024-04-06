@@ -44,7 +44,7 @@ const GetHomePostFlow = async (req, res) => {
     console.error("Unexpected error:", error);
     return res.status(500).json("Internal server error");
   } finally {
-    client?.end();
+    await client?.end();
   }
 };
 

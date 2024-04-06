@@ -45,7 +45,7 @@ const SendWebPush = async (title, body, to) => {
   } catch (err) {
     console.log(err);
   } finally {
-    client?.end();
+    await client?.end();
   }
 };
 

@@ -23,7 +23,7 @@ const dissconnectSocket = async (socket, connectedUsers) => {
     } catch (err) {
       console.log("unexpected error : ", err);
     } finally {
-      client?.end();
+      await client?.end();
     }
   });
 };
