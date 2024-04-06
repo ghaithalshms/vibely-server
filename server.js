@@ -183,9 +183,7 @@ const listener = server.listen(8000 || process.env.PORT, () => {
 // Function to send HTTP request to the self server
 const sendHttpRequest = async () => {
   try {
-    const response = await axios.get(
-      `${process.env.API_URL}/api/server/activate`
-    );
+    const response = await axios.get(`${process.env.API_URL}/`);
     // console.log("HTTP Request Successful:", response.data);
   } catch (error) {
     console.log("HTTP Request Failed:", error);
