@@ -1,6 +1,6 @@
 const { DeleteFileFromFirebase } = require("../../firebase/delete_file");
 const checkToken = require("../../func/check_token");
-const pool = require("../../pg_pool");
+const { Client } = require("pg");
 
 const DeletePost = async (req, res) => {
   try {
@@ -49,7 +49,8 @@ const getFilePath = async (postID, tokenUsername) => {
 };
 
 const deletePost = async (postID, tokenUsername) => {
-  const client = await pool.connect();
+  const client = new Client({ connectionString: process.env.DATABASE_STRING });
+  await client.connect();
   try {
     await client.query("BEGIN");
     const deleteResult = await client.query(
@@ -64,7 +65,7 @@ const deletePost = async (postID, tokenUsername) => {
     await client.query("ROLLBACK");
     throw error;
   } finally {
-    client.release();
+    client?.end();
   }
 };
 

@@ -1,5 +1,5 @@
 const checkToken = require("../../func/check_token");
-const pool = require("../../pg_pool");
+const { Client } = require("pg");
 require("dotenv").config();
 
 const getInboxUsers = async (client, tokenUsername) => {
@@ -73,7 +73,8 @@ const formatInboxUsers = (inboxUsersArray, connectedUsers) => {
 
 const GetInbox = async (req, res, connectedUsers) => {
   const { token } = req.query;
-  const client = await pool.connect().catch((err) => console.log(err));
+  const client = new Client({ connectionString: process.env.DATABASE_STRING });
+  await client.connect();
 
   try {
     if (!token) {
@@ -93,7 +94,7 @@ const GetInbox = async (req, res, connectedUsers) => {
   } catch (error) {
     if (!res.headersSent) res.status(400).json(error.message);
   } finally {
-    client?.release();
+    client?.end();
   }
 };
 

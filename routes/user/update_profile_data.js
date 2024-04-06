@@ -1,6 +1,6 @@
 const { UploadFileToFireBase } = require("../../firebase/upload_file.js");
 const checkToken = require("../../func/check_token");
-const pool = require("../../pg_pool");
+const { Client } = require("pg");
 
 const updateProfileData = async (client, req, res, tokenUsername) => {
   const {
@@ -47,7 +47,8 @@ const updateProfileData = async (client, req, res, tokenUsername) => {
 
 const UpdateProfileData = async (req, res) => {
   const { token } = req.body;
-  const client = await pool.connect().catch((err) => console.log(err));
+  const client = new Client({ connectionString: process.env.DATABASE_STRING });
+  await client.connect();
 
   try {
     if (!(token && req.body.username)) {
@@ -66,7 +67,7 @@ const UpdateProfileData = async (req, res) => {
     console.log("unexpected error : ", err);
     res.status(500).json(err);
   } finally {
-    client?.release();
+    client?.end();
   }
 };
 

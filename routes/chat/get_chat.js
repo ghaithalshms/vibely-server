@@ -1,5 +1,5 @@
 const checkToken = require("../../func/check_token");
-const pool = require("../../pg_pool");
+const { Client } = require("pg");
 require("dotenv").config();
 
 const getChatMessages = async (client, tokenUsername, otherUsername) => {
@@ -32,7 +32,8 @@ const formatChatMessages = (chatQuery) => {
 
 const GetChat = async (req, res) => {
   const { token, username } = req.query;
-  const client = await pool.connect().catch((err) => console.log(err));
+  const client = new Client({ connectionString: process.env.DATABASE_STRING });
+  await client.connect();
 
   try {
     if (!(token && username)) {
@@ -53,7 +54,7 @@ const GetChat = async (req, res) => {
     console.log("unexpected error : ", err);
     res.status(500).json(err);
   } finally {
-    client?.release();
+    client?.end();
   }
 };
 

@@ -1,10 +1,11 @@
 const { GetFileFromFireBase } = require("../../firebase/get_file.js");
-const pool = require("../../pg_pool");
+const { Client } = require("pg");
 require("dotenv").config();
 
 const GetUserPicture = async (req, res) => {
   const { username } = req.query;
-  const client = await pool.connect().catch((err) => console.log(err));
+  const client = new Client({ connectionString: process.env.DATABASE_STRING });
+  await client.connect();
 
   if (!username) {
     res.status(400).json("Data missing");
@@ -38,7 +39,7 @@ const GetUserPicture = async (req, res) => {
     console.error("Unexpected error:", err);
     res.status(500).json(err);
   } finally {
-    client.release();
+    client?.end();
   }
 };
 

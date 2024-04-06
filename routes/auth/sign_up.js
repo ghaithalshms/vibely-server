@@ -1,6 +1,6 @@
 const FuncIsValidUsername = require("../../func/is_valid_username");
 const jwt = require("jsonwebtoken");
-const pool = require("../../pg_pool");
+const { Client } = require("pg");
 
 require("dotenv").config();
 
@@ -11,7 +11,8 @@ const signUp = async (req, res) => {
     return res.status(400).json("Missing required data");
   }
 
-  const client = await pool.connect().catch(handleError(res));
+  const client = new Client({ connectionString: process.env.DATABASE_STRING });
+  await client.connect();
 
   try {
     const usernameVerified = validateUsername(username);
@@ -39,7 +40,7 @@ const signUp = async (req, res) => {
   } catch (err) {
     handleError(res)(err);
   } finally {
-    client?.release();
+    client?.end();
   }
 };
 

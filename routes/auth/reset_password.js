@@ -1,4 +1,4 @@
-const pool = require("../../pg_pool");
+const { Client } = require("pg");
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 
@@ -25,10 +25,8 @@ async function updateUserPassword(client, tokenUsername, newPassword) {
 
 const ResetPassword = async (req, res) => {
   const { password, token } = req.body;
-  const client = await pool.connect().catch((err) => {
-    console.log(err);
-    res.status(500).send("Error connecting to database");
-  });
+  const client = new Client({ connectionString: process.env.DATABASE_STRING });
+  await client.connect();
 
   try {
     if (!(password && token)) {
@@ -49,7 +47,7 @@ const ResetPassword = async (req, res) => {
     console.error("unexpected error : ", err);
     res.status(500).json(err);
   } finally {
-    client?.release();
+    client?.end();
   }
 };
 

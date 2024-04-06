@@ -1,12 +1,13 @@
 require("dotenv").config();
 
 const jwt = require("jsonwebtoken");
-const pool = require("../pg_pool");
+const { Client } = require("pg");
 
 // !!!!!!!!!!! USE await !!!!!!!!!!!!!!!!!!!!!!!!
 
 async function checkToken(token) {
-  const client = await pool.connect().catch((err) => console.log(err));
+  const client = new Client({ connectionString: process.env.DATABASE_STRING });
+  await client.connect();
 
   try {
     if (!token) return false;
@@ -29,7 +30,7 @@ async function checkToken(token) {
   } catch (err) {
     return false;
   } finally {
-    client?.release();
+    client?.end();
   }
 }
 

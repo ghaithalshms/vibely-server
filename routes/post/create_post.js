@@ -1,12 +1,13 @@
 const { UploadFileToFireBase } = require("../../firebase/upload_file.js");
 const checkToken = require("../../func/check_token");
-const pool = require("../../pg_pool");
+const { Client } = require("pg");
 
 const CreatePost = async (req, res) => {
   const file = req.file;
   const { fileType, token, description } = req.body;
 
-  const client = await pool.connect().catch((err) => console.log(err));
+  const client = new Client({ connectionString: process.env.DATABASE_STRING });
+  await client.connect();
 
   try {
     if (!(token && (file || description))) {
@@ -30,7 +31,7 @@ const CreatePost = async (req, res) => {
     console.error("Unexpected error:", error);
     return res.status(500).json(error);
   } finally {
-    client.release();
+    client?.end();
   }
 };
 

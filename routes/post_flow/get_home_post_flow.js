@@ -1,13 +1,15 @@
 require("dotenv").config();
 const checkToken = require("../../func/check_token");
-const pool = require("../../pg_pool");
+const { Client } = require("pg");
 
 const GetHomePostFlow = async (req, res) => {
   const { token, lastGotPostID } = req.query;
 
+  const client = new Client({
+    connectionString: process.env.DATABASE_STRING,
+  });
+  await client.connect();
   try {
-    const client = await pool.connect().catch((err) => console.log(err));
-
     if (!lastGotPostID) {
       return res.json({ postFlowArray: [] });
     }
@@ -41,6 +43,8 @@ const GetHomePostFlow = async (req, res) => {
   } catch (error) {
     console.error("Unexpected error:", error);
     return res.status(500).json("Internal server error");
+  } finally {
+    client?.end();
   }
 };
 

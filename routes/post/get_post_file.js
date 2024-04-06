@@ -1,7 +1,7 @@
 require("dotenv").config();
 const { GetFileFromFireBase } = require("../../firebase/get_file.js");
 const checkToken = require("../../func/check_token");
-const pool = require("../../pg_pool");
+const { Client } = require("pg");
 
 const updatePostViewCount = async (client, tokenUsername, postID) => {
   await client.query(
@@ -26,7 +26,8 @@ const getFileQuery = async (client, tokenUsername, postID) => {
 
 const GetPostFile = async (req, res) => {
   const { token, postID } = req.query;
-  const client = await pool.connect().catch((err) => console.log(err));
+  const client = new Client({ connectionString: process.env.DATABASE_STRING });
+  await client.connect();
 
   try {
     if (!(token && postID)) {
@@ -62,7 +63,7 @@ const GetPostFile = async (req, res) => {
     console.log("unexpected error:", err);
     res.status(500).json(err);
   } finally {
-    client?.release();
+    client?.end();
   }
 };
 
