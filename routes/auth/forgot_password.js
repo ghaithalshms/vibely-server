@@ -1,6 +1,6 @@
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
-const pool = require("../../pg_pool");
+const { Client } = require("pg");
 const SendMail = require("../../mail/send_mail");
 
 const getEmailFromUsernameOrEmail = async (client, usernameOrEmailVerified) => {
@@ -33,12 +33,19 @@ const composeEmailBody = (usernameOrEmailVerified, token) => {
   </div>`;
 };
 
+const censorWord = function (str) {
+  return str[0] + "*".repeat(str.length - 2) + str.slice(-1);
+};
+
+const censorEmail = function (email) {
+  var arr = email.split("@");
+  if (arr.length > 1) return censorWord(arr[0]) + "@" + censorWord(arr[1]);
+};
+
 const ForgotPassword = async (req, res) => {
   const { usernameOrEmail } = req.body;
-  const client = await pool.connect().catch((err) => {
-    console.log(err);
-    res.status(500).send("Error connecting to database");
-  });
+  const client = new Client({ connectionString: process.env.DATABASE_STRING });
+  await client.connect();
 
   try {
     if (!usernameOrEmail) {
@@ -56,13 +63,14 @@ const ForgotPassword = async (req, res) => {
       const token = generateResetPasswordToken(usernameOrEmailVerified);
       const body = composeEmailBody(usernameOrEmailVerified, token);
       await SendMail(email, "Reset Password", body);
-      res.status(200).send({ email });
+      const censoredEmail = censorEmail(email);
+      res.status(200).send({ censoredEmail });
     }
   } catch (err) {
     console.log("unexpected error : ", err);
     res.status(500).json(err);
   } finally {
-    client?.release();
+    client?.end();
   }
 };
 
