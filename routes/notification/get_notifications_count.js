@@ -15,6 +15,9 @@ const getNotificationCount = async (client, tokenUsername) => {
 const GetNotificationCount = async (req, res) => {
   const { token } = req.query;
   const client = new Client({ connectionString: process.env.DATABASE_STRING });
+  client.on("error", (err) =>
+    console.error("something bad has happened!", err.stack)
+  );
   await client.connect();
 
   try {

@@ -4,6 +4,9 @@ const { Client } = require("pg");
 
 const signIn = async (req, res) => {
   const client = new Client({ connectionString: process.env.DATABASE_STRING });
+  client.on("error", (err) =>
+    console.error("something bad has happened!", err.stack)
+  );
   await client.connect();
   try {
     const { usernameOrEmail, password } = req.body;

@@ -6,6 +6,9 @@ require("dotenv").config();
 const GetPostLikedUsers = async (req, res) => {
   const { postID, token } = req.query;
   const client = new Client({ connectionString: process.env.DATABASE_STRING });
+  client.on("error", (err) =>
+    console.error("something bad has happened!", err.stack)
+  );
   await client.connect();
 
   try {

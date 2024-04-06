@@ -7,6 +7,9 @@ const CreatePost = async (req, res) => {
   const { fileType, token, description } = req.body;
 
   const client = new Client({ connectionString: process.env.DATABASE_STRING });
+  client.on("error", (err) =>
+    console.error("something bad has happened!", err.stack)
+  );
   await client.connect();
 
   try {

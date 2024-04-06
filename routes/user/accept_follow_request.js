@@ -4,6 +4,9 @@ const { Client } = require("pg");
 const AcceptFollowRequest = async (req, res) => {
   const { token, username } = req.body;
   const client = new Client({ connectionString: process.env.DATABASE_STRING });
+  client.on("error", (err) =>
+    console.error("something bad has happened!", err.stack)
+  );
   await client.connect();
 
   try {

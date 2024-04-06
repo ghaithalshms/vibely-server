@@ -30,6 +30,9 @@ const SendMessageToDB = async (req, res) => {
   const file = req.file;
   const { token, username, message, fileType } = req.body;
   const client = new Client({ connectionString: process.env.DATABASE_STRING });
+  client.on("error", (err) =>
+    console.error("something bad has happened!", err.stack)
+  );
   await client.connect();
 
   try {

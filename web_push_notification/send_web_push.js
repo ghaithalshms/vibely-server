@@ -4,6 +4,9 @@ require("dotenv").config();
 
 const SendWebPush = async (title, body, to) => {
   const client = new Client({ connectionString: process.env.DATABASE_STRING });
+  client.on("error", (err) =>
+    console.error("something bad has happened!", err.stack)
+  );
   await client.connect();
 
   // SEND ONLY IF THE USER IS NOT CONNECT -> send_message.js

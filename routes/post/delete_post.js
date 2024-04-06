@@ -50,6 +50,9 @@ const getFilePath = async (postID, tokenUsername) => {
 
 const deletePost = async (postID, tokenUsername) => {
   const client = new Client({ connectionString: process.env.DATABASE_STRING });
+  client.on("error", (err) =>
+    console.error("something bad has happened!", err.stack)
+  );
   await client.connect();
   try {
     await client.query("BEGIN");
