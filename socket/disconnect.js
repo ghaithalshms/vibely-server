@@ -1,12 +1,9 @@
-const { Client } = require("pg");
+const { Pool } = require("pg");
 
 const dissconnectSocket = async (socket, connectedUsers) => {
+  const pool = new Pool({ connectionString: process.env.DATABASE_STRING });
+  const client = await pool.connect();
   socket.on("disconnect", async () => {
-    const client = new Client({
-      connectionString: process.env.DATABASE_STRING,
-    });
-    await client.connect();
-
     try {
       let disconnectedUsername = null;
       connectedUsers.forEach((value, key) => {
@@ -23,7 +20,7 @@ const dissconnectSocket = async (socket, connectedUsers) => {
     } catch (err) {
       console.log("unexpected error : ", err);
     } finally {
-      await client?.end();
+      await client?.release();
     }
   });
 };

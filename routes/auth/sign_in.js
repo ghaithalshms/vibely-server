@@ -1,13 +1,14 @@
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
-const { Client } = require("pg");
+const { Pool } = require("pg");
 
 const signIn = async (req, res) => {
-  const client = new Client({ connectionString: process.env.DATABASE_STRING });
+  const pool = new Pool({ connectionString: process.env.DATABASE_STRING });
+  const client = await pool.connect();
   client.on("error", (err) =>
     console.error("something bad has happened!", err.stack)
   );
-  await client.connect();
+
   try {
     const { usernameOrEmail, password } = req.body;
     if (!usernameOrEmail || !password) {
@@ -35,7 +36,7 @@ const signIn = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   } finally {
     if (client) {
-      await client?.end();
+      await client?.release();
     }
   }
 };

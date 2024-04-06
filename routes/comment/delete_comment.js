@@ -1,12 +1,12 @@
 const checkToken = require("../../func/check_token");
-const { Client } = require("pg");
+const { Pool } = require("pg");
 
 const deleteComment = async (req, res) => {
-  const client = new Client({ connectionString: process.env.DATABASE_STRING });
+  const pool = new Pool({ connectionString: process.env.DATABASE_STRING });
+  const client = await pool.connect();
   client.on("error", (err) =>
     console.error("something bad has happened!", err.stack)
   );
-  await client.connect();
 
   try {
     const { token, commentID } = req.body;
@@ -33,7 +33,7 @@ const deleteComment = async (req, res) => {
     console.log("Error in deleteComment:", error);
     return res.status(500).json("Internal server error");
   } finally {
-    await client?.end();
+    await client?.release();
   }
 };
 

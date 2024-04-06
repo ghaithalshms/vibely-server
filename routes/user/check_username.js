@@ -1,5 +1,5 @@
 const funcIsValidUsername = require("../../func/is_valid_username");
-const { Client } = require("pg");
+const { Pool } = require("pg");
 
 const checkUsername = async (req, res) => {
   const { username } = req.body;
@@ -8,11 +8,11 @@ const checkUsername = async (req, res) => {
     return res.status(400).json("Data missing");
   }
 
-  const client = new Client({ connectionString: process.env.DATABASE_STRING });
+  const pool = new Pool({ connectionString: process.env.DATABASE_STRING });
+  const client = await pool.connect();
   client.on("error", (err) =>
     console.error("something bad has happened!", err.stack)
   );
-  await client.connect();
 
   try {
     const isValid = validateUsername(username);
@@ -33,7 +33,7 @@ const checkUsername = async (req, res) => {
   } catch (err) {
     handleError(res)(err);
   } finally {
-    await client?.end();
+    await client?.release();
   }
 };
 

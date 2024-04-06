@@ -1,6 +1,6 @@
 require("dotenv").config();
 const CheckTokenNoDB = require("../func/check_token_no_db");
-const { Client } = require("pg");
+const { Pool } = require("pg");
 
 const unsubscribeWebPush = async (client, tokenUsername, browserID, res) => {
   await client
@@ -21,11 +21,11 @@ const UnsubscribeWebPush = async (req, res) => {
 
   if (!(token && browserID)) return;
 
-  const client = new Client({ connectionString: process.env.DATABASE_STRING });
+  const pool = new Pool({ connectionString: process.env.DATABASE_STRING });
+  const client = await pool.connect();
   client.on("error", (err) =>
     console.error("something bad has happened!", err.stack)
   );
-  await client.connect();
 
   try {
     const tokenUsername = await CheckTokenNoDB(token);
@@ -36,7 +36,7 @@ const UnsubscribeWebPush = async (req, res) => {
     console.log("unexpected error:", err);
     if (!res.headersSent) res.status(500).json(err);
   } finally {
-    await client?.end();
+    await client?.release();
   }
 };
 

@@ -1,5 +1,5 @@
 const CheckTokenNoDB = require("../../func/check_token_no_db");
-const { Client } = require("pg");
+const { Pool } = require("pg");
 require("dotenv").config();
 
 const getMessagesCount = async (client, tokenUsername) => {
@@ -15,11 +15,11 @@ const getMessagesCount = async (client, tokenUsername) => {
 
 const GetMessagesCount = async (req, res) => {
   const { token } = req.query;
-  const client = new Client({ connectionString: process.env.DATABASE_STRING });
+  const pool = new Pool({ connectionString: process.env.DATABASE_STRING });
+  const client = await pool.connect();
   client.on("error", (err) =>
     console.error("something bad has happened!", err.stack)
   );
-  await client.connect();
 
   try {
     if (!token) {
@@ -45,7 +45,7 @@ const GetMessagesCount = async (req, res) => {
     console.log("unexpected error : ", err);
     res.status(500).json(err);
   } finally {
-    await client?.end();
+    await client?.release();
   }
 };
 

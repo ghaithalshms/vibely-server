@@ -1,7 +1,7 @@
 require("dotenv").config();
 
 const checkToken = require("../func/check_token");
-const { Client } = require("pg");
+const { Pool } = require("pg");
 
 const insertNewWebPush = async (
   client,
@@ -58,11 +58,11 @@ const SubscribeWebPush = async (req, res) => {
     return;
   }
 
-  const client = new Client({ connectionString: process.env.DATABASE_STRING });
+  const pool = new Pool({ connectionString: process.env.DATABASE_STRING });
+  const client = await pool.connect();
   client.on("error", (err) =>
     console.error("something bad has happened!", err.stack)
   );
-  await client.connect();
 
   try {
     const tokenUsername = await checkToken(token);
@@ -98,7 +98,7 @@ const SubscribeWebPush = async (req, res) => {
     console.log("unexpected error : ", err);
     res.status(500).json(err);
   } finally {
-    await client?.end();
+    await client?.release();
   }
 };
 

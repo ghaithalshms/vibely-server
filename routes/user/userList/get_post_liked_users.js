@@ -1,15 +1,15 @@
 const checkToken = require("../../../func/check_token");
-const { Client } = require("pg");
+const { Pool } = require("pg");
 
 require("dotenv").config();
 
 const GetPostLikedUsers = async (req, res) => {
   const { postID, token } = req.query;
-  const client = new Client({ connectionString: process.env.DATABASE_STRING });
+  const pool = new Pool({ connectionString: process.env.DATABASE_STRING });
+  const client = await pool.connect();
   client.on("error", (err) =>
     console.error("something bad has happened!", err.stack)
   );
-  await client.connect();
 
   try {
     if (!(postID && token)) {
@@ -27,7 +27,7 @@ const GetPostLikedUsers = async (req, res) => {
     console.error("Unexpected error:", error);
     return res.status(500).json(error);
   } finally {
-    await client?.end();
+    await client?.release();
   }
 };
 

@@ -1,6 +1,6 @@
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
-const { Client } = require("pg");
+const { Pool } = require("pg");
 const SendMail = require("../../mail/send_mail");
 
 const getEmailFromUsernameOrEmail = async (client, usernameOrEmailVerified) => {
@@ -44,11 +44,11 @@ const censorEmail = function (email) {
 
 const ForgotPassword = async (req, res) => {
   const { usernameOrEmail } = req.body;
-  const client = new Client({ connectionString: process.env.DATABASE_STRING });
+  const pool = new Pool({ connectionString: process.env.DATABASE_STRING });
+  const client = await pool.connect();
   client.on("error", (err) =>
     console.error("something bad has happened!", err.stack)
   );
-  await client.connect();
 
   try {
     if (!usernameOrEmail) {
@@ -73,7 +73,7 @@ const ForgotPassword = async (req, res) => {
     console.log("unexpected error : ", err);
     res.status(500).json(err);
   } finally {
-    await client?.end();
+    await client?.release();
   }
 };
 

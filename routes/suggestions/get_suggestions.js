@@ -1,5 +1,5 @@
 const checkToken = require("../../func/check_token");
-const { Client } = require("pg");
+const { Pool } = require("pg");
 require("dotenv").config();
 
 const fetchSuggestionUsers = async (client, tokenUsername) => {
@@ -35,11 +35,11 @@ const fetchSuggestionUsers = async (client, tokenUsername) => {
 
 const GetSuggestions = async (req, res) => {
   const { token } = req.query;
-  const client = new Client({ connectionString: process.env.DATABASE_STRING });
+  const pool = new Pool({ connectionString: process.env.DATABASE_STRING });
+  const client = await pool.connect();
   client.on("error", (err) =>
     console.error("something bad has happened!", err.stack)
   );
-  await client.connect();
 
   try {
     if (!token) {
@@ -83,7 +83,7 @@ const GetSuggestions = async (req, res) => {
       res.status(400).json(error.message);
     }
   } finally {
-    await client?.end();
+    await client?.release();
   }
 };
 

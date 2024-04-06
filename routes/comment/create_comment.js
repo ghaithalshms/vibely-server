@@ -1,13 +1,13 @@
 const checkToken = require("../../func/check_token");
-const { Client } = require("pg");
+const { Pool } = require("pg");
 
 const createComment = async (req, res) => {
   const { token, postID, comment } = req.body;
-  const client = new Client({ connectionString: process.env.DATABASE_STRING });
+  const pool = new Pool({ connectionString: process.env.DATABASE_STRING });
+  const client = await pool.connect();
   client.on("error", (err) =>
     console.error("something bad has happened!", err.stack)
   );
-  await client.connect();
 
   try {
     if (!(token && postID && comment)) {
@@ -28,7 +28,7 @@ const createComment = async (req, res) => {
       res.status(500).json(err);
     }
   } finally {
-    await client?.end();
+    await client?.release();
   }
 };
 

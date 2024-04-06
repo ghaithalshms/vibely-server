@@ -1,13 +1,12 @@
 const checkToken = require("../../func/check_token");
-const { Client } = require("pg");
+const { Pool } = require("pg");
 
 const UnarchivePost = async (req, res) => {
   const { token, postID } = req.body;
 
-  const client = new Client({
-    connectionString: process.env.DATABASE_STRING,
-  });
-  await client.connect();
+  const pool = new Pool({ connectionString: process.env.DATABASE_STRING });
+  const client = await pool.connect();
+
   try {
     if (!(token && postID)) {
       return res.status(400).json("Data missing");
@@ -31,7 +30,7 @@ const UnarchivePost = async (req, res) => {
     console.error("Unexpected error:", error);
     return res.status(500).json("Internal server error");
   } finally {
-    await client?.end();
+    await client?.release();
   }
 };
 

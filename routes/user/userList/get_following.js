@@ -1,5 +1,5 @@
 const checkToken = require("../../../func/check_token");
-const { Client } = require("pg");
+const { Pool } = require("pg");
 
 require("dotenv").config();
 
@@ -10,11 +10,11 @@ const GetUserFollowing = async (req, res) => {
     return res.status(400).json("Data missing");
   }
 
-  const client = new Client({ connectionString: process.env.DATABASE_STRING });
+  const pool = new Pool({ connectionString: process.env.DATABASE_STRING });
+  const client = await pool.connect();
   client.on("error", (err) =>
     console.error("something bad has happened!", err.stack)
   );
-  await client.connect();
 
   try {
     const tokenUsername = await verifyToken(token);
@@ -29,7 +29,7 @@ const GetUserFollowing = async (req, res) => {
   } catch (err) {
     handleError(res)(err);
   } finally {
-    await client?.end();
+    await client?.release();
   }
 };
 

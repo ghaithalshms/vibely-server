@@ -1,13 +1,13 @@
 const webpush = require("web-push");
-const { Client } = require("pg");
+const { Pool } = require("pg");
 require("dotenv").config();
 
 const SendWebPush = async (title, body, to) => {
-  const client = new Client({ connectionString: process.env.DATABASE_STRING });
+  const pool = new Pool({ connectionString: process.env.DATABASE_STRING });
+  const client = await pool.connect();
   client.on("error", (err) =>
     console.error("something bad has happened!", err.stack)
   );
-  await client.connect();
 
   // SEND ONLY IF THE USER IS NOT CONNECT -> send_message.js
   try {
@@ -48,7 +48,7 @@ const SendWebPush = async (title, body, to) => {
   } catch (err) {
     console.log(err);
   } finally {
-    await client?.end();
+    await client?.release();
   }
 };
 
