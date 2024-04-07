@@ -28,15 +28,11 @@ const GetUserPicture = async (req, res) => {
           res.redirect(url);
         })
         .catch((err) => {
-          res.redirect(
-            "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg"
-          );
+          res.send("defaultPfp");
           console.error("Error getting user picture:", err);
         });
     } else {
-      res.redirect(
-        "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg"
-      );
+      res.send("defaultPfp");
     }
   } catch (err) {
     console.error("Unexpected error:", err);
