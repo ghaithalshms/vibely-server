@@ -17,7 +17,7 @@ const sendMessageSocket = (socket, connectedUsers) => {
 };
 
 const setNotiBody = (messageData) => {
-  messageData.fileType.startsWith("text")
+  return messageData.fileType.startsWith("text")
     ? messageData.message
     : `Sent you ${
         messageData.fileType.split("/")[0].charAt(0) === "v" ? "a" : "an"
