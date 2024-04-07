@@ -23,7 +23,7 @@ Welcome to the Vibely social media server application! This Node.js application 
    - [Accept Follow Request Route](#accept-follow-request-route)
    - [Check Username Route](#check-username-route)
    - [Get User Data Route](#get-user-data-route)
-   - [Get User Profile Picture Route](#get-user-profile-picture-picture-route)
+   - [Get User Profile Picture Route](#get-user-profile-picture-route)
    - [Update User Profile Data Route](#update-user-profile-data-route)
    - [User List Routes](#user-list-routes)
      - [Get User Followers Route](#get-user-followers-route)
@@ -310,7 +310,7 @@ axios
 
 ```javascript
 axios
-  .get("/api/user/update/picture", {
+  .get("/api/user/data/picture", {
     params: {
       username: "userToRetrieveProfilePictureFor",
     },
