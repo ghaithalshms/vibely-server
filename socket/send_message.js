@@ -6,17 +6,21 @@ const sendMessageSocket = (socket, connectedUsers) => {
       const userSocketID = connectedUsers.get(messageData.to)?.id;
       socket.to(userSocketID)?.emit("receive_message", messageData);
       let title = messageData.from,
-        body = messageData.fileType.startsWith("text")
-          ? messageData.message
-          : `Sent you ${
-              messageData.fileType.split("/")[0].charAt(0) === "v" ? "a" : "an"
-            }` + messageData.fileType.split("/")[0];
-      to = messageData.to;
+        body = setNotiBody(messageData),
+        to = messageData.to;
 
       if (!userSocketID) SendWebPush(title, body, to);
     } catch (err) {
       console.log(err);
     }
   });
+};
+
+const setNotiBody = (messageData) => {
+  messageData.fileType.startsWith("text")
+    ? messageData.message
+    : `Sent you ${
+        messageData.fileType.split("/")[0].charAt(0) === "v" ? "a" : "an"
+      }` + messageData.fileType.split("/")[0];
 };
 module.exports = sendMessageSocket;
