@@ -58,6 +58,7 @@ const GetMessageFile = require("./routes/chat/get_message_file");
 const ForgotPassword = require("./routes/auth/forgot_password");
 const ResetPassword = require("./routes/auth/reset_password");
 const DeleteMessageFromDB = require("./routes/chat/delete_message");
+const GetAppVersion = require("./routes/app_version/get_app_version");
 
 const app = express();
 const server = http.createServer(app);
@@ -109,6 +110,8 @@ app.post(postLink.sendMessageToDB, upload.single("file"), SendMessageToDB);
 // WEB PUSH NOTIFICATION
 app.post(postLink.subscribeWebPush, SubscribeWebPush);
 // *********** GET ***********
+// APP
+app.get(getLink.appVersion, GetAppVersion);
 // USER
 app.get(getLink.getUserData, (req, res) =>
   GetUserData(req, res, connectedUsers)

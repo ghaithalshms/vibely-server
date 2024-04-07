@@ -19,6 +19,8 @@ const postLink = {
   subscribeWebPush: `/api/notification/subscribe`,
 };
 const getLink = {
+  // APP VERSION
+  appVersion: `/api/app/version`,
   // ACTIVATE SERVER
   activateServer: `/api/server/activate`,
   // USER
