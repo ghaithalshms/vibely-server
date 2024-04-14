@@ -69,7 +69,7 @@ const GetChat = async (req, res) => {
     const chatArray = formatChatMessages(chatQuery);
 
     if (!res.headersSent)
-      res.send({ chatArray: chatArray, oldestMessageGot: chatArray[0].id });
+      res.send({ chatArray: chatArray, oldestMessageGot: chatArray[0]?.id });
   } catch (err) {
     console.log("unexpected error : ", err);
     res.status(500).json(err);
