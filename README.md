@@ -522,6 +522,7 @@ axios
 - **Query Parameters:**
   - `token`: Authentication token (String)
   - `username`: Username of the chat partner (String)
+  - `oldestMessageGot`: ID of the oldest message received (Integer)
 
 **Example:**
 
@@ -531,6 +532,7 @@ axios
     params: {
       token: "authenticationToken",
       username: "chatPartnerUsername",
+      oldestMessageGot: "123",
     },
   })
   .then((response) => {
