@@ -493,6 +493,7 @@ These routes handle various operations related to chatting, including sending me
   - `message`: Content of the message (String)
   - `file`: File to be sent (image, video or audio (can be null))
   - `fileType`: Type of the file (String)
+  - `oneTime`: One time viewed media only for images and videos (Boolean)
 
 **Example:**
 
