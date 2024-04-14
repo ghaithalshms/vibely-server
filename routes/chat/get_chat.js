@@ -12,14 +12,15 @@ const getChatMessages = async (
     oldestMessageGot > 0 ? "AND msg_id < $3" : "AND msg_id > $3";
 
   return await client.query(
-    `SELECT msg_id, message, msg_from, msg_to, sent_date, seen, file_type FROM message_tbl
+    `SELECT msg_id, message, msg_from, msg_to, sent_date, seen, file_type, one_time, one_time_opened
+    FROM message_tbl
     WHERE (
       (msg_to = $1 AND msg_from = $2) 
       OR (msg_to = $2 AND msg_from = $1)
     )
     ${messageIDInstructionString}
     ORDER BY msg_id DESC
-    LIMIT 20
+    LIMIT 15
   `,
     [tokenUsername, otherUsername, oldestMessageGot]
   );
@@ -36,6 +37,8 @@ const formatChatMessages = (chatQuery) => {
       sentDate: message.sent_date,
       fileType: message.file_type,
       seen: message.seen,
+      oneTime: message.one_time,
+      oneTimeOpened: message.one_time_opened,
     });
   }
   return chatList;
@@ -69,7 +72,7 @@ const GetChat = async (req, res) => {
     const chatArray = formatChatMessages(chatQuery);
 
     if (!res.headersSent)
-      res.send({ chatArray: chatArray, oldestMessageGot: chatArray[0]?.id });
+      res.send({ chatArray, oldestMessageGot: chatArray[0]?.id });
   } catch (err) {
     console.log("unexpected error : ", err);
     res.status(500).json(err);

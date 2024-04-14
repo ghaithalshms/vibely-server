@@ -6,7 +6,7 @@ const fetch = require("node-fetch");
 
 const getFileInformation = async (client, messageID, tokenUsername) => {
   const fileQuery = await client.query(
-    `SELECT file_path, file_type FROM message_tbl 
+    `SELECT file_path, file_type, one_time, one_time_opened, msg_from FROM message_tbl 
     WHERE msg_id = $1
     AND (msg_from = $2 OR msg_to = $2)`,
     [messageID, tokenUsername]
@@ -14,19 +14,12 @@ const getFileInformation = async (client, messageID, tokenUsername) => {
   return fileQuery.rows[0];
 };
 
-const fetchAndStreamAudio = async (res, url) => {
-  try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error("Failed to fetch audio file");
-    }
-    const contentType = response.headers.get("content-type");
-    res.setHeader("Content-Type", contentType);
-    response.body.pipe(res);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Error fetching audio");
-  }
+const setOneTimeFileOpened = async (client, messageID, tokenUsername) => {
+  await client.query(
+    `UPDAte message_tbl set one_time_opened = true  
+    WHERE msg_id = $1`,
+    [messageID]
+  );
 };
 
 const GetMessageFile = async (req, res) => {
@@ -56,17 +49,30 @@ const GetMessageFile = async (req, res) => {
       return;
     }
 
-    const { file_path: filePath, file_type: fileType } = fileInfo;
+    const {
+      file_path: filePath,
+      file_type: fileType,
+      one_time: oneTime,
+      one_time_opened: oneTimeOpened,
+      msg_from: from,
+    } = fileInfo;
 
     if (!res.headersSent) {
-      GetFileFromFireBase(filePath)
-        .then((url) => {
-          res.redirect(url);
-        })
-        .catch((error) => {
-          console.error(error);
-          res.status(500).send("Error fetching audio");
-        });
+      if (!oneTime || (oneTime && !oneTimeOpened && from !== tokenUsername)) {
+        GetFileFromFireBase(filePath)
+          .then(async (url) => {
+            if (oneTime && !oneTimeOpened) {
+              await setOneTimeFileOpened(client, messageID, tokenUsername);
+            }
+            res.redirect(url);
+          })
+          .catch((error) => {
+            console.error(error);
+            res.status(500).send("Error fetching audio");
+          });
+      } else {
+        res.status(400).send("File was already opened");
+      }
     }
   } catch (err) {
     console.log("unexpected error : ", err);

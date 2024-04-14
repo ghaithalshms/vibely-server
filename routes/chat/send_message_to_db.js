@@ -9,11 +9,12 @@ const sendMessageToDB = async (
   username,
   message,
   fileType,
-  filePath
+  filePath,
+  oneTime
 ) => {
   const idQuery = await client.query(
-    `INSERT INTO message_tbl (msg_from, msg_to, message, file_path, file_type, sent_date) 
-    VALUES ($1, $2, $3, $4, $5, $6) RETURNING msg_id as id`,
+    `INSERT INTO message_tbl (msg_from, msg_to, message, file_path, file_type, sent_date, one_time) 
+    VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING msg_id as id`,
     [
       tokenUsername,
       username,
@@ -21,6 +22,7 @@ const sendMessageToDB = async (
       filePath,
       fileType,
       new Date().toISOString(),
+      oneTime || false,
     ]
   );
   return idQuery.rows[0];
@@ -28,7 +30,7 @@ const sendMessageToDB = async (
 
 const SendMessageToDB = async (req, res) => {
   const file = req.file;
-  const { token, username, message, fileType } = req.body;
+  const { token, username, message, fileType, oneTime } = req.body;
   const pool = new Pool({ connectionString: process.env.DATABASE_STRING });
   const client = await pool.connect();
   client.on("error", (err) =>
@@ -67,7 +69,8 @@ const SendMessageToDB = async (req, res) => {
       username,
       message,
       fileType,
-      filePath
+      filePath,
+      oneTime
     );
     if (!res.headersSent) {
       res.status(200).json(messageId);
