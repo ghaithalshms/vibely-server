@@ -25,7 +25,7 @@ const sendMessageToDB = async (
       oneTime || false,
     ]
   );
-  return idQuery.rows[0];
+  return idQuery.rows[0].id;
 };
 
 const SendMessageToDB = async (req, res) => {
@@ -66,7 +66,7 @@ const SendMessageToDB = async (req, res) => {
       }
     }
 
-    const messageId = await sendMessageToDB(
+    const id = await sendMessageToDB(
       client,
       tokenUsername,
       username,
@@ -76,7 +76,7 @@ const SendMessageToDB = async (req, res) => {
       oneTime
     );
     if (!res.headersSent) {
-      res.status(200).json(messageId);
+      res.status(200).json({ id, sentDate: new Date().toISOString() });
     }
   } catch (err) {
     console.log("unexpected error : ", err);
