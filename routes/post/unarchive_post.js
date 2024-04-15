@@ -5,7 +5,10 @@ const UnarchivePost = async (req, res) => {
   const { token, postID } = req.body;
 
   const pool = new Pool({ connectionString: process.env.DATABASE_STRING });
-  const client = await pool.connect();
+  const client = await pool.connect().catch((err) => {
+    console.log(err);
+    res.status(500).json(err);
+  });
 
   try {
     if (!(token && postID)) {

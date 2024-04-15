@@ -6,7 +6,10 @@ const GetHomePostFlow = async (req, res) => {
   const { token, lastGotPostID } = req.query;
 
   const pool = new Pool({ connectionString: process.env.DATABASE_STRING });
-  const client = await pool.connect();
+  const client = await pool.connect().catch((err) => {
+    console.log(err);
+    res.status(500).json(err);
+  });
 
   try {
     if (!lastGotPostID) {

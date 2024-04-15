@@ -2,7 +2,10 @@ const { Pool } = require("pg");
 
 const dissconnectSocket = async (socket, connectedUsers) => {
   const pool = new Pool({ connectionString: process.env.DATABASE_STRING });
-  const client = await pool.connect();
+  const client = await pool.connect().catch((err) => {
+    console.log(err);
+    res.status(500).json(err);
+  });
   socket.on("disconnect", async () => {
     try {
       let disconnectedUsername = null;
