@@ -609,7 +609,7 @@ axios
 
 ```javascript
 axios
-  .delete("/api/chat/message/delete", {
+  .post("/api/chat/message/delete", {
     data: {
       token: "authenticationToken",
       messageID: "messageIDToDelete",
