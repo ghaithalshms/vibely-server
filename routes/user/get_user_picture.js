@@ -31,11 +31,15 @@ const GetUserPicture = async (req, res) => {
           res.redirect(url);
         })
         .catch((err) => {
-          res.send("defaultPfp");
+          res.redirect(
+            "https://thumbs.dreamstime.com/b/default-avatar-profile-icon-vector-social-media-user-portrait-176256935.jpg"
+          );
           console.error("Error getting user picture:", err);
         });
     } else {
-      res.send("defaultPfp");
+      res.redirect(
+        "https://thumbs.dreamstime.com/b/default-avatar-profile-icon-vector-social-media-user-portrait-176256935.jpg"
+      );
     }
   } catch (err) {
     console.error("Unexpected error:", err);
