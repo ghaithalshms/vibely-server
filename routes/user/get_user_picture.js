@@ -24,6 +24,8 @@ const GetUserPicture = async (req, res) => {
       [username]
     );
     const pfpPath = pictureQuery.rows[0]?.pfp_path;
+    const defaultPfpUri =
+      "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg?20200418092106";
 
     if (pfpPath) {
       GetFileFromFireBase(pfpPath)
@@ -31,15 +33,11 @@ const GetUserPicture = async (req, res) => {
           res.redirect(url);
         })
         .catch((err) => {
-          res.redirect(
-            "https://thumbs.dreamstime.com/b/default-avatar-profile-icon-vector-social-media-user-portrait-176256935.jpg"
-          );
+          res.redirect(defaultPfpUri);
           console.error("Error getting user picture:", err);
         });
     } else {
-      res.redirect(
-        "https://thumbs.dreamstime.com/b/default-avatar-profile-icon-vector-social-media-user-portrait-176256935.jpg"
-      );
+      res.redirect(defaultPfpUri);
     }
   } catch (err) {
     console.error("Unexpected error:", err);
