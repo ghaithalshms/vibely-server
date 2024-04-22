@@ -1,7 +1,7 @@
 require("dotenv").config();
 const { GetFileFromFireBase } = require("../../firebase/get_file.js");
-const checkToken = require("../../func/check_token");
 const { Pool } = require("pg");
+const CheckTokenNoDB = require("../../func/check_token_no_db.js");
 
 const updatePostViewCount = async (client, tokenUsername, postID) => {
   await client.query(
@@ -36,15 +36,18 @@ const GetPostFile = async (req, res) => {
   );
 
   try {
-    if (!(token && postID)) {
+    if (!postID) {
       res.status(400).json("data missing");
       return;
     }
 
-    const tokenUsername = await checkToken(token);
-    if (tokenUsername === false) {
-      res.status(401).json("wrong token");
-      return;
+    let tokenUsername;
+    if (token) {
+      tokenUsername = await CheckTokenNoDB(token);
+    }
+
+    if (token && !tokenUsername) {
+      return res.status(401).json("Invalid token");
     }
 
     const fileQuery = await getFileQuery(client, tokenUsername, postID);

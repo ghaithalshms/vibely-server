@@ -5,7 +5,7 @@ require("dotenv").config();
 const GetUserData = async (req, res, connectedUsers) => {
   const { username, token } = req.query;
 
-  if (!(username && token)) {
+  if (!username) {
     return res.status(400).json("Data missing");
   }
 
@@ -19,9 +19,12 @@ const GetUserData = async (req, res, connectedUsers) => {
   );
 
   try {
-    const tokenUsername = await verifyToken(token);
+    let tokenUsername;
+    if (token) {
+      tokenUsername = await CheckTokenNoDB(token);
+    }
 
-    if (!tokenUsername) {
+    if (token && !tokenUsername) {
       return res.status(401).json("Invalid token");
     }
 
@@ -49,28 +52,40 @@ const handleError = (res) => (err) => {
   res.status(500).json(err);
 };
 
-const verifyToken = async (token) => {
-  return await CheckTokenNoDB(token);
-};
-
 const fetchUserData = async (
   client,
   requestedUsername,
   tokenUsername,
   connectedUsers
 ) => {
-  const dataQuery = await client.query(
-    `SELECT username, first_name, last_name, post_count, follower_count, 
-    following_count, biography, link, privacity, verified, admin, 
-    follow_id, req_id, last_seen
+  let query, params;
+
+  if (tokenUsername) {
+    query = `
+    SELECT username, first_name, last_name, post_count, follower_count, 
+    following_count, biography, link, privacity, verified, admin, last_seen,
+    follow_id, req_id
     FROM user_tbl u
     LEFT JOIN follow_tbl f ON f.follower = $1 AND f.following = u.username
     LEFT JOIN follow_request_tbl fr ON fr.req_follower = $2 AND fr.req_following = u.username
-    WHERE u.username = $3`,
-    [tokenUsername, tokenUsername, requestedUsername]
-  );
+    WHERE u.username = $2`;
+    params = [tokenUsername, requestedUsername];
+  } else {
+    query = `
+    SELECT username, first_name, last_name, post_count, follower_count, 
+    following_count, biography, link, privacity, verified, admin, last_seen
+    FROM user_tbl u
+    WHERE u.username = $1`;
+    params = [requestedUsername];
+  }
 
-  if (dataQuery.rows.length > 0 && tokenUsername !== requestedUsername) {
+  const dataQuery = await client.query(query, params);
+
+  if (
+    tokenUsername &&
+    dataQuery.rows.length > 0 &&
+    tokenUsername !== requestedUsername
+  ) {
     await client.query(
       `INSERT INTO profile_views_tbl (viewer_user, viewed_user, viewed_time) VALUES ($1,$2,$3)`,
       [tokenUsername, requestedUsername, new Date().toISOString()]

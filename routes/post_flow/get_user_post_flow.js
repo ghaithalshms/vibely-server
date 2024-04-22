@@ -10,7 +10,7 @@ const handleUserPostFlow = async (req, res) => {
     return;
   }
 
-  if (!(token && username)) {
+  if (!username) {
     res.status(401).json("data missing");
     return;
   }
@@ -25,13 +25,22 @@ const handleUserPostFlow = async (req, res) => {
   );
 
   try {
-    const tokenUsername = await checkToken(token);
-    if (tokenUsername === false) {
-      if (!res.headersSent) res.status(401).json("wrong token");
-      return;
+    let tokenUsername;
+    if (token) {
+      tokenUsername = await checkToken(token);
+    }
+
+    if (token && !tokenUsername) {
+      return res.status(401).json("Invalid token");
     }
 
     const userPrivacy = await fetchUserPrivacy(username, client);
+
+    if (userPrivacy && !tokenUsername) {
+      if (!res.headersSent) res.json("private account");
+      return;
+    }
+
     if (userPrivacy && username !== tokenUsername) {
       const isFollowing = await checkFollowing(tokenUsername, username, client);
       if (!isFollowing) {
@@ -84,22 +93,35 @@ const fetchUserPostFlow = async (
   lastGotPostID,
   client
 ) => {
+  let query, params;
   const postIdInstructionString =
-    lastGotPostID > 0 ? "AND p.post_id < $3" : "AND p.post_id > $3";
+    lastGotPostID > 0 ? "AND p.post_id < $1" : "AND p.post_id > $1";
 
-  const userPostFlowQuery = await client.query(
-    `SELECT DISTINCT p.post_id, p.posted_user, p.description, p.file_type, p.like_count, p.comment_count, p.post_date,
+  if (tokenUsername) {
+    query = `SELECT DISTINCT p.post_id, p.posted_user, p.description, 
+    p.file_type, p.like_count, p.comment_count, p.post_date,
     pl.like_id, ps.saved_id
     FROM post_tbl p
-    JOIN user_tbl u ON u.username = p.posted_user AND u.username=$1
-    LEFT JOIN post_like_tbl pl ON pl.liked_post = p.post_id AND pl.liked_user =$2
-    LEFT JOIN post_save_tbl ps ON ps.post_id = p.post_id AND ps.saved_user = $2
+    JOIN user_tbl u ON u.username = p.posted_user AND u.username=$2
+    LEFT JOIN post_like_tbl pl ON pl.liked_post = p.post_id AND pl.liked_user =$3
+    LEFT JOIN post_save_tbl ps ON ps.post_id = p.post_id AND ps.saved_user = $3
     WHERE archived=false
     ${postIdInstructionString}
     ORDER BY p.post_id desc
-    LIMIT 3`,
-    [username, tokenUsername, lastGotPostID]
-  );
+    LIMIT 3`;
+    params = [lastGotPostID, username, tokenUsername];
+  } else {
+    query = `SELECT DISTINCT p.post_id, p.posted_user, p.description, 
+      p.file_type, p.like_count, p.comment_count, p.post_date    FROM post_tbl p
+    JOIN user_tbl u ON u.username = p.posted_user AND u.username=$2
+    WHERE archived=false
+    ${postIdInstructionString}
+    ORDER BY p.post_id desc
+    LIMIT 3`;
+    params = [lastGotPostID, username];
+  }
+
+  const userPostFlowQuery = await client.query(query, params);
 
   return userPostFlowQuery.rows;
 };
