@@ -21,6 +21,6 @@ const setNotiBody = (messageData) => {
     ? messageData.message
     : `Sent you ${
         messageData.fileType.split("/")[0].charAt(0) === "v" ? "a" : "an"
-      }` + messageData.fileType.split("/")[0];
+      } ` + messageData.fileType.split("/")[0];
 };
 module.exports = sendMessageSocket;
